@@ -271,6 +271,12 @@ A few things to observe:
   - `machine-data`: Fetches details about machines such as id, model and maintenance history.
   - `maintenance-data`: Retrieves specific metric threshold values for certain machine types.
 - A project connection is created for the MCP tools
+- Save the *MCP Server URL* of the MCP server as `MACHINE_MCP_SERVER_ENDPOINTT="<MCP_SERVER_URL>"`
+Reload the environment variables from file to make the new environment variables available in the shell
+```bash
+export $(cat ../.env | xargs)
+```
+
 
 ---
 
