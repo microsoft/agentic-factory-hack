@@ -168,13 +168,13 @@ public static class RepairPlannerAgentFactory
             tools.AddRange(CreateCosmosTools(cosmosService));
         }
 
-        return new AzureOpenAIClient(new Uri(azureOpenAIEndpoint), new DefaultAzureCredential())
+        return new AzureOpenAIClient(new Uri(azureOpenAIEndpoint), new AzureCliCredential())
             .GetChatClient(deployment)
             .AsIChatClient()
             .AsBuilder()
-            .UseOpenTelemetry()
+            .UseOpenTelemetry(sourceName: "RepairPlannerAgent")
             .Build()
-            .CreateAIAgent(
+            .AsAIAgent(
                 instructions: DefaultInstructions,
                 name: "RepairPlannerAgent",
                 tools: tools.Count > 0 ? tools : null);

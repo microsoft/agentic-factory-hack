@@ -24,12 +24,20 @@ public static class AgentServiceProvider
         var agents = new List<AIAgent>();
 
         // AnomalyClassificationAgent - classifies severity of telemetry anomalies
-        var anomalyAgent = projectClient.GetAIAgent("AnomalyClassificationAgent");
+        var anomalyAgent = projectClient
+            .AsAIAgent("AnomalyClassificationAgent")
+            .AsBuilder()
+            .UseOpenTelemetry(sourceName: "AnomalyClassificationAgent")
+            .Build();
         agents.Add(anomalyAgent);
         logger.LogInformation("Retrieved Agent Service agent: {AgentName}", anomalyAgent.Name);
 
         // FaultDiagnosisAgent - diagnoses root causes using knowledge base
-        var faultAgent = projectClient.GetAIAgent("FaultDiagnosisAgent");
+        var faultAgent = projectClient
+            .AsAIAgent("FaultDiagnosisAgent")
+            .AsBuilder()
+            .UseOpenTelemetry(sourceName: "FaultDiagnosisAgent")
+            .Build();
         agents.Add(faultAgent);
         logger.LogInformation("Retrieved Agent Service agent: {AgentName}", faultAgent.Name);
 

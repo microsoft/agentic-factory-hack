@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:1-3.11-bullseye
+FROM mcr.microsoft.com/devcontainers/python:3.13-bullseye
 
 # Remove Yarn apt repo entirely to avoid expired GPG key errors during feature installs
 USER root
