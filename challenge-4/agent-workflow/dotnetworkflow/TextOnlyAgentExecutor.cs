@@ -40,7 +40,7 @@ public sealed class TextOnlyAgentExecutor : Executor<string, string>
         _onStepCompleted = callback;
     }
 
-    public TextOnlyAgentExecutor(AIAgent agent) : base($"TextOnly-{agent.Name}")
+    public TextOnlyAgentExecutor(AIAgent agent) : base($"{agent.Name}")
     {
         _agent = agent ?? throw new ArgumentNullException(nameof(agent));
     }
@@ -79,7 +79,7 @@ public sealed class TextOnlyAgentExecutor : Executor<string, string>
                             {
                                 agentStep.ToolCalls.Add(new ToolCallInfo
                                 {
-                                    ToolName = mcp.ToolName,
+                                    ToolName = mcp.Name,
                                     CallId = mcp.CallId,
                                     Arguments = SerializeArguments(mcp.Arguments)
                                 });
@@ -92,7 +92,7 @@ public sealed class TextOnlyAgentExecutor : Executor<string, string>
                                 if (matchingCall != null)
                                 {
                                     // Extract readable content from the Output (which is List<AIContent>)
-                                    matchingCall.Result = ExtractOutputText(mcpr.Output);
+                                    matchingCall.Result = ExtractOutputText(mcpr.Outputs);
                                 }
                             }
                             else if (content is FunctionCallContent fcc)

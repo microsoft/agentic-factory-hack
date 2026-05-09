@@ -93,8 +93,8 @@ Grounding rules (IMPORTANT):
                 input="""
                     Hello, what can the issue be when machine-001 has curing temperature reading of 179.2°C that exceeds warning threshold of 178°C?
                 """,
-                extra_body={"agent": {"name": agent.name,
-                                      "type": "agent_reference"}},
+                extra_body={"agent_reference": {"name": agent.name,
+                                                "type": "agent_reference"}},
             )
 
             print(f"✅ Agent response: {response.output_text}")

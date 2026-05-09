@@ -1,17 +1,15 @@
-using Azure.Identity;
 using Azure.AI.Projects;
-using System.Text.Json;
-
+using Azure.Identity;
+using Azure.Monitor.OpenTelemetry.Exporter;
+using FactoryWorkflow;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
-
-using Azure.Monitor.OpenTelemetry.Exporter;
-
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-
-using FactoryWorkflow;
+using System.Diagnostics;
+using System.Text.Json;
 
 // ============================================================================
 // Application Startup
@@ -35,7 +33,7 @@ builder.Services.AddSingleton(sp =>
 {
     var endpoint = sp.GetRequiredService<IConfiguration>()["AZURE_AI_PROJECT_ENDPOINT"]
         ?? throw new InvalidOperationException("AZURE_AI_PROJECT_ENDPOINT is required");
-    return new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
+    return new AIProjectClient(new Uri(endpoint), new AzureCliCredential());
 });
 
 builder.Services.AddSingleton<ILoggerFactory>(sp => LoggerFactory.Create(b => b.AddConsole()));
@@ -149,10 +147,10 @@ app.MapPost("/api/analyze_machine/stream", async (
         // Collect agents (same as non-streaming endpoint)
         var agents = new List<AIAgent>();
         agents.AddRange(AgentServiceProvider.GetAgents(projectClient, logger));
-        
+
         var repairPlanner = LocalAgentProvider.GetRepairPlannerAgent(config, loggerFactory, logger);
         if (repairPlanner != null) agents.Add(repairPlanner);
-        
+
         agents.AddRange(await A2AAgentProvider.GetAgentsAsync(config, logger));
 
         // Send workflow_started event
@@ -169,7 +167,7 @@ app.MapPost("/api/analyze_machine/stream", async (
         {
             await SendEventAsync(new SseAgentCompleted { Step = step });
             agentIndex++;
-            
+
             // Send agent_started for next agent if there is one
             if (agentIndex < agents.Count)
             {
@@ -223,7 +221,7 @@ static async Task<WorkflowResponse> ExecuteWorkflowAsync(
 {
     // Create executors that pass only text between agents
     var executors = agents.Select(a => new TextOnlyAgentExecutor(a)).ToList();
-
+    //var executors = agents;
     // Clear results from any previous run
     TextOnlyAgentExecutor.ClearResults();
 
@@ -231,17 +229,19 @@ static async Task<WorkflowResponse> ExecuteWorkflowAsync(
     var workflowBuilder = new WorkflowBuilder(executors[0]);
     for (int i = 1; i < executors.Count; i++)
     {
-        workflowBuilder.BindExecutor(executors[i]);
+        //workflowBuilder.BindExecutor(executors[i]);
         workflowBuilder.AddEdge(executors[i - 1], executors[i]);
     }
+    workflowBuilder.WithOpenTelemetry(
+                // Set `EnableSensitiveData` to true to include message content in traces
+                configure: cfg => cfg.EnableSensitiveData = true);
     workflowBuilder.WithOutputFrom(executors[^1]);
 
     var workflow = workflowBuilder.Build();
     logger.LogInformation("Workflow built with {Count} agents", executors.Count);
 
     // Execute the workflow
-    var run = await InProcessExecution.Default.StreamAsync<string>(workflow, input);
-
+    var run = await InProcessExecution.RunStreamingAsync<string>(workflow, input);
 
 
     // Extract final output from workflow events
@@ -278,23 +278,34 @@ static void ConfigureTracing(WebApplicationBuilder builder)
             new KeyValuePair<string, object>("deployment.environment", builder.Environment.EnvironmentName),
         ]);
 
-    var tracerBuilder = Sdk.CreateTracerProviderBuilder()
-        .SetResourceBuilder(resourceBuilder)
-        .AddSource(SourceName, "ChatClient")
-        .AddSource("Microsoft.Agents.AI.*") // Agent Framework telemetry
-        .AddSource("Microsoft.Extensions.AI.*") // Extensions AI telemetry
-        .AddSource("AnomalyClassificationAgent", "FaultDiagnosisAgent", "RepairPlannerAgent")
-        .AddSource("MaintenanceSchedulerAgent", "PartsOrderingAgent")
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddOtlpExporter();
+    builder.Services.AddOpenTelemetry()
+            .WithTracing(tracingBuilder =>
+             {
+                 tracingBuilder
+                    .SetResourceBuilder(resourceBuilder)
+                    .AddSource(SourceName, "ChatClient")
+                    .AddSource("*Microsoft.Agents.AI*") // Agent Framework telemetry
+                    .AddSource("AnomalyClassificationAgent", "FaultDiagnosisAgent", "RepairPlannerAgent")
+                    .AddSource("MaintenanceSchedulerAgent", "PartsOrderingAgent")
+                    .AddHttpClientInstrumentation()
+                    .AddAspNetCoreInstrumentation();
 
-    var appInsightsConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
-    if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
-    {
-        tracerBuilder.AddAzureMonitorTraceExporter(options =>
-            options.ConnectionString = appInsightsConnectionString);
-    }
+                 if (!string.IsNullOrEmpty(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+                 {
+                     tracingBuilder.AddOtlpExporter();
+                 }
 
-    tracerBuilder.Build();
+                 var appInsightsConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+                 if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
+                 {
+                     tracingBuilder.AddAzureMonitorTraceExporter(options =>
+                         options.ConnectionString = appInsightsConnectionString);
+                 }
+             })
+            .WithMetrics(metricsBuilder =>
+            {
+                metricsBuilder
+                    .AddMeter("Microsoft.Agents.AI*") // Agent Framework metrics
+                    .AddHttpClientInstrumentation();
+            });
 }

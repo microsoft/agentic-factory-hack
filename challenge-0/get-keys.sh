@@ -331,6 +331,9 @@ echo "AI_FOUNDRY_PROJECT_NAME=\"$aiFoundryProjectName\"" >> "$ENV_OUT"
 echo "AI_FOUNDRY_ENDPOINT=\"$aiFoundryEndpoint\"" >> "$ENV_OUT"
 echo "AI_FOUNDRY_KEY=\"$aiFoundryKey\"" >> "$ENV_OUT"
 
+# The new packages required OpenAI Standard for env variables
+echo "AZURE_OPENAI_CHAT_MODEL=\"gpt-4o-mini\"" >> "$ENV_OUT"
+
 # RepairPlannerAgent (Challenge 2) environment variables
 # For chat, use the same key as the AI Foundry/Cognitive Services account.
 echo "AZURE_AI_CHAT_KEY=\"$aiFoundryKey\"" >> "$ENV_OUT"
@@ -344,7 +347,7 @@ if [ -n "$aiFoundryEndpoint" ]; then
 else
     echo "AZURE_AI_CHAT_ENDPOINT=\"\"" >> "$ENV_OUT"
 fi
-
+echo "AZURE_AI_CHAT_MODEL=\"$azureAIChatModel\"" >> "$ENV_OUT"
 # Constant for the workshop (placed after the endpoint for readability)
 echo "AZURE_AI_CHAT_MODEL_DEPLOYMENT_NAME=\"gpt-4o-mini\"" >> "$ENV_OUT"
 # Construct AI Foundry Hub Endpoint if missing

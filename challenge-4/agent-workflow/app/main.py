@@ -9,8 +9,7 @@ import re
 import fastapi
 import fastapi.responses
 import fastapi.staticfiles
-import opentelemetry.instrumentation.fastapi as otel_fastapi
-import telemetry
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from pydantic import BaseModel
 from agents import run_factory_workflow, create_maintenance_scheduler_a2a_app, create_parts_ordering_a2a_app
 from agent_framework.observability import configure_otel_providers
@@ -19,7 +18,6 @@ from dotenv import load_dotenv
 
 @contextlib.asynccontextmanager
 async def lifespan(app):
-    telemetry.configure_opentelemetry()
     configure_otel_providers()
     yield
 
@@ -33,14 +31,17 @@ load_dotenv()
 app = fastapi.FastAPI(lifespan=lifespan)
 
 # Add middleware to log all requests
+
+
 @app.middleware("http")
 async def log_requests(request: fastapi.Request, call_next):
     logger.info(f">>> Incoming request: {request.method} {request.url.path}")
     response = await call_next(request)
-    logger.info(f"<<< Response: {request.method} {request.url.path} - Status: {response.status_code}")
+    logger.info(
+        f"<<< Response: {request.method} {request.url.path} - Status: {response.status_code}")
     return response
 
-otel_fastapi.FastAPIInstrumentor.instrument_app(app, exclude_spans=["send"])
+FastAPIInstrumentor.instrument_app(app, exclude_spans=["send"])
 
 # =============================================================================
 # A2A Agent Endpoints
@@ -48,16 +49,15 @@ otel_fastapi.FastAPIInstrumentor.instrument_app(app, exclude_spans=["send"])
 # These can be called from the dotnet workflow using A2A protocol
 # =============================================================================
 try:
-    maintenance_scheduler_a2a = create_maintenance_scheduler_a2a_app()
-    parts_ordering_a2a = create_parts_ordering_a2a_app()
-
-    # Build the Starlette apps from A2A applications and mount them
-    maintenance_scheduler_starlette = maintenance_scheduler_a2a.build()
-    parts_ordering_starlette = parts_ordering_a2a.build()
+    # Create and mount the A2A Starlette applications directly
+    # These are already Starlette apps, no need to build them
+    maintenance_scheduler_starlette = create_maintenance_scheduler_a2a_app()
+    parts_ordering_starlette = create_parts_ordering_a2a_app()
 
     app.mount("/maintenance-scheduler", maintenance_scheduler_starlette)
     app.mount("/parts-ordering", parts_ordering_starlette)
-    logger.info("A2A agents mounted successfully at /maintenance-scheduler and /parts-ordering")
+    logger.info(
+        "A2A agents mounted successfully at /maintenance-scheduler and /parts-ordering")
 except Exception as e:
     logger.warning(f"Failed to initialize A2A agents: {e}")
 
@@ -67,6 +67,7 @@ if not os.path.exists("static"):
     async def root():
         """Root endpoint."""
         return "API service is running. Navigate to <a href='/api/weatherforecast'>/api/weatherforecast</a> to see sample data or POST to <a href='/docs'>/api/analyze_machine</a>."
+
 
 @app.get("/api/weatherforecast")
 async def weather_forecast():
@@ -99,24 +100,27 @@ async def weather_forecast():
 
     return forecast
 
+
 class AnalyzeRequest(BaseModel):
     machine_id: str
     telemetry: list[dict] | dict
 
+
 @app.post("/api/analyze_machine")
 async def analyze_machine(request: AnalyzeRequest):
     logger.info(f"Analyzing machine {request.machine_id}")
-    
+
     try:
         outputs = await run_factory_workflow(request.machine_id, request.telemetry)
-        
+
         serialized_outputs = []
         for out in outputs:
             # Handle AgentRunResponse or similar
             if hasattr(out, 'text'):
                 serialized_outputs.append(out.text)
-            elif hasattr(out, 'params') and hasattr(out.params, 'text'): # AgentRunResponse vs AgentRunEvent
-                 serialized_outputs.append(str(out))
+            # AgentRunResponse vs AgentRunEvent
+            elif hasattr(out, 'params') and hasattr(out.params, 'text'):
+                serialized_outputs.append(str(out))
             else:
                 serialized_outputs.append(str(out))
 
@@ -131,7 +135,6 @@ async def analyze_machine(request: AnalyzeRequest):
 async def health_check():
     """Health check endpoint."""
     return "Healthy"
-
 
 
 # Serve static files directly from root, if the "static" directory exists

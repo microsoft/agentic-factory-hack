@@ -16,9 +16,13 @@ import sys
 from datetime import datetime
 from typing import List
 
-from agent_framework.azure import AzureAIClient
+from agent_framework import Agent
+from agent_framework.foundry import FoundryChatClient, FoundryAgent
+from agent_framework.observability import create_resource, enable_instrumentation, get_tracer, configure_otel_providers
+from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.ai.projects.aio import AIProjectClient
-from azure.identity.aio import AzureCliCredential, DefaultAzureCredential
+from azure.identity.aio import AzureCliCredential
+from opentelemetry.trace import SpanKind
 from dotenv import load_dotenv
 from services.cosmos_db_service import (
     CosmosDbService,
@@ -27,11 +31,9 @@ from services.cosmos_db_service import (
     MaintenanceWindow,
     WorkOrder,
 )
-from services.observability import enable_tracing
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=True)
-
 
 # =============================================================================
 # Agent Service
@@ -46,6 +48,7 @@ class MaintenanceSchedulerAgent:
         self.deployment_name = deployment_name
         self.cosmos_service = cosmos_service
 
+    @get_tracer().start_as_current_span("predict_schedule")
     async def predict_schedule(
         self,
         work_order: WorkOrder,
@@ -81,19 +84,35 @@ Always respond in valid JSON format as requested."""
             except Exception as e:
                 print(f"   Warning: Could not restore chat history: {e}")
 
-        # Use newer AzureAIClient pattern (matches anomaly_classification_agent.py)
-        async with AzureCliCredential() as credential:
-            async with AzureAIClient(credential=credential).create_agent(
-                name="MaintenanceSchedulerAgent",
-                description="Predictive maintenance scheduling agent for tire manufacturing",
-                instructions=instructions,
-            ) as agent:
-                print(f"   ✅ Using agent: {agent.id}")
-                result = await agent.run(full_prompt)
-                response_text = result.text
+        agent = Agent(
+            client=FoundryChatClient(credential=AzureCliCredential(),
+                                     project_endpoint=self.project_endpoint,
+                                     model=self.deployment_name),
+            name="MaintenanceSchedulerAgent",
+            description="Predictive maintenance scheduling agent for tire manufacturing",
+            instructions=instructions,
+            id="MaintenanceSchedulerAgent"
+        )
 
-                # Save interaction to chat history
-                await self._save_interaction_history(work_order.machine_id, context, response_text)
+        # Use the Foundry PromptAgent
+        # agent = FoundryAgent(
+        #     project_endpoint=self.project_endpoint,
+        #     name="MaintenanceSchedulerAgent",
+        #     agent_name="MaintenanceSchedulerAgent",
+        #     credential=AzureCliCredential(),
+        #     default_options={
+        #         "model": "gpt-4.1",
+        #         "extra_body": {"model": "gpt-4.1"},
+        #     }
+        # )
+
+        print(f"   ✅ Using agent: {agent.id}")
+
+        result = await agent.run(full_prompt)
+        response_text = result.text
+
+        # Save interaction to chat history
+        await self._save_interaction_history(work_order.machine_id, context, response_text)
 
         json_response = self._extract_json(response_text)
         data = json.loads(json_response)
@@ -281,30 +300,37 @@ async def main():
 
     print("=== Predictive Maintenance Agent ===\n")
 
-    # Load configuration (use AZURE_AI_PROJECT_ENDPOINT for consistency with other challenge scripts)
+    # Load configuration (use AI_FOUNDRY_PROJECT_ENDPOINT for consistency with other challenge scripts)
     cosmos_endpoint = os.getenv("COSMOS_ENDPOINT")
     cosmos_key = os.getenv("COSMOS_KEY")
     database_name = os.getenv("COSMOS_DATABASE_NAME")
-    foundry_project_endpoint = os.getenv(
-        "AZURE_AI_PROJECT_ENDPOINT") or os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
+    foundry_project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
     deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4.1")
-    app_insights_connection = os.getenv(
-        "APPLICATIONINSIGHTS_CONNECTION_STRING")
+    otel_exporter_endpoint = os.getenv(
+        "OTEL_EXPORTER_OTLP_ENDPOINT")
 
     # Validate
     if not all([cosmos_endpoint, cosmos_key, database_name, foundry_project_endpoint]):
         print("Error: Missing required environment variables.")
-        print("Required: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE_NAME, AZURE_AI_PROJECT_ENDPOINT")
+        print("Required: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE_NAME, AI_FOUNDRY_PROJECT_ENDPOINT")
         return
 
-    enable_tracing(app_insights_connection)
+    if otel_exporter_endpoint:
+        configure_otel_providers()
+    else:
+        configure_azure_monitor(
+            connection_string=os.getenv(
+                "APPLICATIONINSIGHTS_CONNECTION_STRING"),
+            resource=create_resource(),  # Uses OTEL_SERVICE_NAME, etc.
+        )
+        enable_instrumentation(enable_sensitive_data=True)
 
     cosmos_service = CosmosDbService(
         cosmos_endpoint, cosmos_key, database_name)
 
     # Register agent in Azure AI Foundry portal
     async with (
-        DefaultAzureCredential() as credential,
+        AzureCliCredential() as credential,
         AIProjectClient(endpoint=foundry_project_endpoint, credential=credential) as project_client,
     ):
         try:
@@ -366,68 +392,70 @@ Output JSON with: scheduled_date, risk_score (0-100), predicted_failure_probabil
             print(f"   ⚠️  Could not register agent in portal: {e}\n")
             logger.warning(f"Could not register agent in portal: {e}")
 
-    agent_service = MaintenanceSchedulerAgent(
-        foundry_project_endpoint, deployment_name, cosmos_service)
+    with get_tracer().start_as_current_span("Scenario: Predictive Maintenance Agent", kind=SpanKind.CLIENT) as current_span:
 
-    # Get work order
-    print("1. Retrieving work order...")
-    work_order_id = sys.argv[1] if len(sys.argv) > 1 else "wo-2024-468"
+        agent_service = MaintenanceSchedulerAgent(
+            foundry_project_endpoint, deployment_name, cosmos_service)
 
-    try:
-        work_order = await cosmos_service.get_work_order(work_order_id)
-        print(f"   ✓ Work Order: {work_order.id}")
-        print(f"   Machine: {work_order.machine_id}")
-        print(f"   Fault: {work_order.fault_type}")
-        print(f"   Priority: {work_order.priority}\n")
-    except Exception as e:
-        print(f"   ✗ Error: {str(e)}")
-        return
+        # Get work order
+        print("1. Retrieving work order...")
+        work_order_id = sys.argv[1] if len(sys.argv) > 1 else "wo-2024-468"
 
-    print("2. Analyzing historical maintenance data...")
-    history = await cosmos_service.get_maintenance_history(work_order.machine_id)
-    print(f"   ✓ Found {len(history)} historical maintenance records\n")
+        try:
+            work_order = await cosmos_service.get_work_order(work_order_id)
+            print(f"   ✓ Work Order: {work_order.id}")
+            print(f"   Machine: {work_order.machine_id}")
+            print(f"   Fault: {work_order.fault_type}")
+            print(f"   Priority: {work_order.priority}\n")
+        except Exception as e:
+            print(f"   ✗ Error: {str(e)}")
+            return
 
-    print("3. Checking available maintenance windows...")
-    windows = await cosmos_service.get_available_maintenance_windows(14)
-    print(f"   ✓ Found {len(windows)} available windows in next 14 days\n")
+        print("2. Analyzing historical maintenance data...")
+        history = await cosmos_service.get_maintenance_history(work_order.machine_id)
+        print(f"   ✓ Found {len(history)} historical maintenance records\n")
 
-    print("4. Running AI predictive analysis...")
-    try:
-        schedule = await agent_service.predict_schedule(work_order, history, windows)
-        print("   ✓ Analysis complete!\n")
+        print("3. Checking available maintenance windows...")
+        windows = await cosmos_service.get_available_maintenance_windows(14)
+        print(f"   ✓ Found {len(windows)} available windows in next 14 days\n")
 
-        print("=== Predictive Maintenance Schedule ===")
-        print(f"Schedule ID: {schedule.id}")
-        print(f"Machine: {schedule.machine_id}")
-        print(
-            f"Scheduled Date: {schedule.scheduled_date.strftime('%Y-%m-%d %H:%M')}")
-        print(
-            f"Window: {schedule.maintenance_window.start_time.strftime('%H:%M')} - {schedule.maintenance_window.end_time.strftime('%H:%M')}"
-        )
-        print(
-            f"Production Impact: {schedule.maintenance_window.production_impact}")
-        print(f"Risk Score: {schedule.risk_score}/100")
-        print(
-            f"Failure Probability: {schedule.predicted_failure_probability * 100:.1f}%")
-        print(f"Recommended Action: {schedule.recommended_action}")
-        print("\nReasoning:")
-        print(f"{schedule.reasoning}")
-        print()
+        print("4. Running AI predictive analysis...")
+        try:
+            schedule = await agent_service.predict_schedule(work_order, history, windows)
+            print("   ✓ Analysis complete!\n")
 
-        print("5. Saving maintenance schedule...")
-        await cosmos_service.save_maintenance_schedule(schedule)
-        print("   ✓ Schedule saved to Cosmos DB\n")
+            print("=== Predictive Maintenance Schedule ===")
+            print(f"Schedule ID: {schedule.id}")
+            print(f"Machine: {schedule.machine_id}")
+            print(
+                f"Scheduled Date: {schedule.scheduled_date.strftime('%Y-%m-%d %H:%M')}")
+            print(
+                f"Window: {schedule.maintenance_window.start_time.strftime('%H:%M')} - {schedule.maintenance_window.end_time.strftime('%H:%M')}"
+            )
+            print(
+                f"Production Impact: {schedule.maintenance_window.production_impact}")
+            print(f"Risk Score: {schedule.risk_score}/100")
+            print(
+                f"Failure Probability: {schedule.predicted_failure_probability * 100:.1f}%")
+            print(f"Recommended Action: {schedule.recommended_action}")
+            print("\nReasoning:")
+            print(f"{schedule.reasoning}")
+            print()
 
-        print("6. Updating work order status...")
-        await cosmos_service.update_work_order_status(work_order.id, "Scheduled")
-        print("   ✓ Work order status updated to 'Scheduled'\n")
+            print("5. Saving maintenance schedule...")
+            await cosmos_service.save_maintenance_schedule(schedule)
+            print("   ✓ Schedule saved to Cosmos DB\n")
 
-        print("✓ Predictive Maintenance Agent completed successfully!")
-    except Exception as e:
-        print(f"   ✗ Error during predictive analysis: {str(e)}")
-        import traceback
+            print("6. Updating work order status...")
+            await cosmos_service.update_work_order_status(work_order.id, "Scheduled")
+            print("   ✓ Work order status updated to 'Scheduled'\n")
 
-        print(f"\nStack trace:\n{traceback.format_exc()}")
+            print("✓ Predictive Maintenance Agent completed successfully!")
+        except Exception as e:
+            print(f"   ✗ Error during predictive analysis: {str(e)}")
+            import traceback
+
+            print(f"\nStack trace:\n{traceback.format_exc()}")
 
 
 if __name__ == "__main__":

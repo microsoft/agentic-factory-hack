@@ -17,10 +17,14 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from agent_framework.azure import AzureAIClient
+from agent_framework import Agent
+from agent_framework.foundry import FoundryChatClient
+from agent_framework.observability import create_resource, enable_instrumentation, get_tracer, configure_otel_providers
+from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.ai.projects.aio import AIProjectClient
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity.aio import AzureCliCredential
 from dotenv import load_dotenv
+from opentelemetry.trace import SpanKind
 from services.cosmos_db_service import (
     CosmosDbService,
     InventoryItem,
@@ -29,7 +33,6 @@ from services.cosmos_db_service import (
     Supplier,
     WorkOrder,
 )
-from services.observability import enable_tracing
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=True)
@@ -48,6 +51,7 @@ class PartsOrderingAgent:
         self.deployment_name = deployment_name
         self.cosmos_service = cosmos_service
 
+    @get_tracer().start_as_current_span("generate_order")
     async def generate_order(
         self,
         work_order: WorkOrder,
@@ -83,18 +87,22 @@ Always respond in valid JSON format as requested."""
             except Exception as e:
                 print(f"   Warning: Could not restore chat history: {e}")
 
-        credential = DefaultAzureCredential()
-
-        async with AzureAIClient(credential=credential).create_agent(
-            endpoint=self.project_endpoint,
-            model=self.deployment_name,
+        agent = Agent(
+            client=FoundryChatClient(credential=AzureCliCredential(),
+                                     project_endpoint=self.project_endpoint,
+                                     model=self.deployment_name),
             name="PartsOrderingAgent",
+            description="Parts ordering agent for industrial tire manufacturing equipment",
             instructions=instructions,
-        ) as agent:
-            result = await agent.run(full_context)
-            response_text = result.text
+            id="PartsOrderingAgent"
+        )
 
-            await self._save_interaction_history(work_order.id, full_context, response_text)
+        print(f"   ✅ Using agent: {agent.id}")
+
+        result = await agent.run(full_context)
+        response_text = result.text
+
+        await self._save_interaction_history(work_order.id, full_context, response_text)
 
         json_response = self._extract_json(response_text)
         data = json.loads(json_response)
@@ -252,25 +260,32 @@ async def main():
     cosmos_endpoint = os.getenv("COSMOS_ENDPOINT")
     cosmos_key = os.getenv("COSMOS_KEY")
     database_name = os.getenv("COSMOS_DATABASE_NAME")
-    foundry_project_endpoint = os.getenv(
-        "AZURE_AI_PROJECT_ENDPOINT") or os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
+    foundry_project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
     deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4o")
-    app_insights_connection = os.getenv(
-        "APPLICATIONINSIGHTS_CONNECTION_STRING")
+    otel_exporter_endpoint = os.getenv(
+        "OTEL_EXPORTER_OTLP_ENDPOINT")
 
     if not all([cosmos_endpoint, cosmos_key, database_name, foundry_project_endpoint]):
         print("Error: Missing required environment variables.")
-        print("Required: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE_NAME, AZURE_AI_PROJECT_ENDPOINT")
+        print("Required: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE_NAME, AI_FOUNDRY_PROJECT_ENDPOINT")
         return
 
-    enable_tracing(app_insights_connection)
+    if otel_exporter_endpoint:
+        configure_otel_providers()
+    else:
+        configure_azure_monitor(
+            connection_string=os.getenv(
+                "APPLICATIONINSIGHTS_CONNECTION_STRING"),
+            resource=create_resource(),  # Uses OTEL_SERVICE_NAME, etc.
+        )
+        enable_instrumentation(enable_sensitive_data=True)
 
     cosmos_service = CosmosDbService(
         cosmos_endpoint, cosmos_key, database_name)
 
     # Register agent in Azure AI Foundry portal
     async with (
-        DefaultAzureCredential() as credential,
+        AzureCliCredential() as credential,
         AIProjectClient(endpoint=foundry_project_endpoint, credential=credential) as project_client,
     ):
         try:
@@ -338,86 +353,88 @@ Always respond in valid JSON format with: supplierId, supplierName, orderItems (
     agent_service = PartsOrderingAgent(
         foundry_project_endpoint, deployment_name, cosmos_service)
 
-    print("1. Retrieving work order...")
-    work_order_id = sys.argv[1] if len(sys.argv) > 1 else "2024-468"
+    with get_tracer().start_as_current_span("Scenario: Parts Ordering Agent", kind=SpanKind.CLIENT) as current_span:
 
-    try:
-        work_order = await cosmos_service.get_work_order(work_order_id)
-        print(f"   ✓ Work Order: {work_order.id}")
-        print(f"   Machine: {work_order.machine_id}")
-        print(f"   Required Parts: {len(work_order.required_parts)}")
-        print(f"   Priority: {work_order.priority}\n")
-    except Exception as e:
-        print(f"   ✗ Error: {str(e)}")
-        return
+        print("1. Retrieving work order...")
+        work_order_id = sys.argv[1] if len(sys.argv) > 1 else "2024-468"
 
-    print("2. Checking inventory status...")
-    part_numbers = [p.part_number for p in work_order.required_parts]
-    inventory = await cosmos_service.get_inventory_items(part_numbers)
-    print(f"   ✓ Found {len(inventory)} inventory records\n")
+        try:
+            work_order = await cosmos_service.get_work_order(work_order_id)
+            print(f"   ✓ Work Order: {work_order.id}")
+            print(f"   Machine: {work_order.machine_id}")
+            print(f"   Required Parts: {len(work_order.required_parts)}")
+            print(f"   Priority: {work_order.priority}\n")
+        except Exception as e:
+            print(f"   ✗ Error: {str(e)}")
+            return
 
-    parts_needing_order = [
-        p for p in work_order.required_parts if not p.is_available]
+        print("2. Checking inventory status...")
+        part_numbers = [p.part_number for p in work_order.required_parts]
+        inventory = await cosmos_service.get_inventory_items(part_numbers)
+        print(f"   ✓ Found {len(inventory)} inventory records\n")
 
-    if not parts_needing_order:
-        print("✓ All required parts are available in stock!")
-        print("No parts order needed.\n")
+        parts_needing_order = [
+            p for p in work_order.required_parts if not p.is_available]
 
-        print("3. Updating work order status...")
-        await cosmos_service.update_work_order_status(work_order.id, "Ready")
-        print("   ✓ Work order status updated to 'Ready'\n")
+        if not parts_needing_order:
+            print("✓ All required parts are available in stock!")
+            print("No parts order needed.\n")
 
-        print("✓ Parts Ordering Agent completed successfully!")
-        return
+            print("3. Updating work order status...")
+            await cosmos_service.update_work_order_status(work_order.id, "Ready")
+            print("   ✓ Work order status updated to 'Ready'\n")
 
-    print(f"⚠️  {len(parts_needing_order)} part(s) need to be ordered:")
-    for part in parts_needing_order:
-        print(f"   - {part.part_name} (Qty: {part.quantity})")
-    print()
+            print("✓ Parts Ordering Agent completed successfully!")
+            return
 
-    print("3. Finding suppliers...")
-    needed_part_numbers = [p.part_number for p in parts_needing_order]
-    suppliers = await cosmos_service.get_suppliers_for_parts(needed_part_numbers)
-    print(f"   ✓ Found {len(suppliers)} potential suppliers\n")
-
-    if not suppliers:
-        print("✗ No suppliers found for required parts!")
-        return
-
-    print("4. Running AI parts ordering analysis...")
-    try:
-        order = await agent_service.generate_order(work_order, inventory, suppliers)
-        print("   ✓ Parts order generated!\n")
-
-        print("=== Parts Order ===")
-        print(f"Order ID: {order.id}")
-        print(f"Work Order: {order.work_order_id}")
-        print(f"Supplier: {order.supplier_name} (ID: {order.supplier_id})")
-        print(
-            f"Expected Delivery: {order.expected_delivery_date.strftime('%Y-%m-%d')}")
-        print(f"Total Cost: ${order.total_cost:.2f}")
-        print(f"Status: {order.order_status}")
-        print("\nOrder Items:")
-        for item in order.order_items:
-            print(f"  - {item.part_name} (#{item.part_number})")
-            print(
-                f"    Qty: {item.quantity} @ ${item.unit_cost:.2f} = ${item.total_cost:.2f}")
+        print(f"⚠️  {len(parts_needing_order)} part(s) need to be ordered:")
+        for part in parts_needing_order:
+            print(f"   - {part.part_name} (Qty: {part.quantity})")
         print()
 
-        print("5. Saving parts order...")
-        await cosmos_service.save_parts_order(order)
-        print("   ✓ Order saved to SCM system\n")
+        print("3. Finding suppliers...")
+        needed_part_numbers = [p.part_number for p in parts_needing_order]
+        suppliers = await cosmos_service.get_suppliers_for_parts(needed_part_numbers)
+        print(f"   ✓ Found {len(suppliers)} potential suppliers\n")
 
-        print("6. Updating work order status...")
-        await cosmos_service.update_work_order_status(work_order.id, "PartsOrdered")
-        print("   ✓ Work order status updated to 'PartsOrdered'\n")
+        if not suppliers:
+            print("✗ No suppliers found for required parts!")
+            return
 
-        print("✓ Parts Ordering Agent completed successfully!")
-    except Exception as e:
-        print(f"   ✗ Error during parts ordering: {str(e)}")
-        import traceback
+        print("4. Running AI parts ordering analysis...")
+        try:
+            order = await agent_service.generate_order(work_order, inventory, suppliers)
+            print("   ✓ Parts order generated!\n")
 
-        print(f"\nStack trace:\n{traceback.format_exc()}")
+            print("=== Parts Order ===")
+            print(f"Order ID: {order.id}")
+            print(f"Work Order: {order.work_order_id}")
+            print(f"Supplier: {order.supplier_name} (ID: {order.supplier_id})")
+            print(
+                f"Expected Delivery: {order.expected_delivery_date.strftime('%Y-%m-%d')}")
+            print(f"Total Cost: ${order.total_cost:.2f}")
+            print(f"Status: {order.order_status}")
+            print("\nOrder Items:")
+            for item in order.order_items:
+                print(f"  - {item.part_name} (#{item.part_number})")
+                print(
+                    f"    Qty: {item.quantity} @ ${item.unit_cost:.2f} = ${item.total_cost:.2f}")
+            print()
+
+            print("5. Saving parts order...")
+            await cosmos_service.save_parts_order(order)
+            print("   ✓ Order saved to SCM system\n")
+
+            print("6. Updating work order status...")
+            await cosmos_service.update_work_order_status(work_order.id, "PartsOrdered")
+            print("   ✓ Work order status updated to 'PartsOrdered'\n")
+
+            print("✓ Parts Ordering Agent completed successfully!")
+        except Exception as e:
+            print(f"   ✗ Error during parts ordering: {str(e)}")
+            import traceback
+
+            print(f"\nStack trace:\n{traceback.format_exc()}")
 
 
 if __name__ == "__main__":
