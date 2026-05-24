@@ -370,7 +370,7 @@ Out of 2 anomaly records reviewed for machine-001 (Tire Curing Press A1), one vi
 <img src="./images/challenge-1-foundry-portal-anomaly-classification-agent.png" alt="Foundry Portal Anomaly Classification Agent" width="40%">
 
 > [!NOTE]
-> There are two vesions of **Anomaly Classifcation Agent** created, one for the inital agent with local tools and one for the version that uses MCP tools
+> There are two versions of **Anomaly Classification Agent** created, one for the initial agent with local tools and one for the version that uses MCP tools
 
 ❹ Select the **Anomaly Classification Agent** and try out some additional questions in the playground:
 
