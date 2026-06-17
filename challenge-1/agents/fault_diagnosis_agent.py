@@ -13,7 +13,7 @@ model_name = os.environ.get("MODEL_DEPLOYMENT_NAME")
 # Configuration
 knowledge_base_name = 'machine-kb'
 search_endpoint = os.environ.get("SEARCH_SERVICE_ENDPOINT")
-machine_wiki_mcp_endpoint = f"{search_endpoint}knowledgebases/{knowledge_base_name}/mcp?api-version=2025-11-01-preview"
+machine_wiki_mcp_endpoint = f"{search_endpoint}/knowledgebases/{knowledge_base_name}/mcp?api-version=2025-11-01-preview"
 machine_data_mcp_endpoint = os.environ.get("MACHINE_MCP_SERVER_ENDPOINT")
 apim_subscription_key = os.environ.get("APIM_SUBSCRIPTION_KEY")
 
@@ -71,7 +71,12 @@ Grounding rules (IMPORTANT):
                         project_connection_id="machine-data-connection"
                     ),
 
-                    # TODO: add Foundry IQ MCP tool
+                    MCPTool(
+                        server_label="machine-wiki",
+                        server_url=machine_wiki_mcp_endpoint,
+                        require_approval="never",
+                        project_connection_id="machine-wiki-connection"
+                    )
 
                 ]
 
