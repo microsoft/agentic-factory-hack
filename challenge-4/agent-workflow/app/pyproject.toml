@@ -16,7 +16,7 @@ dependencies = [
     "opentelemetry-sdk>=1.40",
     "opentelemetry-exporter-otlp-proto-grpc>=1.40",
     "opentelemetry-semantic-conventions-ai>=0.5",
-    "aiohttp>=3.11.13"
+    "aiohttp>=3.14.1"
 ]
 
 [tool.uv]
