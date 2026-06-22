@@ -181,6 +181,13 @@ else
     searchServiceEndpoint=""
 fi
 
+# Normalize the search endpoint to always end with exactly one trailing slash.
+# Downstream consumers (challenge-1 notebook and fault_diagnosis_agent.py) build
+# URLs like "${SEARCH_SERVICE_ENDPOINT}knowledgebases/..." and rely on the slash.
+if [ -n "$searchServiceEndpoint" ]; then
+    searchServiceEndpoint="${searchServiceEndpoint%/}/"
+fi
+
 # Application Insights
 if [ -n "$applicationInsightsName" ]; then
     appInsightsInstrumentationKey=$(az resource show --resource-group $resourceGroupName --name $applicationInsightsName --resource-type "Microsoft.Insights/components" --query properties.InstrumentationKey -o tsv 2>/dev/null || echo "")
