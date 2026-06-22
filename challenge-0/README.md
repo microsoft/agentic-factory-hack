@@ -214,13 +214,18 @@ export RESOURCE_GROUP="rg-tire-factory-hack-${RG_SUFFIX}"
 export LOCATION="swedencentral"
 
 # Create resource group
-az group create --name $RESOURCE_GROUP --location $LOCATION
+az group create --name $RESOURCE_GROUP --location $LOCATION --tags SecurityControl=Ignore SecurityExemption=StorageAccountKeyAccess
 
 # Deploy infrastructure
 az deployment group create \
   --resource-group $RESOURCE_GROUP \
   --template-file infra/azuredeploy.json \
   --parameters location=$LOCATION
+```
+
+# If redeployed - purge all soft-deleted Azure Resources
+```
+./purge-soft-deleted.sh --resource-group $RESOURCE_GROUP
 ```
 
 ⏱️Deployment takes approximately 5-10 minutes.

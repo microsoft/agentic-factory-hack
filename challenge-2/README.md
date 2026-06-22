@@ -338,7 +338,7 @@ Try out your agent.
 
 ```bash
 # Load environment variables
-export $(cat ../.env | xargs)
+export $(cat ../../.env | xargs)
 
 dotnet run
 ```
