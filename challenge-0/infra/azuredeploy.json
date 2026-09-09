@@ -351,16 +351,16 @@
     {
       "type": "Microsoft.CognitiveServices/accounts/deployments",
       "apiVersion": "2025-04-01-preview",
-      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-4o-mini')]",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4-mini')]",
       "sku": {
         "capacity": 50,
         "name": "GlobalStandard"
       },
       "properties": {
         "model": {
-          "name": "gpt-4o-mini",
+          "name": "gpt-5.4-mini",
           "format": "OpenAI",
-          "version": "2024-07-18"
+          "version": "2026-03-17"
         }
       },
       "dependsOn": [
@@ -370,21 +370,21 @@
     {
       "type": "Microsoft.CognitiveServices/accounts/deployments",
       "apiVersion": "2025-04-01-preview",
-      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-4.1')]",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4')]",
       "sku": {
         "capacity": 50,
         "name": "GlobalStandard"
       },
       "properties": {
         "model": {
-          "name": "gpt-4.1",
+          "name": "gpt-5.4",
           "format": "OpenAI",
-          "version": "2025-04-14"
+          "version": "2026-03-05"
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-4o-mini')]"
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4-mini')]"
       ]
     },
     {
@@ -404,7 +404,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-4.1')]"
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4')]"
       ]
     },
     {
