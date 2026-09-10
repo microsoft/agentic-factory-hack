@@ -32,7 +32,7 @@ The following image illustrates the setup:
 
 All resources reside in a single resource group.
 
-- A **Foundry Account** with a **Foundry Project** with model deployments for **gpt-4.1**, **gpt-4o-mini** and **text-embedding-ada-002**
+- A **Foundry Account** with a **Foundry Project** with model deployments for **gpt-5.4**, **gpt-5.4-mini** and **text-embedding-3-large**
 - **API Management** with two API proxies that read data from **Cosmos DB**
 - **Cosmos DB** with a database including data for machines, technicians, work orders, and more
 - **Storage Account** with knowledge base wiki articles in Markdown

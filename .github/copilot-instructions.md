@@ -36,16 +36,16 @@ This workshop must work reliably with smaller models (e.g., GPT-5-mini). Follow 
 
 ### Pinned versions (Challenge 2)
 Always use these exact NuGet package versions:
-- `Azure.AI.Projects` → `1.2.0-beta.5`
-- `Azure.Identity` → `1.17.1`
-- `Microsoft.Agents.AI` → `1.0.0-preview.260108.1`
-- `Microsoft.Agents.AI.AzureAI` → `1.0.0-preview.260108.1`
-- `Microsoft.Extensions.AI` → `10.2.0`
-- `Microsoft.Extensions.AI.Abstractions` → `10.2.0`
-- `Microsoft.Azure.Cosmos` → `3.56.0`
-- `Microsoft.Extensions.DependencyInjection` → `10.0.2`
-- `Microsoft.Extensions.Logging` → `10.0.2`
-- `Microsoft.Extensions.Logging.Console` → `10.0.2`
+- `Azure.AI.Projects` → `2.1.0-beta.4`
+- `Azure.Identity` → `1.21.0`
+- `Microsoft.Agents.AI` → `1.20.0`
+- `Microsoft.Agents.AI.Foundry` → `1.20.0-preview.260831.1`
+- `Microsoft.Extensions.AI` → `10.9.0`
+- `Microsoft.Extensions.AI.Abstractions` → `10.9.0`
+- `Microsoft.Azure.Cosmos` → `3.63.0`
+- `Microsoft.Extensions.DependencyInjection` → `10.0.12`
+- `Microsoft.Extensions.Logging` → `10.0.12`
+- `Microsoft.Extensions.Logging.Console` → `10.0.12`
 - `Newtonsoft.Json` → `13.0.4`
 
 ### Environment variables (Challenge 2)

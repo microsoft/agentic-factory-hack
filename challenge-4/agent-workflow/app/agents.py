@@ -143,7 +143,7 @@ def create_maintenance_scheduler_a2a_app():
                     "COSMOS_DATABASE_NAME") or os.getenv("COSMOS_DATABASE")
                 project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT") or os.getenv(
                     "AZURE_AI_PROJECT_ENDPOINT")
-                deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4o")
+                deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-5.4")
 
                 if not all([cosmos_endpoint, cosmos_key, database_name, project_endpoint]):
                     response_text = "Error: Missing required environment variables for MaintenanceSchedulerAgent"
@@ -307,7 +307,7 @@ def create_parts_ordering_a2a_app():
                     "COSMOS_DATABASE_NAME") or os.getenv("COSMOS_DATABASE")
                 project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT") or os.getenv(
                     "AZURE_AI_PROJECT_ENDPOINT")
-                deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4o")
+                deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-5.4")
 
                 if not all([cosmos_endpoint, cosmos_key, database_name, project_endpoint]):
                     response_text = "Error: Missing required environment variables for PartsOrderingAgent"
@@ -517,7 +517,7 @@ async def run_factory_workflow(machine_id: str, telemetry: list):
     """
 
     project_endpoint = _require_env("AZURE_AI_PROJECT_ENDPOINT")
-    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4o")
+    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-5.4")
     repair_planner_url = os.getenv("REPAIR_PLANNER_AGENT_URL")
 
     credential = AzureCliCredential()

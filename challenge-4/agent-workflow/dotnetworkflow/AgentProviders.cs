@@ -64,7 +64,7 @@ public static class LocalAgentProvider
         ILogger logger)
     {
         var aoaiEndpoint = config["AZURE_OPENAI_ENDPOINT"];
-        var aoaiDeployment = config["AZURE_OPENAI_DEPLOYMENT_NAME"] ?? "gpt-4o";
+        var aoaiDeployment = config["AZURE_OPENAI_DEPLOYMENT_NAME"] ?? "gpt-5.4";
         var cosmosEndpoint = config["COSMOS_ENDPOINT"];
         var cosmosKey = config["COSMOS_KEY"];
         var cosmosDatabase = config["COSMOS_DATABASE"] ?? "FactoryOpsDB";

@@ -27,7 +27,7 @@ async def main():
             agent_name="FaultDiagnosisAgent",
             description="Fault diagnosis agent",
             definition=PromptAgentDefinition(
-                model="gpt-4.1",
+                model=model_name,
                 instructions="""You are a Fault Diagnosis Agent evaluating the root cause of maintenance alerts.
 
 You will receive detected sensor deviations for a given machine. Your task is to determine the most likely root cause using ONLY the provided tools.
@@ -70,6 +70,13 @@ Grounding rules (IMPORTANT):
                         require_approval="never",
                         project_connection_id="machine-data-connection"
                     ),
+                    MCPTool(
+                        server_label="machine-wiki",
+                        server_url=machine_wiki_mcp_endpoint,
+                        require_approval="never",
+                        project_connection_id="machine-wiki-connection"
+                    )
+
 
                     # TODO: add Foundry IQ MCP tool
 

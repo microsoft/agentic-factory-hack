@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.AI.Projects;
-using Azure.AI.Projects.OpenAI;
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Foundry;
 using Microsoft.Extensions.Logging;
 using RepairPlanner.Models;
 using RepairPlanner.Services;
@@ -51,19 +51,20 @@ public sealed class RepairPlannerAgent(
         PropertyNameCaseInsensitive = true,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
     };
+    private ChatClientAgent? agent;
 
     /// <summary>
-    /// Ensures the Foundry Prompt Agent version is created/updated.
+    /// Initializes a Foundry Responses-backed agent.
     /// </summary>
     public async Task EnsureAgentVersionAsync(CancellationToken ct = default)
     {
-        logger.LogInformation("Creating agent '{AgentName}' with model '{Model}'", AgentName, modelDeploymentName);
-
-        var definition = new PromptAgentDefinition(model: modelDeploymentName) { Instructions = AgentInstructions };
-        await projectClient.Agents.CreateAgentVersionAsync(AgentName, new AgentVersionCreationOptions(definition), ct);
-
-        var latest = projectClient.GetAIAgent(name: AgentName, cancellationToken: ct);
-        logger.LogInformation("Agent version: {Version}", latest.GetService<AgentVersion>()?.Id ?? "unknown");
+        agent = projectClient.AsAIAgent(
+            model: modelDeploymentName,
+            instructions: AgentInstructions,
+            name: AgentName,
+            description: "Generates work orders for diagnosed faults.");
+        logger.LogInformation("Initialized agent '{AgentName}' with model '{Model}'", AgentName, modelDeploymentName);
+        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -91,8 +92,12 @@ public sealed class RepairPlannerAgent(
     private async Task<string> InvokeAgentAsync(string input, CancellationToken ct)
     {
         logger.LogInformation("Invoking agent '{AgentName}'", AgentName);
-        var agent = projectClient.GetAIAgent(name: AgentName, cancellationToken: ct);
-        var response = await agent.RunAsync(input, thread: null, options: null, cancellationToken: ct);
+        agent ??= projectClient.AsAIAgent(
+            model: modelDeploymentName,
+            instructions: AgentInstructions,
+            name: AgentName,
+            description: "Generates work orders for diagnosed faults.");
+        var response = await agent.RunAsync(input, session: null, options: null, cancellationToken: ct);
         return response.Text ?? "";
     }
 
