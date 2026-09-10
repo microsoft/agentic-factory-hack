@@ -2,14 +2,14 @@
     // Workshop/demo: keep reference solutions out of Explorer + Search results.
     // This reduces accidental Copilot retrieval, but the most reliable approach is still
     // keeping solutions outside the opened workspace (separate branch/worktree).
-    "files.exclude": {
-        "example-solution": true,
-        "**/example-solution/**": true
-    },
-    "search.exclude": {
-        "example-solution": true,
-        "**/example-solution/**": true
-    },
+    // "files.exclude": {
+    //     "example-solution": true,
+    //     "**/example-solution/**": true
+    // },
+    // "search.exclude": {
+    //     "example-solution": true,
+    //     "**/example-solution/**": true
+    // },
     "workbench.editorAssociations": {
         "*.md": "vscode.markdown.preview.editor"
     }

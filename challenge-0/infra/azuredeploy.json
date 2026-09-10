@@ -52,6 +52,7 @@
     "searchServiceContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')]",
     "searchIndexDataReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]",
     "aiDeveloperRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '64702f94-c441-49e6-a78b-ef80e0188fee')]",
+    "monitoringReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')]",
     "contributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
     "cosmosDbDataContributorRoleId": "00000000-0000-0000-0000-000000000002"
   },
@@ -351,16 +352,16 @@
     {
       "type": "Microsoft.CognitiveServices/accounts/deployments",
       "apiVersion": "2025-04-01-preview",
-      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-4o-mini')]",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4-mini')]",
       "sku": {
         "capacity": 50,
         "name": "GlobalStandard"
       },
       "properties": {
         "model": {
-          "name": "gpt-4o-mini",
+          "name": "gpt-5.4-mini",
           "format": "OpenAI",
-          "version": "2024-07-18"
+          "version": "2026-03-17"
         }
       },
       "dependsOn": [
@@ -370,21 +371,21 @@
     {
       "type": "Microsoft.CognitiveServices/accounts/deployments",
       "apiVersion": "2025-04-01-preview",
-      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-4.1')]",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4')]",
       "sku": {
         "capacity": 50,
         "name": "GlobalStandard"
       },
       "properties": {
         "model": {
-          "name": "gpt-4.1",
+          "name": "gpt-5.4",
           "format": "OpenAI",
-          "version": "2025-04-14"
+          "version": "2026-03-05"
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-4o-mini')]"
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4-mini')]"
       ]
     },
     {
@@ -404,7 +405,22 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-4.1')]"
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), variables('monitoringReaderRoleId'))]",
+      "scope": "[format('Microsoft.Insights/components/{0}', variables('applicationInsightsName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('monitoringReaderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
       ]
     },
     {

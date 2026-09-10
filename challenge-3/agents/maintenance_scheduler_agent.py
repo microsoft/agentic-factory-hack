@@ -101,8 +101,8 @@ Always respond in valid JSON format as requested."""
         #     agent_name="MaintenanceSchedulerAgent",
         #     credential=AzureCliCredential(),
         #     default_options={
-        #         "model": "gpt-4.1",
-        #         "extra_body": {"model": "gpt-4.1"},
+        #         "model": "gpt-5.4",
+        #         "extra_body": {"model": "gpt-5.4"},
         #     }
         # )
 
@@ -305,7 +305,7 @@ async def main():
     cosmos_key = os.getenv("COSMOS_KEY")
     database_name = os.getenv("COSMOS_DATABASE_NAME")
     foundry_project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
-    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4.1")
+    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-5.4")
     otel_exporter_endpoint = os.getenv(
         "OTEL_EXPORTER_OTLP_ENDPOINT")
 

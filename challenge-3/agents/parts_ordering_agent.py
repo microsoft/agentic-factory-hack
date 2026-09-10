@@ -14,7 +14,7 @@ import logging
 import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from agent_framework import Agent
@@ -107,24 +107,41 @@ Always respond in valid JSON format as requested."""
         json_response = self._extract_json(response_text)
         data = json.loads(json_response)
 
+        order_items = [
+            OrderItem(
+                part_number=item["partNumber"],
+                part_name=item["partName"],
+                quantity=item["quantity"],
+                unit_cost=item.get("unitCost") or 0.0,
+                total_cost=item.get("totalCost") or (
+                    item["quantity"] * (item.get("unitCost") or 0.0)),
+            )
+            for item in data["orderItems"]
+        ]
+        # Fall back to summing item costs if the model omitted/nulled the order total
+        total_cost = data.get("totalCost")
+        if total_cost is None:
+            total_cost = sum(item.total_cost for item in order_items)
+
+        expected_delivery_raw = data.get("expectedDeliveryDate")
+        if expected_delivery_raw:
+            expected_delivery_date = datetime.fromisoformat(
+                expected_delivery_raw.replace("Z", "+00:00"))
+        else:
+            # Model omitted the date; derive it from the chosen supplier's lead time
+            supplier = next(
+                (s for s in suppliers if s.id == data.get("supplierId")), None)
+            lead_time_days = supplier.lead_time_days if supplier else 7
+            expected_delivery_date = datetime.utcnow() + timedelta(days=lead_time_days)
+
         return PartsOrder(
             id=f"PO-{str(uuid.uuid4())[:8]}",
             work_order_id=work_order.id,
-            order_items=[
-                OrderItem(
-                    part_number=item["partNumber"],
-                    part_name=item["partName"],
-                    quantity=item["quantity"],
-                    unit_cost=item["unitCost"],
-                    total_cost=item["totalCost"],
-                )
-                for item in data["orderItems"]
-            ],
+            order_items=order_items,
             supplier_id=data["supplierId"],
             supplier_name=data["supplierName"],
-            total_cost=data["totalCost"],
-            expected_delivery_date=datetime.fromisoformat(
-                data["expectedDeliveryDate"].replace("Z", "+00:00")),
+            total_cost=total_cost,
+            expected_delivery_date=expected_delivery_date,
             order_status="Pending",
             created_at=datetime.utcnow(),
         )
@@ -152,6 +169,8 @@ Always respond in valid JSON format as requested."""
         lines = [
             "# Parts Ordering Analysis Request",
             "",
+            f"Today's date: {datetime.utcnow().strftime('%Y-%m-%d')}",
+            "",
             "## Work Order Information",
             f"- Work Order ID: {work_order.id}",
             f"- Machine ID: {work_order.machine_id}",
@@ -177,6 +196,7 @@ Always respond in valid JSON format as requested."""
                 lines.append(f"  * Current Stock: {item.current_stock}")
                 lines.append(f"  * Minimum Stock: {item.min_stock}")
                 lines.append(f"  * Reorder Point: {item.reorder_point}")
+                lines.append(f"  * Unit Cost: ${item.unit_cost:.2f}")
                 lines.append(
                     f"  * Status: {'⚠️  NEEDS ORDERING' if needs_order else '✓ Adequate'}")
                 lines.append(f"  * Location: {item.location}")
@@ -207,6 +227,9 @@ Always respond in valid JSON format as requested."""
                 "2. Optimal supplier selection (reliability > lead time > cost)",
                 "3. Expected delivery date",
                 "4. Total order cost",
+                "",
+                "Use the exact 'Unit Cost' values listed above under 'Current Inventory Status' "
+                "for unitCost/totalCost. Do not invent or estimate costs.",
                 "",
                 "```json",
                 "{",
@@ -261,7 +284,7 @@ async def main():
     cosmos_key = os.getenv("COSMOS_KEY")
     database_name = os.getenv("COSMOS_DATABASE_NAME")
     foundry_project_endpoint = os.getenv("AI_FOUNDRY_PROJECT_ENDPOINT")
-    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-4o")
+    deployment_name = os.getenv("MODEL_DEPLOYMENT_NAME", "gpt-5.4")
     otel_exporter_endpoint = os.getenv(
         "OTEL_EXPORTER_OTLP_ENDPOINT")
 

@@ -27,7 +27,7 @@ async def main():
             agent_name="FaultDiagnosisAgent",
             description="Fault diagnosis agent",
             definition=PromptAgentDefinition(
-                model="gpt-4.1",
+                model=model_name,
                 instructions="""You are a Fault Diagnosis Agent evaluating the root cause of maintenance alerts.
 
 You will receive detected sensor deviations for a given machine. Your task is to determine the most likely root cause using ONLY the provided tools.

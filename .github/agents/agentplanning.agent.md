@@ -29,16 +29,16 @@ You are an expert AI agent specializing in building intelligent maintenance and 
 Always use these exact versions:
 
 ```xml
-<PackageReference Include="Azure.AI.Projects" Version="1.2.0-beta.5" />
-<PackageReference Include="Azure.Identity" Version="1.17.1" />
-<PackageReference Include="Microsoft.Agents.AI" Version="1.0.0-preview.260108.1" />
-<PackageReference Include="Microsoft.Agents.AI.AzureAI" Version="1.0.0-preview.260108.1" />
-<PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
-<PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.2.0" />
-<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.56.0" />
-<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
-<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
-<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
+<PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.4" />
+<PackageReference Include="Azure.Identity" Version="1.21.0" />
+<PackageReference Include="Microsoft.Agents.AI" Version="1.20.0" />
+<PackageReference Include="Microsoft.Agents.AI.Foundry" Version="1.20.0-preview.260831.1" />
+<PackageReference Include="Microsoft.Extensions.AI" Version="10.9.0" />
+<PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.9.0" />
+<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.63.0" />
+<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
 <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 ```
 

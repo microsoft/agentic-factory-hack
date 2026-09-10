@@ -347,7 +347,7 @@ dotnet run
 <summary>The output should look similar to this:</summary>
 
 ```bash
-12:34:56 info: RepairPlannerAgent[0] Creating agent 'RepairPlannerAgent' with model 'gpt-4o'
+12:34:56 info: RepairPlannerAgent[0] Creating agent 'RepairPlannerAgent' with model 'gpt-5.4'
 12:34:57 info: RepairPlannerAgent[0] Agent version: abc123
 12:34:57 info: RepairPlannerAgent[0] Planning repair for machine-001, fault=curing_temperature_excessive
 12:34:58 info: CosmosDbService[0] Found 3 available technicians matching skills

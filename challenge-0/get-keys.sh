@@ -339,7 +339,7 @@ echo "AI_FOUNDRY_ENDPOINT=\"$aiFoundryEndpoint\"" >> "$ENV_OUT"
 echo "AI_FOUNDRY_KEY=\"$aiFoundryKey\"" >> "$ENV_OUT"
 
 # The new packages required OpenAI Standard for env variables
-echo "AZURE_OPENAI_CHAT_MODEL=\"gpt-4o-mini\"" >> "$ENV_OUT"
+echo "AZURE_OPENAI_CHAT_MODEL=\"gpt-5.4-mini\"" >> "$ENV_OUT"
 
 # RepairPlannerAgent (Challenge 2) environment variables
 # For chat, use the same key as the AI Foundry/Cognitive Services account.
@@ -347,16 +347,16 @@ echo "AZURE_AI_CHAT_KEY=\"$aiFoundryKey\"" >> "$ENV_OUT"
 
 # Chat endpoint is derived from the Cognitive Services endpoint.
 # Expected final format:
-#   https://<resource>.cognitiveservices.azure.com/openai/deployments/gpt-4o-mini
+#   https://<resource>.cognitiveservices.azure.com/openai/deployments/gpt-5.4-mini
 if [ -n "$aiFoundryEndpoint" ]; then
     aiChatBaseEndpoint=${aiFoundryEndpoint%/}
-    echo "AZURE_AI_CHAT_ENDPOINT=\"${aiChatBaseEndpoint}/openai/deployments/gpt-4o-mini\"" >> "$ENV_OUT"
+    echo "AZURE_AI_CHAT_ENDPOINT=\"${aiChatBaseEndpoint}/openai/deployments/gpt-5.4-mini\"" >> "$ENV_OUT"
 else
     echo "AZURE_AI_CHAT_ENDPOINT=\"\"" >> "$ENV_OUT"
 fi
-echo "AZURE_AI_CHAT_MODEL=\"$azureAIChatModel\"" >> "$ENV_OUT"
+echo "AZURE_AI_CHAT_MODEL=\"gpt-5.4-mini\"" >> "$ENV_OUT"
 # Constant for the workshop (placed after the endpoint for readability)
-echo "AZURE_AI_CHAT_MODEL_DEPLOYMENT_NAME=\"gpt-4o-mini\"" >> "$ENV_OUT"
+echo "AZURE_AI_CHAT_MODEL_DEPLOYMENT_NAME=\"gpt-5.4-mini\"" >> "$ENV_OUT"
 # Construct AI Foundry Hub Endpoint if missing
 if [ -z "$aiFoundryHubEndpoint" ] && [ -n "$aiFoundryHubName" ]; then
     echo "Constructing AI Foundry Hub Endpoint..."
@@ -415,7 +415,7 @@ echo "AI_FOUNDRY_PROJECT_ENDPOINT=\"$aiFoundryProjectEndpoint\"" >> "$ENV_OUT"
 echo "AZURE_AI_PROJECT_ENDPOINT=\"$aiFoundryProjectEndpoint\"" >> "$ENV_OUT"
 echo "AZURE_AI_PROJECT_RESOURCE_ID=\"$azureAIProjectResourceId\"" >> "$ENV_OUT"
 echo "AZURE_AI_CONNECTION_ID=\"$azureAIConnectionId\"" >> "$ENV_OUT"
-echo "AZURE_AI_MODEL_DEPLOYMENT_NAME=\"gpt-4.1\"" >> "$ENV_OUT"
+echo "AZURE_AI_MODEL_DEPLOYMENT_NAME=\"gpt-5.4\"" >> "$ENV_OUT"
 echo "EMBEDDING_MODEL_DEPLOYMENT_NAME=\"text-embedding-3-large\"" >> "$ENV_OUT"
 # Azure Cosmos DB
 echo "COSMOS_NAME=\"$cosmosDbAccountName\"" >> "$ENV_OUT"
@@ -450,8 +450,8 @@ else
 fi
 echo "AZURE_OPENAI_ENDPOINT=\"$azureOpenAIEndpoint\"" >> "$ENV_OUT"
 echo "AZURE_OPENAI_KEY=\"$aiFoundryKey\"" >> "$ENV_OUT"
-echo "AZURE_OPENAI_DEPLOYMENT_NAME=\"gpt-4.1\"" >> "$ENV_OUT"
-echo "MODEL_DEPLOYMENT_NAME=\"gpt-4.1\"" >> "$ENV_OUT"
+echo "AZURE_OPENAI_DEPLOYMENT_NAME=\"gpt-5.4\"" >> "$ENV_OUT"
+echo "MODEL_DEPLOYMENT_NAME=\"gpt-5.4\"" >> "$ENV_OUT"
 
 echo "Keys and properties are stored in '.env' file successfully."
 

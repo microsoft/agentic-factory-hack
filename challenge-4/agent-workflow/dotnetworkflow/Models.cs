@@ -44,6 +44,11 @@ public class AgentStepResult
     public string TextOutput { get; set; } = string.Empty;
 
     /// <summary>
+    /// Indicates that the agent execution itself failed.
+    /// </summary>
+    public bool IsError { get; set; }
+
+    /// <summary>
     /// Final message from this agent (passed to the next agent in the workflow).
     /// </summary>
     public string? FinalMessage { get; set; }

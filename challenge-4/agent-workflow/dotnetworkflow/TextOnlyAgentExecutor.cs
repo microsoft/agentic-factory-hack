@@ -133,6 +133,7 @@ public sealed class TextOnlyAgentExecutor : Executor<string, string>
         catch (Exception ex)
         {
             Console.WriteLine($"Agent {_agent.Name} failed: {ex.Message}");
+            agentStep.IsError = true;
             agentStep.FinalMessage = $"Error: {ex.Message}";
             agentStep.TextOutput = $"Error: {ex.Message}";
         }

@@ -108,7 +108,11 @@ function AgentStepEvents({ steps }: { steps: AgentStepResult[] }) {
   const hasEvents = allToolCalls.length > 0 || combinedOutput.trim()
   if (!hasEvents) return null
   
-  const isError = isErrorOutput(combinedOutput)
+  // Prefer the backend's explicit execution status. Fall back to text matching
+  // only for older or demo payloads that do not include isError.
+  const isError = steps.some((step) =>
+    step.isError === undefined ? isErrorOutput(step.textOutput) : step.isError,
+  )
   const summary = getSummary(combinedOutput)
   
   return (
@@ -185,9 +189,10 @@ export function AgentIllustration(props: {
     if (runState === 'completed' && workflowResponse) {
       const steps = agentEventsMap.get(agentId)
       if (steps && steps.some(s => hasContent(s))) {
-        // Check if the output indicates an error
-        const combinedOutput = steps.map(s => s.textOutput).join('\n')
-        if (isErrorOutput(combinedOutput)) {
+        const hasExecutionError = steps.some((step) =>
+          step.isError === undefined ? isErrorOutput(step.textOutput) : step.isError,
+        )
+        if (hasExecutionError) {
           return 'error'
         }
         return 'done'

@@ -12,6 +12,8 @@ export interface AgentStepResult {
   agentName: string
   toolCalls: ToolCallInfo[]
   textOutput: string
+  /** Explicit execution failure from the backend; absent on older/demo payloads. */
+  isError?: boolean
   finalMessage: string | null
 }
 
