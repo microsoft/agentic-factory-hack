@@ -34,7 +34,6 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "github.copilot",
                 "github.copilot-chat",
                 "ms-azuretools.vscode-azurefunctions",
                 "ms-python.autopep8",
