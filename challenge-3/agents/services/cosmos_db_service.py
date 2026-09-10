@@ -103,6 +103,7 @@ class InventoryItem:
     current_stock: int = 0
     min_stock: int = 0
     reorder_point: int = 0
+    unit_cost: float = 0.0
     location: str = ""
 
 
@@ -463,14 +464,19 @@ class CosmosDbService:
                 )
 
                 for item in items:
+                    # Seeded documents use quantityInStock/reorderLevel/name/unitCost;
+                    # keep the older key names as a fallback for compatibility.
                     results.append(
                         InventoryItem(
                             id=item.get("id", ""),
                             part_number=item.get("partNumber", ""),
-                            part_name=item.get("partName", ""),
-                            current_stock=item.get("currentStock", 0),
+                            part_name=item.get("name", item.get("partName", "")),
+                            current_stock=item.get(
+                                "quantityInStock", item.get("currentStock", 0)),
                             min_stock=item.get("minStock", 0),
-                            reorder_point=item.get("reorderPoint", 0),
+                            reorder_point=item.get(
+                                "reorderLevel", item.get("reorderPoint", 0)),
+                            unit_cost=item.get("unitCost", 0.0),
                             location=item.get("location", ""),
                         )
                     )

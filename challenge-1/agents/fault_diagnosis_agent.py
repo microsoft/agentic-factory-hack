@@ -70,13 +70,6 @@ Grounding rules (IMPORTANT):
                         require_approval="never",
                         project_connection_id="machine-data-connection"
                     ),
-                    MCPTool(
-                        server_label="machine-wiki",
-                        server_url=machine_wiki_mcp_endpoint,
-                        require_approval="never",
-                        project_connection_id="machine-wiki-connection"
-                    )
-
 
                     # TODO: add Foundry IQ MCP tool
 
