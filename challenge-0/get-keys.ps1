@@ -1,7 +1,4 @@
 #!/usr/bin/env pwsh
-# Copyright (c) Microsoft Corporation.
-# SPDX-License-Identifier: MIT
-#Requires -Version 7.0
 
 <#
 .SYNOPSIS
