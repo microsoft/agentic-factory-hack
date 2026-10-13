@@ -33,7 +33,7 @@ fi
 
 # Get resource group deployments, find deployments starting with 'Microsoft.Template' and sort them by timestamp
 echo "Getting the deployments in '$resourceGroupName'..."
-deploymentName=$(az deployment group list --resource-group $resourceGroupName --query "[?contains(name, 'Microsoft.Template') || contains(name, 'azuredeploy') || contains(name, 'hack-deployment')].{name:name}[0].name" --output tsv)
+deploymentName=$(az deployment group list --resource-group $resourceGroupName --query "[?contains(name, 'Microsoft.Template') || contains(name, 'azuredeploy') || contains(name, 'hack-deployment') || contains(name, 'lab-services')].{name:name}[0].name" --output tsv)
 if [ $? -ne 0 ]; then
     echo "Error occurred while fetching deployments. Exiting..."
     exit 1
