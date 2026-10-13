@@ -25,7 +25,7 @@ echo "🚀 Starting data seeding..."
 # Install required Python packages
 echo "📦 Installing required Python packages..."
 pip3 install azure-cosmos --quiet
-pip3 install azure-storage-blob --quiet
+pip3 install azure-storage-blob 'cffi>=1.17.1' --quiet
 
 # Create Python script to handle the data import
 cat > seed_data.py << 'EOF'
