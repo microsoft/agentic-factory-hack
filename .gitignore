@@ -1,7 +1,11 @@
 # Hack automation credentials (sensitive)
+.hack-users/
 hack-setup-automation/coach-credentials.txt
 hack-setup-automation/hack-user-credentials.txt
 hack-setup-automation/hack-user-credentials.csv
+
+# Generated deployment outputs (written in the caller's working directory)
+deployment-*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

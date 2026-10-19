@@ -22,6 +22,15 @@
         "description": "Azure location where resources should be deployed"
       }
     },
+    "resourceSuffix": {
+      "type": "string",
+      "defaultValue": "[uniqueString(resourceGroup().id)]",
+      "minLength": 13,
+      "maxLength": 13,
+      "metadata": {
+        "description": "Stable lowercase alphanumeric resource suffix. For an existing environment, reuse its current 13-character suffix to avoid creating duplicate resources."
+      }
+    },
     "searchServiceSku": {
       "type": "string",
       "defaultValue": "basic",
@@ -36,7 +45,7 @@
   },
   "variables": {
     "prefix": "msagthack",
-    "suffix": "[uniqueString(resourceGroup().id, deployment().name)]",
+    "suffix": "[parameters('resourceSuffix')]",
     "storageAccountName": "[replace(format('{0}-sa-{1}', variables('prefix'), variables('suffix')), '-', '')]",
     "logAnalyticsWorkspaceName": "[format('{0}-loganalytics-{1}', variables('prefix'), variables('suffix'))]",
     "searchServiceName": "[format('{0}-search-{1}', variables('prefix'), variables('suffix'))]",
@@ -323,6 +332,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts/connections', variables('aiFoundryName'), format('{0}-aisearch', variables('aiFoundryName')))]",
         "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
       ]
     },
@@ -354,7 +364,7 @@
       "apiVersion": "2025-04-01-preview",
       "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4-mini')]",
       "sku": {
-        "capacity": 50,
+        "capacity": 25,
         "name": "GlobalStandard"
       },
       "properties": {
@@ -373,7 +383,7 @@
       "apiVersion": "2025-04-01-preview",
       "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4')]",
       "sku": {
-        "capacity": 50,
+        "capacity": 25,
         "name": "GlobalStandard"
       },
       "properties": {
@@ -503,6 +513,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'text-embedding-3-large')]",
         "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName'))]"
       ]
     },

@@ -15,6 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_FILE="$REPO_ROOT/challenge-0/infra/azuredeploy.json"
 ADDITIONAL_TAGS=""
+RESOURCE_SUFFIX=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -24,7 +25,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 usage() {
-    echo "Usage: $0 -u <username> -g <resource-group> -l <location> [-t <tags>]"
+    echo "Usage: $0 -u <username> -g <resource-group> -l <location> [-t <tags>] [--resource-suffix <suffix>]"
     echo ""
     echo "NOTE: This script is for workshop facilitators only, not for hack participants."
     echo ""
@@ -35,6 +36,7 @@ usage() {
     echo ""
     echo "Optional parameters:"
     echo "  -t, --tags            Additional tags in format 'key1=value1 key2=value2'"
+    echo "  --resource-suffix     Existing 13-character suffix to reuse when multiple environments are found"
     echo "  -h, --help            Show this help message"
     echo ""
     echo "Example:"
@@ -81,6 +83,14 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             usage
             ;;
+        --resource-suffix)
+            if [[ $# -lt 2 || ! "$2" =~ ^[a-z0-9]{13}$ ]]; then
+                log_error "--resource-suffix requires exactly 13 lowercase letters or digits"
+                exit 1
+            fi
+            RESOURCE_SUFFIX="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             usage
@@ -106,6 +116,10 @@ if [ ! -f "$TEMPLATE_FILE" ]; then
     log_error "Template file not found: $TEMPLATE_FILE"
     exit 1
 fi
+if ! command -v jq >/dev/null 2>&1; then
+    log_error "jq is required to discover existing resource suffixes."
+    exit 1
+fi
 
 # Check if logged into Azure
 log_info "Checking Azure CLI login status..."
@@ -121,15 +135,63 @@ log_info "Using subscription: $SUBSCRIPTION_NAME ($SUBSCRIPTION_ID)"
 
 # Get user's Object ID
 log_info "Looking up user: $USERNAME"
-USER_ID=$(az ad user show --id "$USERNAME" --query id -o tsv 2>/dev/null) || {
-    log_error "Could not find user: $USERNAME"
-    echo "Make sure the username is a valid Azure AD user email address."
+USER_ID=$(az ad user show --id "$USERNAME" --query id -o tsv --only-show-errors) || {
+    log_error "Could not look up user: $USERNAME"
+    echo "See the Azure CLI error above. Check the username, current tenant, Graph permissions, and login session."
     exit 1
 }
+if [[ -z "$USER_ID" || "$USER_ID" == "null" || "$USER_ID" == "None" ]]; then
+    log_error "User lookup returned no object ID for: $USERNAME"
+    exit 1
+fi
 log_success "Found user with Object ID: $USER_ID"
 
 # Check if resource group already exists
-if az group show --name "$RESOURCE_GROUP" &>/dev/null; then
+GROUP_EXISTS=$(az group exists --name "$RESOURCE_GROUP" --subscription "$SUBSCRIPTION_ID") || {
+    log_error "Could not check whether resource group $RESOURCE_GROUP exists."
+    exit 1
+}
+if [[ "$GROUP_EXISTS" != "true" && "$GROUP_EXISTS" != "false" ]]; then
+    log_error "Unexpected resource-group existence response: $GROUP_EXISTS"
+    exit 1
+fi
+if [[ "$GROUP_EXISTS" == "true" ]]; then
+    EXISTING_RESOURCES=$(az resource list \
+        --resource-group "$RESOURCE_GROUP" \
+        --subscription "$SUBSCRIPTION_ID" \
+        --query "[].name" --output json) || {
+        log_error "Could not list existing resources; refusing to guess a resource suffix."
+        exit 1
+    }
+    EXISTING_SUFFIXES=$(jq -r '
+        if type != "array" or any(.[]; type != "string") then
+            error("Expected an array of resource names")
+        else
+            [.[] | select(test("^msagthack(-.*-|cr|sa)[a-z0-9]{13}$"))
+             | capture("(?<suffix>[a-z0-9]{13})$").suffix]
+            | unique | .[]
+        end
+    ' <<< "$EXISTING_RESOURCES") || {
+        log_error "Could not parse existing resource suffixes."
+        exit 1
+    }
+    if [[ -n "$EXISTING_SUFFIXES" ]]; then
+        if [[ -n "$RESOURCE_SUFFIX" ]]; then
+            if ! grep -Fxq -- "$RESOURCE_SUFFIX" <<< "$EXISTING_SUFFIXES"; then
+                log_error "Selected suffix $RESOURCE_SUFFIX does not match an existing environment."
+                printf 'Existing suffixes:\n%s\n' "$EXISTING_SUFFIXES"
+                exit 1
+            fi
+        elif [[ "$EXISTING_SUFFIXES" == *$'\n'* ]]; then
+            log_error "Multiple environment suffixes found; no resources were changed."
+            printf 'Existing suffixes:\n%s\n' "$EXISTING_SUFFIXES"
+            echo "Inspect the environments, then rerun with --resource-suffix <suffix-to-keep>."
+            echo "This selects the environment to update; it does not delete the others."
+            exit 1
+        else
+            RESOURCE_SUFFIX="$EXISTING_SUFFIXES"
+        fi
+    fi
     log_warning "Resource group $RESOURCE_GROUP already exists"
     read -p "Do you want to continue with deployment? (y/N) " -n 1 -r
     echo
@@ -149,10 +211,19 @@ else
     
     az group create \
         --name "$RESOURCE_GROUP" \
+        --subscription "$SUBSCRIPTION_ID" \
         --location "$LOCATION" \
         --tags $ALL_TAGS \
         --output none
     log_success "Resource group created"
+fi
+
+DEPLOYMENT_PARAMETERS=("location=$LOCATION")
+if [[ -n "$RESOURCE_SUFFIX" ]]; then
+    log_info "Reusing resource suffix: $RESOURCE_SUFFIX"
+    DEPLOYMENT_PARAMETERS+=("resourceSuffix=$RESOURCE_SUFFIX")
+else
+    log_info "Using stable resource names derived from the resource-group ID."
 fi
 
 # Define scope for role assignments
@@ -167,6 +238,7 @@ assign_role() {
         --assignee "$USER_ID" \
         --role "$role_name" \
         --scope "$RG_SCOPE" \
+        --subscription "$SUBSCRIPTION_ID" \
         --output none 2>&1; then
         log_success "$role_name role assigned"
     else
@@ -190,8 +262,9 @@ START_TIME=$(date +%s)
 if az deployment group create \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \
+    --subscription "$SUBSCRIPTION_ID" \
     --template-file "$TEMPLATE_FILE" \
-    --parameters location="$LOCATION" \
+    --parameters "${DEPLOYMENT_PARAMETERS[@]}" \
     --output json > "deployment-$RESOURCE_GROUP.json"; then
     
     END_TIME=$(date +%s)
@@ -214,6 +287,14 @@ if az deployment group create \
     echo "Deployment details saved to: deployment-$RESOURCE_GROUP.json"
 else
     log_error "Deployment failed for $RESOURCE_GROUP"
-    echo "Check the Azure portal for deployment details."
+    echo "Failed deployment: $DEPLOYMENT_NAME"
+    if ! az deployment operation group list \
+        --name "$DEPLOYMENT_NAME" \
+        --resource-group "$RESOURCE_GROUP" \
+        --subscription "$SUBSCRIPTION_ID" \
+        --query "[?properties.provisioningState=='Failed'].{resource:properties.targetResource.resourceName,type:properties.targetResource.resourceType,error:properties.statusMessage}" \
+        --output json; then
+        log_warning "Could not retrieve failed operations. Check this deployment in the Azure portal."
+    fi
     exit 1
 fi
