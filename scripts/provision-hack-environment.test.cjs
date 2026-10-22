@@ -102,6 +102,20 @@ test('template naming is independent of the deployment name and preserves capaci
         [['gpt-5.4-mini', 25], ['gpt-5.4', 25], ['text-embedding-3-large', 10]]);
 });
 
+test('Foundry telemetry connection uses the full Application Insights connection string', () => {
+    const data = JSON.parse(readFileSync(template, 'utf8'));
+    const connections = data.resources.filter((resource) =>
+        resource.type === 'Microsoft.CognitiveServices/accounts/projects/connections'
+        && resource.properties.category === 'AppInsights');
+    assert.equal(connections.length, 1);
+    const connection = connections[0];
+    assert.equal(connection.properties.authType, 'ApiKey');
+    assert.equal(connection.properties.credentials.key,
+        "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]");
+    assert.ok(connection.dependsOn.includes(
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"));
+});
+
 test('new resource group uses stable template default', () => {
     const call = deployment(runProvision({ exists: false }));
     assert.ok(!call.some((value) => value.startsWith('resourceSuffix=')));

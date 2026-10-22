@@ -145,6 +145,8 @@ not necessarily mean the account is absent (authentication or Graph access can f
 
 The infrastructure template serializes model deployments, the account Search
 connection, project creation and the project connection under the Foundry account.
+The project Application Insights connection uses the full Application Insights
+connection string; an instrumentation key alone is not supported.
 Parallel account-child writes can cause `RequestConflict` even in a fresh resource
 group. If deployment fails, the script prints the failed resource operations.
 Wait for any in-flight account operation to finish, then rerun against the **same**
