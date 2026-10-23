@@ -15,7 +15,7 @@ aiohttp==3.14.3
 
 # Azure AI Tracing & Monitoring
 azure-monitor-opentelemetry==1.8.9
-opentelemetry-api==1.43.0
+opentelemetry-api==1.45.1
 opentelemetry-sdk==1.43.0
 opentelemetry-exporter-otlp-proto-grpc==1.43.0
 opentelemetry-semantic-conventions-ai==0.5.1
