@@ -208,6 +208,11 @@ already absent users/groups without changing cloud resources or the CSV. It chec
 read access, **not deletion permissions**. Even if `--yes` is supplied together with
 `--dry-run`, nothing is deleted. To delete, remove `--dry-run` and supply `--yes`.
 
+Cleanup accepts LF or Windows CRLF line endings and an optional UTF-8 BOM, including
+Excel's CSV UTF-8 export. Keep the original six comma-separated columns and their
+header names unchanged; semicolon-delimited and UTF-16 exports are not supported.
+The manifest is not rewritten during cleanup.
+
 Cleanup validates every row before deleting, requires a matching login tenant,
 and uses recorded object IDs rather than prefix-based deletion. Existing usernames
 must match their IDs. Optional group deletion uses the recorded subscription and
@@ -215,8 +220,11 @@ requires `hackuser=<username>`, `environment=hack`, and `createdBy=automation` t
 set by `provision-hack-environment.sh`. Do not retag/reuse workshop resource groups.
 Protect the manifest from modification; it is not an authorization boundary.
 
-Resource groups are deleted before their corresponding users, waiting for
-completion. Errors stop cleanup; resolve the cause and rerun with the same CSV.
+Resource-group deletion is requested before deleting each corresponding user,
+using `az group delete --no-wait`. Cleanup continues without waiting for the
+resource groups to finish deleting, so multiple deletions can proceed in Azure
+at once. Request errors stop cleanup; resolve the cause and rerun with the same CSV.
+Completion and later deletion failures are not checked; check Azure for final status.
 Already absent users/groups are skipped. Entra deletion is soft deletion and
 removes group memberships. The CSV is retained for audit/retry; securely remove
 it when no longer needed.

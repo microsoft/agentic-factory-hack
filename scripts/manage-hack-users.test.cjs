@@ -69,7 +69,12 @@ if (args[0] === 'account') {
   emit(state.groups[option('--name')]);
 } else if (args[0] === 'group' && args[1] === 'delete') {
   if (option('--subscription') !== state.subscription) fail('Wrong subscription');
-  delete state.groups[option('--name')];
+  if (state.failGroupDelete) fail('Resource-group deletion request denied');
+  if (args.includes('--no-wait')) {
+    state.groups[option('--name')].provisioningState = 'Deleting';
+  } else {
+    delete state.groups[option('--name')];
+  }
 } else {
   fail('Unexpected mock command: ' + args.join(' '));
 }
@@ -294,6 +299,37 @@ test('cleanup accepts both legacy password formats', t => {
   assert.equal(f.read().users.length, 0);
 });
 
+test('cleanup accepts Excel CRLF and optional UTF-8 BOM without rewriting the manifest', t => {
+  const f = fixture(t);
+  assert.equal(f.create().status, 0);
+  const original = fs.readFileSync(f.csv, 'utf8');
+  for (const [bom, newline] of [['', '\r\n'], ['\uFEFF', '\n'], ['\uFEFF', '\r\n']]) {
+    const csv = bom + original.replaceAll('\n', newline);
+    fs.writeFileSync(f.csv, csv);
+    const preview = f.remove(['--dry-run']);
+    assert.equal(preview.status, 0, preview.stderr);
+    assert.match(preview.stderr, /Would delete user hack-user-02/);
+    assert.equal(f.read().users.length, 2);
+    assert.equal(fs.readFileSync(f.csv, 'utf8'), csv);
+  }
+  const csv = fs.readFileSync(f.csv, 'utf8');
+  const result = f.remove(['--yes']);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(f.read().users.length, 0);
+  assert.equal(fs.readFileSync(f.csv, 'utf8'), csv);
+});
+
+test('cleanup still rejects embedded carriage returns before deleting any users', t => {
+  const f = fixture(t);
+  assert.equal(f.create().status, 0);
+  const csv = fs.readFileSync(f.csv, 'utf8').replace('rg-hack-user-02', 'rg-hack-\ruser-02');
+  fs.writeFileSync(f.csv, csv);
+  const result = f.remove(['--yes']);
+  assert.notEqual(result.status, 0);
+  assert.equal(f.read().users.length, 2);
+  assert.ok(!f.read().events.some(e => e.command === 'ad user delete'));
+});
+
 test('refuses collisions, overwrites, invalid counts and nonignored repository output', t => {
   const f = fixture(t);
   f.update({ users: [{ userPrincipalName: 'hack-user-02@test.onmicrosoft.com' }] });
@@ -402,7 +438,7 @@ test('refuses changed user identity and missing ownership tags', t => {
   assert.ok(!f.read().events.some(e => e.command.startsWith('group delete')));
 });
 
-test('deletes tagged RGs in recorded subscription before users and skips absent RGs', t => {
+test('requests tagged RG deletion without waiting before deleting users and skips absent RGs', t => {
   const f = fixture(t);
   assert.equal(f.create().status, 0);
   f.update({ groups: { 'rg-hack-user-01': {
@@ -411,9 +447,27 @@ test('deletes tagged RGs in recorded subscription before users and skips absent 
   const result = f.remove(['--yes', '--delete-resource-groups']);
   assert.equal(result.status, 0, result.stderr);
   assert.equal(f.read().users.length, 0);
-  assert.deepEqual(f.read().groups, {});
+  assert.equal(f.read().groups['rg-hack-user-01'].provisioningState, 'Deleting');
+  assert.match(result.stderr, /without waiting for completion/);
+  assert.match(result.stderr, /completion is not verified/);
+  assert.match(result.stderr, /Resource group already absent: rg-hack-user-02/);
   const events = f.read().events;
   const deletion = events.find(e => e.command.startsWith('group delete'));
+  assert.ok(deletion.args.includes('--no-wait'));
   assert.equal(deletion.args[deletion.args.indexOf('--subscription') + 1], subscription);
   assert.ok(events.indexOf(deletion) < events.findIndex(e => e.command === 'ad user delete'));
+});
+
+test('resource-group deletion request failure stops cleanup before deleting its user', t => {
+  const f = fixture(t);
+  assert.equal(f.create().status, 0);
+  f.update({ failGroupDelete: true, groups: { 'rg-hack-user-01': {
+    tags: { hackuser: f.rows()[1][0], environment: 'hack', createdBy: 'automation' },
+  } } });
+  const result = f.remove(['--yes', '--delete-resource-groups']);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Azure CLI operation 'group delete' failed/);
+  assert.doesNotMatch(result.stderr, /Cleanup complete/);
+  assert.equal(f.read().users.length, 2);
+  assert.ok(!f.read().events.some(e => e.command === 'ad user delete'));
 });

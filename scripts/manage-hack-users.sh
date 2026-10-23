@@ -46,7 +46,7 @@ Common options:
 
 Delete options:
   --yes                     Required for real deletion; deletes ONLY manifest user IDs
-  --delete-resource-groups   Also delete tagged resource groups in recorded subscriptions
+  --delete-resource-groups   Request deletion of tagged resource groups without waiting
 
 Requires Bash 4+, Azure CLI, jq, OpenSSL, Git, and an authorized `az login`.
 The CSV contains plaintext passwords. Existing files are never overwritten.
@@ -251,6 +251,12 @@ if [[ "$ACTION" == create ]]; then
     info "Saved $COUNT users to $CSV (permissions 600). Resource groups have not been created."
 else
     mapfile -t ROWS <"$CSV"
+    for ((ROW_INDEX=0; ROW_INDEX<${#ROWS[@]}; ROW_INDEX++)); do
+        ROWS[ROW_INDEX]="${ROWS[ROW_INDEX]%$'\r'}"
+    done
+    if ((${#ROWS[@]} > 0)); then
+        ROWS[0]="${ROWS[0]#$'\xef\xbb\xbf'}"
+    fi
     [[ "${ROWS[0]:-}" == "$HEADER" ]] ||
         die "Unrecognized CSV header; use the original generated manifest"
     ((${#ROWS[@]} > 1)) || die "CSV has no users"
@@ -294,10 +300,10 @@ else
                     .tags.environment == "hack" and .tags.createdBy == "automation"' \
                     <<<"$RG" >/dev/null || die "Refusing to delete $RESOURCE_GROUP: expected workshop ownership tags are missing or different"
                 if [[ "$DRY_RUN" == true ]]; then
-                    info "DRY RUN: Would delete resource group $RESOURCE_GROUP in subscription $ROW_SUB and ALL resources inside it"
+                    info "DRY RUN: Would delete resource group $RESOURCE_GROUP in subscription $ROW_SUB and ALL resources inside it (without waiting for completion)"
                 else
-                    info "Deleting resource group $RESOURCE_GROUP in subscription $ROW_SUB (waiting for completion)"
-                    az_safe group delete --name "$RESOURCE_GROUP" --subscription "$ROW_SUB" --yes --output none
+                    info "Requesting deletion of resource group $RESOURCE_GROUP in subscription $ROW_SUB (without waiting for completion)"
+                    az_safe group delete --name "$RESOURCE_GROUP" --subscription "$ROW_SUB" --yes --no-wait --output none
                 fi
             elif [[ "$EXISTS" == false ]]; then
                 info "Resource group already absent: $RESOURCE_GROUP"
@@ -319,6 +325,9 @@ else
     if [[ "$DRY_RUN" == true ]]; then
         info "DRY RUN complete. No users or resource groups deleted; CSV unchanged. Read access was checked, not delete permissions."
     else
+        if [[ "$DELETE_RGS" == true ]]; then
+            info "Resource-group deletion requests submitted; completion is not verified. Check Azure for final status."
+        fi
         info "Cleanup complete. Entra users are soft-deleted; the sensitive CSV is retained for audit/retry."
     fi
 fi
