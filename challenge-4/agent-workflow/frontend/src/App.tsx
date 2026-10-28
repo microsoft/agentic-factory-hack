@@ -4,6 +4,7 @@ import './App.css'
 
 import { AlarmForm, type AnalyzeMachinePayload } from './components/AlarmForm'
 import { AgentIllustration, type AgentNode } from './components/AgentIllustration'
+import { WheelLoaderViewer } from './components/WheelLoaderViewer'
 import type { WorkflowResponse, AgentStepResult } from './types/workflow'
 import { streamAnalyzeMachine } from './api/streamAnalyze'
 
@@ -229,6 +230,10 @@ function App() {
     setActiveIndex(null)
   }
 
+  if (window.location.pathname === '/wheel-loader') {
+    return <WheelLoaderViewer />
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -245,6 +250,9 @@ function App() {
         <p className="app-subtitle">
           Define an alert, then watch agents process it.
         </p>
+        <a className="machine-view-link" href="/wheel-loader">
+          Explore the wheel loader <span aria-hidden="true">↗</span>
+        </a>
       </header>
 
       <main className="main-content">
