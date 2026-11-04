@@ -28,7 +28,11 @@
     "applicationInsightsName": "[format('{0}-appinsights-{1}', variables('prefix'), variables('suffix'))]",
     "cosmosDbAccountName": "[format('{0}-cosmos-{1}', variables('prefix'), variables('suffix'))]",
     "contentSafetyName": "[format('{0}-contentsafety-{1}', variables('prefix'), variables('suffix'))]",
-    "monitoringReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')]"
+    "monitoringReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')]",
+    "mcpFunctionAppName": "[format('{0}-mcp-{1}', variables('prefix'), variables('suffix'))]",
+    "mcpPlanName": "[format('{0}-mcpplan-{1}', variables('prefix'), variables('suffix'))]",
+    "mcpDeployContainerName": "mcp-deploy",
+    "cosmosDbDataContributorRoleId": "00000000-0000-0000-0000-000000000002"
   },
   "resources": [
     {
@@ -209,9 +213,83 @@
         "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
         "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
       ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('mcpDeployContainerName'))]",
+      "properties": { "publicAccess": "None" },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-04-01",
+      "name": "[variables('mcpPlanName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "sku": { "name": "FC1", "tier": "FlexConsumption" },
+      "properties": { "reserved": true }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2024-04-01",
+      "name": "[variables('mcpFunctionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('mcpPlanName'))]",
+        "httpsOnly": true,
+        "siteConfig": {
+          "appSettings": [
+            { "name": "AzureWebJobsStorage", "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', variables('storageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-05-01').keys[0].value, environment().suffixes.storage)]" },
+            { "name": "DEPLOYMENT_STORAGE_CONNECTION_STRING", "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', variables('storageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-05-01').keys[0].value, environment().suffixes.storage)]" },
+            { "name": "APPLICATIONINSIGHTS_CONNECTION_STRING", "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]" },
+            { "name": "COSMOS_ENDPOINT", "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName')), '2023-04-15').documentEndpoint]" },
+            { "name": "COSMOS_DATABASE_NAME", "value": "FactoryOpsDB" }
+          ]
+        },
+        "functionAppConfig": {
+          "deployment": {
+            "storage": {
+              "type": "blobContainer",
+              "value": "[format('{0}{1}', reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-05-01').primaryEndpoints.blob, variables('mcpDeployContainerName'))]",
+              "authentication": {
+                "type": "StorageAccountConnectionString",
+                "storageAccountConnectionStringName": "DEPLOYMENT_STORAGE_CONNECTION_STRING"
+              }
+            }
+          },
+          "runtime": { "name": "python", "version": "3.12" },
+          "scaleAndConcurrency": { "maximumInstanceCount": 10, "instanceMemoryMB": 2048 }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('mcpPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', variables('storageAccountName'), 'default', variables('mcpDeployContainerName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2024-05-15",
+      "name": "[format('{0}/{1}', variables('cosmosDbAccountName'), guid(resourceId('Microsoft.Web/sites', variables('mcpFunctionAppName')), resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName')), variables('cosmosDbDataContributorRoleId')))]",
+      "properties": {
+        "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', variables('cosmosDbAccountName'), variables('cosmosDbDataContributorRoleId'))]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('mcpFunctionAppName')), '2024-04-01', 'full').identity.principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('mcpFunctionAppName'))]"
+      ]
     }
   ],
   "outputs": {
+    "mcpFunctionAppName": { "type": "string", "value": "[variables('mcpFunctionAppName')]" },
+    "mcpFunctionAppHost": { "type": "string", "value": "[reference(resourceId('Microsoft.Web/sites', variables('mcpFunctionAppName')), '2024-04-01').defaultHostName]" },
     "storageAccountName": { "type": "string", "value": "[variables('storageAccountName')]" },
     "logAnalyticsWorkspaceName": { "type": "string", "value": "[variables('logAnalyticsWorkspaceName')]" },
     "searchServiceName": { "type": "string", "value": "[variables('searchServiceName')]" },

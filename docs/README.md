@@ -18,21 +18,26 @@ Deploy the solution from this repo into a **new resource group** and be able to 
 | Monthly budget | USD 120 |
 
 ## Key decisions (see [06-risks-and-decisions.md](06-risks-and-decisions.md))
-- **Cost strategy A**: API Management and AI Search are the expensive services (~$146 and ~$74/month). They are **deleted after each demo** and recreated before the next one.
+- **No API Management by default** (2026-11-04): it cost $0.27/hour (~$197/month always-on) and only served two MCP tools. Those tools now run on an **Azure Functions (Flex Consumption) MCP server** (~$0, permanent). APIM is an optional extra: `scripts/demo-up.sh --with-apim`, show-only.
+- **AI Search on the Free tier** ($0, 50 MB, 3 indexes). It holds the Foundry IQ knowledge base. A paid tier is only a fallback (`searchServiceSku=basic`, ~$0.10/hour).
+- Result: **nothing in the solution is billed hourly any more** – expected cost is a few dollars per month plus model tokens.
 - ACR and the placeholder Container App from the template are **removed** (not used).
 - Challenge 2 (C# Repair Planner built with Copilot `agentplanning` agent) is **included**.
 
 ## Architecture in one picture
 ```
-Local machine (Aspire: UI + workflow API + Python agents)
+Local machine (Aspire: UI + workflow API + Python agents + C# Repair Planner)
         │
         ▼
 Microsoft Foundry (agents + gpt-5.4 / gpt-5.4-mini / embeddings)
-   │            │                │
-   ▼            ▼                ▼
-API Mgmt     AI Search       Cosmos DB (serverless)
-(MCP servers) (Foundry IQ KB)  Storage (machine wiki)
- [ephemeral]  [ephemeral]      App Insights + Log Analytics
+   │               │                    │
+   ▼               ▼                    ▼
+Functions MCP   AI Search (Free)    Cosmos DB (serverless)
+get-machine /   Foundry IQ KB       Storage (machine wiki)
+get-threshold   (machine-kb)        App Insights + Log Analytics
+ [permanent]     [permanent*]
+ optional, show-only: API Management (--with-apim, $0.27/h)
+ * free services can be deleted by Microsoft after long inactivity; demo-up.sh recreates it
 ```
 Agents: Anomaly Classification → Fault Diagnosis → Repair Planner → Maintenance Scheduler → Parts Ordering.
 Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/README.md) · [challenge-1](../challenge-1/README.md) · [challenge-2](../challenge-2/README.md) · [challenge-3](../challenge-3/README.md) · [challenge-4](../challenge-4/README.md)
@@ -40,8 +45,8 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 ## Wiki index
 | Page | Purpose |
 |---|---|
-| [01-plan.md](01-plan.md) | Step-by-step plan (Phases 0–9) |
-| [02-cost-and-budget.md](02-cost-and-budget.md) | Costs, budget, teardown strategy, cost log |
+| [01-plan.md](01-plan.md) | Step-by-step plan (Phases 0–10) |
+| [02-cost-and-budget.md](02-cost-and-budget.md) | Costs, budget, scenarios, cost log |
 | [03-progress-tracker.md](03-progress-tracker.md) | **Live status – check here for progress** |
 | [04-environment-and-config.md](04-environment-and-config.md) | Resource names, `.env` variables, roles |
 | [05-demo-runbook.md](05-demo-runbook.md) | Demo-day procedure and script |
@@ -53,22 +58,23 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 |---|---|
 | 0 Account, guardrails, quota, tooling | ✅ Done (2026-11-04) |
 | 1 Repo infra changes + scripts | ✅ Done (2026-11-04) |
-| 2 Deploy to Azure | ✅ Done (2026-11-04) – APIM + Search are **running and billing** |
+| 2 Deploy to Azure | ✅ Done (2026-11-04) |
 | 3 Data seeding + permissions | ✅ Done (2026-11-04) |
 | 4 Challenge 1 agents | ✅ Done (2026-11-04) |
 | 5 Challenge 2 Repair Planner | ✅ Done (2026-11-04) |
 | 6 Challenge 3 agents | ✅ Done (2026-11-04) |
 | 7 Challenge 4 end-to-end demo | ✅ Done (2026-11-04) |
-| 8 Teardown / rebuild rehearsal | ⬜ Not started |
-| 9 Demo runbook finalised | ⬜ Not started |
+| 10 Remove API Management (Functions MCP + Free Search) | ✅ Done (2026-11-04) – no hourly-billed services left |
+| 8 Teardown / rebuild rehearsal | 🟡 Mostly covered by Phase 10 (Search rebuild + `--with-apim` rehearsed); Aspire dashboard traces / App Insights still to click through |
+| 9 Demo runbook finalised | 🟡 Updated for the new setup; needs one dry run with a second person |
 
 Legend: ⬜ not started · 🟡 in progress · ✅ done · ⛔ blocked
 
 ## Demo day quick start
-1. ~60 min before: run `scripts/demo-up.sh` (creates API Management + AI Search, re-seeds, refreshes `.env`) – *script is created in Phase 1*.
-2. ~15 min before: smoke test (see [05-demo-runbook.md](05-demo-runbook.md)).
-3. Demo: `scripts/start-workflow.sh` (WSL; first start ~3–4 min) → `aspire describe` shows the frontend URL (Vite, port varies) → open it → **Trigger anomaly** (takes ~60–75 s; default payload machine-001, curing_temperature 179.2, cycle_time 14.5).
-4. After the demo: run `scripts/demo-down.sh` to stop the spend.
+1. ~30 min before: `scripts/demo-up.sh` in WSL. Normally it only verifies everything (~2 min). If Microsoft deleted the Free Search service it recreates it and rebuilds the knowledge base (~5–15 min).
+2. Optional, to show the "API Management as AI gateway" story: `scripts/demo-up.sh --with-apim` (adds APIM, **$0.27/hour**), and `scripts/demo-down.sh` afterwards.
+3. `scripts/reset-demo-data.sh`, then `scripts/start-workflow.sh` (first start ~3–4 min) → `aspire describe` shows the frontend URL (Vite, port varies) → open it → **Trigger anomaly** (takes ~60–80 s; default payload machine-001, curing_temperature 179.2, cycle_time 14.5).
+4. After the demo: `scripts/demo-down.sh` (a no-op for billing now, but it removes APIM if you used it) and `scripts/reset-demo-data.sh`.
 
 ## Rules
 - Never commit `.env`, keys or connection strings (`.env` is gitignored). Docs list variable **names** only.

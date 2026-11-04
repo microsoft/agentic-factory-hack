@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
-    "description": "Agentic Factory demo - EPHEMERAL (billed per hour, delete after the demo): API Management, AI Search, their role assignments and the Foundry->Search connection. Requires azuredeploy.demo-core.json to be deployed first in the same resource group (same deterministic names). The Cosmos DB data role for the APIM identity is handled by scripts/demo-up.sh because the managed identity changes on every recreate."
+    "description": "Agentic Factory demo - EPHEMERAL (billed per hour, delete after the demo): AI Search, its role assignments and the Foundry->Search connection. Requires azuredeploy.demo-core.json to be deployed first in the same resource group (same deterministic names). API Management is no longer part of this template: see the optional azuredeploy.demo-apim.json."
   },
   "parameters": {
     "location": {
@@ -13,37 +13,20 @@
     },
     "searchServiceSku": {
       "type": "string",
-      "defaultValue": "basic",
-      "allowedValues": [ "basic", "standard" ],
-      "metadata": { "description": "SKU for Azure AI Search" }
+      "defaultValue": "free",
+      "allowedValues": [ "free", "basic", "standard" ],
+      "metadata": { "description": "SKU for Azure AI Search. free = $0 (50 MB, 3 indexes, one per subscription) and enough for the demo knowledge base" }
     },
     "searchLocation": {
       "type": "string",
       "defaultValue": "",
       "metadata": { "description": "Optional region for AI Search when the main region has no capacity. Empty = same as location" }
-    },
-    "apimSku": {
-      "type": "string",
-      "defaultValue": "BasicV2",
-      "allowedValues": [ "BasicV2", "StandardV2" ],
-      "metadata": { "description": "API Management tier (v2 tiers support MCP servers)" }
-    },
-    "publisherEmail": {
-      "type": "string",
-      "defaultValue": "alon.havivi@macaw.nl",
-      "metadata": { "description": "APIM publisher email" }
-    },
-    "publisherName": {
-      "type": "string",
-      "defaultValue": "Macaw Demo",
-      "metadata": { "description": "APIM publisher name" }
     }
   },
   "variables": {
     "prefix": "msagthack",
     "suffix": "[uniqueString(resourceGroup().id)]",
     "searchLocation": "[if(empty(parameters('searchLocation')), parameters('location'), parameters('searchLocation'))]",
-    "apimName": "[format('{0}-apim-{1}', variables('prefix'), variables('suffix'))]",
     "storageAccountName": "[replace(format('{0}-sa-{1}', variables('prefix'), variables('suffix')), '-', '')]",
     "logAnalyticsWorkspaceName": "[format('{0}-loganalytics-{1}', variables('prefix'), variables('suffix'))]",
     "searchServiceName": "[format('{0}-search-{1}', variables('prefix'), variables('suffix'))]",
@@ -57,18 +40,6 @@
     "searchIndexDataReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '1407120a-92aa-4202-b7e9-c0e197c71c8f')]"
   },
   "resources": [
-    {
-      "type": "Microsoft.ApiManagement/service",
-      "apiVersion": "2023-03-01-preview",
-      "name": "[variables('apimName')]",
-      "location": "[parameters('location')]",
-      "identity": { "type": "SystemAssigned" },
-      "sku": { "name": "[parameters('apimSku')]", "capacity": 1 },
-      "properties": {
-        "publisherEmail": "[parameters('publisherEmail')]",
-        "publisherName": "[parameters('publisherName')]"
-      }
-    },
     {
       "type": "Microsoft.Search/searchServices",
       "apiVersion": "2023-11-01",
@@ -167,8 +138,6 @@
     }
   ],
   "outputs": {
-    "apiManagementName": { "type": "string", "value": "[variables('apimName')]" },
-    "apimPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.ApiManagement/service', variables('apimName')), '2023-03-01-preview', 'full').identity.principalId]" },
     "searchPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.Search/searchServices', variables('searchServiceName')), '2023-11-01', 'full').identity.principalId]" },
     "storageAccountName": { "type": "string", "value": "[variables('storageAccountName')]" },
     "logAnalyticsWorkspaceName": { "type": "string", "value": "[variables('logAnalyticsWorkspaceName')]" },

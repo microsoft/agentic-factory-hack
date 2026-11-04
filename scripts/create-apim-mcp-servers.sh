@@ -1,7 +1,9 @@
 #!/bin/bash
 #
-# create-apim-mcp-servers.sh - expose the Machine and Maintenance APIs as MCP servers in API Management
-# (scripted version of Challenge 1, Task 2.2) and write the endpoints into the repo-root .env.
+# create-apim-mcp-servers.sh - OPTIONAL (demo-up.sh --with-apim): expose the Machine and Maintenance APIs as MCP
+# servers in API Management (scripted version of Challenge 1, Task 2.2) to show the "APIM as AI gateway" story.
+# The agents do NOT use these servers; they use the Azure Functions MCP server (scripts/deploy-mcp-function.sh).
+# Endpoints are written to .env as APIM_MACHINE_MCP_SERVER_ENDPOINT / APIM_MAINTENANCE_MCP_SERVER_ENDPOINT.
 #
 # Idempotent. Run inside WSL after demo-up.sh (demo-up.sh calls it as a post-up hook).
 #
@@ -75,8 +77,8 @@ fi
 create_mcp_server "get-maintenance-data" "Get Maintenance Data" "Gets maintenance data such as thresholds for maintenance alerts" \
     "maintenance-api" "get-threshold" "Gets all metric thresholds (warning and critical) for a machine type, one entry per metric"
 
-set_env MACHINE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-machine-data/mcp"
-set_env MAINTENANCE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-maintenance-data/mcp"
+set_env APIM_MACHINE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-machine-data/mcp"
+set_env APIM_MAINTENANCE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-maintenance-data/mcp"
 
-echo "==> .env updated:"
-grep -E '^(MACHINE|MAINTENANCE)_MCP_SERVER_ENDPOINT=' "$ENV_FILE"
+echo "==> .env updated (separate APIM_* names; the agents keep using the Azure Functions MCP server):"
+grep -E '^APIM_(MACHINE|MAINTENANCE)_MCP_SERVER_ENDPOINT=' "$ENV_FILE"

@@ -37,8 +37,8 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Run `anomaly_classification_agent_mcp.py` → creates project connections `machine-data-connection`, `maintenance-data-connection` and agent `AnomalyClassificationAgent`
 - [x] Knowledge base – **scripted**: `scripts/create-knowledge-base.sh` runs the notebook's code cells (knowledge source `machine-wiki-blob-ks`, knowledge base `machine-kb`, retrieval test, connection `machine-wiki-connection`); the MCP endpoint is `${SEARCH_SERVICE_ENDPOINT}knowledgebases/machine-kb/mcp?api-version=2025-11-01-preview`
 - [x] Added `MCPTool(machine-wiki)` to `fault_diagnosis_agent.py`; ran it → `FaultDiagnosisAgent` returns `curing_temperature_excessive` grounded in the KB
-- Both scripts are also the optional post-up hooks of `demo-up.sh`
-- ⚠ Open for Phase 8: after an APIM recreate the APIM subscription key changes, so the project connections `machine-data-connection` / `maintenance-data-connection` (which store the key) must be refreshed – add a hook
+- Both scripts were also post-up hooks of `demo-up.sh`
+- ⚠ **Superseded by Phase 10**: the two data tools no longer run on API Management but on an Azure Functions MCP server; the connections `machine-data-connection` / `maintenance-data-connection` now use header `x-functions-key`. The APIM steps above were done first and then replaced (APIM is now optional, `--with-apim`)
 
 ## Phase 5 – Challenge 2 Repair Planner  ✅ (2026-11-04)
 - [x] Built the C# RepairPlanner in `challenge-2/RepairPlanner/` following the spec in `.github/agents/agentplanning.agent.md` (pinned NuGet versions, `net10.0`, dual JSON attributes, hard-coded fault mappings, primary constructors). `challenge-2/example-solution` was **not** opened or used. Note: written by the Copilot CLI agent from the spec, not interactively with the VS Code `agentplanning` agent
@@ -58,9 +58,23 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Aspire dashboard reachable (HTTP 200). Traces/Console views not clicked through yet – do that in the Phase 8 rehearsal
 - [x] Aspire stopped afterwards and demo data reset (`scripts/reset-demo-data.sh`: the runs had created 3 extra work orders, schedules and chat history)
 
-## Phase 8 – Teardown / rebuild rehearsal
-- [ ] `scripts/demo-down.sh`; confirm daily cost drops to cents
-- [ ] `scripts/demo-up.sh`; re-test end to end; record timings and fixes in [07-troubleshooting.md](07-troubleshooting.md)
+## Phase 8 – Teardown / rebuild rehearsal  🟡 (mostly done in Phase 10)
+- [x] Teardown and rebuild of the default path: deleted Search (`demo-down.sh --delete-search`), `demo-up.sh` recreated it (Free, francecentral), rebuilt the knowledge base, restored `.env`; whole run 13 min (mostly waiting for the old Search name to be released); workflow verified afterwards on a different machine/fault
+- [x] `demo-up.sh --with-apim` + `demo-down.sh` rehearsed (found and fixed the `get-keys.sh` deployment-selection bug and the asynchronous APIM deletion)
+- [ ] Click through the Aspire dashboard Traces/Console views and App Insights / Foundry tracing once
 
-## Phase 9 – Runbook
-- [ ] Finalise [05-demo-runbook.md](05-demo-runbook.md) with real timings and fallback material
+## Phase 9 – Runbook  🟡
+- [x] [05-demo-runbook.md](05-demo-runbook.md) rewritten for the setup without APIM (steps, demo script, fallbacks, test prompts)
+- [ ] One dry run with a second person; capture screenshots / a recording as a fallback
+
+## Phase 10 – Remove API Management  ✅ (2026-11-04)
+Reason: APIM BasicV2 = $0.27/hour (price corrected from my earlier $0.20) and it only served two MCP tools. See [06-risks-and-decisions.md](06-risks-and-decisions.md).
+- [x] Spikes: Azure Functions MCP extension (Python, Flex Consumption) and AI Search Free tier (throwaway service, full knowledge-base flow, then the real switch)
+- [x] MCP server code `challenge-1/mcp-functions/` (tools `get-machine`, `get-threshold`; Cosmos via managed identity)
+- [x] Core template: Flex plan + function app + deployment container + Cosmos data role; deployed
+- [x] `scripts/deploy-mcp-function.sh` (zip with Linux wheels → `config-zip`, smoke test, Foundry connections with `x-functions-key`, `.env`)
+- [x] Agent scripts: configurable auth header (`MCP_AUTH_HEADER` / `MCP_AUTH_KEY`), `allowed_tools` per MCP label
+- [x] Regression (6 anomaly prompts, diagnosis, workflow via API and UI) before deleting APIM and again after
+- [x] Deleted APIM (+ Cosmos role, soft-delete purge); Search moved from Basic to Free
+- [x] APIM split into optional `azuredeploy.demo-apim.json`; `demo-up.sh` / `demo-down.sh` reworked (`--with-apim`, `--seed`, `--redeploy-mcp`, retry on `ServiceDeleting`, keep Free Search)
+- [x] Wiki updated, corrected cost numbers, committed
