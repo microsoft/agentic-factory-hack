@@ -33,6 +33,16 @@ Challenge 2 expects: `AZURE_AI_PROJECT_ENDPOINT`, `MODEL_DEPLOYMENT_NAME`, `COSM
 
 Reload in a shell: `export $(cat ../.env | xargs)`
 
+## Local tooling (WSL)
+Bash scripts and Aspire run inside WSL **Ubuntu-24.04** (user `alon`, passwordless sudo). Installed by [scripts/setup-wsl-tools.sh](../scripts/setup-wsl-tools.sh): Python 3.12, Node LTS, .NET 10, Azure CLI, uv, Aspire CLI (`~/.aspire/bin`).
+- Repo path in WSL: `/mnt/c/github/agentic-factory-hack`
+- Python venv: `source ~/factory-venv/bin/activate` (has `requirements.txt` installed)
+- WSL has its own `az login` (tenant above, subscription set to the VS Enterprise one). Note the account also sees other subscriptions; always check `az account show` first.
+- `.gitattributes` forces LF for `*.sh` (git `core.autocrlf=true` otherwise breaks bash scripts).
+
+## Budget
+`budget-tire-factory-120` on the subscription: $120/month, alerts at 50 / 75 / 90 % actual and 100 % forecast to alon.havivi@macaw.nl.
+
 ## Roles needed by the signed-in user
 | Role | Scope |
 |---|---|

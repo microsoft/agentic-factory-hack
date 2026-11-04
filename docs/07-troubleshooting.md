@@ -12,3 +12,5 @@ Add every issue we hit here with symptom, cause and fix.
 | 4 | Shell variables empty in new terminal | `.env` not exported | `export $(cat ../.env \| xargs)` |
 | 5 | Agent cannot create/run in Foundry (403) | Missing roles | Assign roles from [04-environment-and-config.md](04-environment-and-config.md), refresh `az login` |
 | 6 | Search endpoint URL concatenation fails | Missing trailing slash | `get-keys.sh` normalises to one trailing slash |
+| 7 | `set: pipefail: invalid option name` / `\r` errors running a `.sh` in WSL | CRLF line endings (git `autocrlf=true`) | `.gitattributes` forces LF for `*.sh`; re-checkout the script (`git rm --cached` is not needed: delete file, `git checkout -- <file>`) |
+| 8 | `pip install` says externally-managed-environment in WSL | Ubuntu 24.04 PEP 668 | Use the venv: `source ~/factory-venv/bin/activate` |

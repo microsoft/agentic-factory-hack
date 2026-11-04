@@ -2,13 +2,13 @@
 
 Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-progress-tracker.md)
 
-## Phase 0 – Account, guardrails, quota, tooling
-- [ ] `az login --tenant 05baed4d-e049-45c7-b47d-c99c66fdb589` and `az account set --subscription a39be7cd-9ae9-42cf-b42f-dc6e45a82464`
-- [ ] Confirm **Owner** role on the subscription (role assignments are required)
-- [ ] Register providers: Microsoft.AlertsManagement, ApiManagement, CognitiveServices, Search, DocumentDB, OperationalInsights, Insights, Storage
-- [ ] Create **$120 budget** with alerts at 50 / 75 / 90 % (email alon.havivi@macaw.nl)
-- [ ] **Quota check** in `swedencentral`: gpt-5.4, gpt-5.4-mini (GlobalStandard), text-embedding-3-large. If 0: request quota, or change region/model (`MODEL_DEPLOYMENT_NAME`)
-- [ ] Install tooling: WSL2 Ubuntu, Azure CLI, .NET SDK 10, Aspire CLI, uv, Node LTS, Python 3.11+, `pip install -r requirements.txt`, VS Code + Jupyter
+## Phase 0 – Account, guardrails, quota, tooling  ✅ (2026-11-04)
+- [x] `az login --tenant 05baed4d-e049-45c7-b47d-c99c66fdb589` and `az account set --subscription a39be7cd-9ae9-42cf-b42f-dc6e45a82464`
+- [x] Confirm **Owner** role on the subscription (role assignments are required)
+- [x] Register providers: Microsoft.AlertsManagement, ApiManagement, CognitiveServices, Search, DocumentDB, OperationalInsights, Insights, Storage
+- [x] Create **$120 budget** with alerts at 50 / 75 / 90 % (email alon.havivi@macaw.nl)
+- [x] **Quota check** in `swedencentral`: gpt-5.4, gpt-5.4-mini (GlobalStandard), text-embedding-3-large. If 0: request quota, or change region/model (`MODEL_DEPLOYMENT_NAME`)
+- [x] Install tooling: WSL2 Ubuntu, Azure CLI, .NET SDK 10, Aspire CLI, uv, Node LTS, Python 3.11+, `pip install -r requirements.txt`, VS Code + Jupyter
 
 ## Phase 1 – Repo infra changes
 - [ ] Split `challenge-0/infra/azuredeploy.json` into **core** and **ephemeral** templates (original left untouched)

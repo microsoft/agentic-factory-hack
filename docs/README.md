@@ -51,7 +51,7 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 ## Status dashboard
 | Phase | Status |
 |---|---|
-| 0 Account, guardrails, quota, tooling | ⬜ Not started |
+| 0 Account, guardrails, quota, tooling | ✅ Done (2026-11-04) |
 | 1 Repo infra changes + scripts | ⬜ Not started |
 | 2 Deploy to Azure | ⬜ Not started |
 | 3 Data seeding + permissions | ⬜ Not started |
