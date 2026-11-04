@@ -14,7 +14,7 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | deploy-core | RG + core template | prep-account, check-quota, split-templates | ✅ | 2026-11-04 | Needed 2 template fixes (see troubleshooting #11, #12). Models: gpt-5.4 (50), gpt-5.4-mini (50), text-embedding-3-large (10) all Succeeded |
 | deploy-ephemeral | APIM + AI Search | deploy-core | ✅ | 2026-11-04 | APIM BasicV2 swedencentral; Search basic **francecentral** (swedencentral + germanywestcentral had no capacity, #13). **Billing started ~11:20 – run `demo-down.sh` when not demoing** |
 | keys-seed | get-keys, seed-data, roles, smoke test | deploy-ephemeral, install-tools | ✅ | 2026-11-04 | Seeded 10 Cosmos containers, 5 wiki blobs, 2 APIM APIs; 3 roles assigned; APIM `/machine`, `/maintenance` return 200 |
-| challenge1 | Anomaly, MCP servers, KB, Fault Diagnosis | keys-seed | ⬜ | | |
+| challenge1 | Anomaly, MCP servers, KB, Fault Diagnosis | keys-seed | ✅ | 2026-11-04 | All 3 steps verified. MCP servers + KB are scripted (`create-apim-mcp-servers.sh`, `create-knowledge-base.sh`). Agents in Foundry: `AnomalyClassificationAgent:1`, `FaultDiagnosisAgent:1`. TODO Phase 8: refresh project connections after APIM recreate |
 | challenge2 | C# Repair Planner via agentplanning | keys-seed | ⬜ | | |
 | challenge3 | Scheduler + Parts Ordering | keys-seed | ⬜ | | |
 | challenge4 | `aspire run` end-to-end demo | challenge1, challenge3 | ⬜ | | |
@@ -29,3 +29,4 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | 2026-11-04 | Phase 1 complete: core + ephemeral templates, `demo-up.sh` / `demo-down.sh`; RG `rg-tire-factory-demo` created |
 | 2026-11-04 | Phase 2 complete: core + ephemeral deployed; template fixes (project/model race, App Insights connection string, `searchLocation` parameter); `.env` generated |
 | 2026-11-04 | Phase 3 complete: data seeded, roles assigned, APIM smoke test OK. Foundry portal check: project has AppInsights + AI Search connections, no agents yet (expected) |
+| 2026-11-04 | Phase 4 complete: MCP servers (scripted), knowledge base (scripted), Anomaly + Fault Diagnosis agents running in Foundry |

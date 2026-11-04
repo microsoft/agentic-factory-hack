@@ -31,12 +31,14 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Assigned roles to alon.havivi@macaw.nl: Azure AI Developer (project), Foundry User (AI Services), Cognitive Services OpenAI Contributor (AI Services account)
 - [x] Smoke test: `GET /machine`, `/machine/machine-001`, `/maintenance/tire_curing_press` via APIM gateway → HTTP 200 with data (proves APIM → Cosmos via managed identity)
 
-## Phase 4 – Challenge 1 agents
-- [ ] Run `agents/anomaly_classification_agent.py`
-- [ ] Create APIM MCP servers `get-machine-data`, `get-maintenance-data`; add URLs to `.env`
-- [ ] Run `anomaly_classification_agent_mcp.py`
-- [ ] Run `create_knowledge_base.ipynb` (Foundry IQ); add wiki MCP endpoint to `.env`
-- [ ] Add `MCPTool(machine-wiki)` to `fault_diagnosis_agent.py`; run it
+## Phase 4 – Challenge 1 agents  ✅ (2026-11-04)
+- [x] Run `agents/anomaly_classification_agent.py` (direct Cosmos tools) → classified machine-001 with 2 warnings
+- [x] Create APIM MCP servers `get-machine-data`, `get-maintenance-data` – **scripted**: `scripts/create-apim-mcp-servers.sh` (ARM API `2025-09-01-preview`, MCP API + tool per operation); endpoints written to `.env` (`https://<apim>.azure-api.net/<name>/mcp`)
+- [x] Run `anomaly_classification_agent_mcp.py` → creates project connections `machine-data-connection`, `maintenance-data-connection` and agent `AnomalyClassificationAgent`
+- [x] Knowledge base – **scripted**: `scripts/create-knowledge-base.sh` runs the notebook's code cells (knowledge source `machine-wiki-blob-ks`, knowledge base `machine-kb`, retrieval test, connection `machine-wiki-connection`); the MCP endpoint is `${SEARCH_SERVICE_ENDPOINT}knowledgebases/machine-kb/mcp?api-version=2025-11-01-preview`
+- [x] Added `MCPTool(machine-wiki)` to `fault_diagnosis_agent.py`; ran it → `FaultDiagnosisAgent` returns `curing_temperature_excessive` grounded in the KB
+- Both scripts are also the optional post-up hooks of `demo-up.sh`
+- ⚠ Open for Phase 8: after an APIM recreate the APIM subscription key changes, so the project connections `machine-data-connection` / `maintenance-data-connection` (which store the key) must be refreshed – add a hook
 
 ## Phase 5 – Challenge 2 Repair Planner
 - [ ] Build the C# RepairPlanner with the Copilot `agentplanning` agent (pinned NuGet versions, no `example-solution`)

@@ -20,7 +20,7 @@ Back to [wiki home](README.md)
 | APIM/Search cannot be stopped, only deleted | Cost if forgotten | Budget alerts, `demo-down.sh`, calendar reminder after demos |
 | Recreate takes 15–25 min | Demo delay | Run `demo-up.sh` 60 min before |
 | Stale Cosmos role assignment after APIM recreate (new managed identity) | APIM→Cosmos 403 | `demo-up.sh` removes old assignment and creates new |
-| APIM subscription key / MCP URL change after recreate | Foundry connections break | Deterministic names; re-save keys in project connections in `demo-up.sh` |
+| APIM subscription key / MCP URL change after recreate | Foundry connections break | Deterministic names keep the URLs. The key changes: the project connections `machine-data-connection` / `maintenance-data-connection` store it → add a refresh hook to `demo-up.sh` (planned in Phase 8) |
 | Repo scripts are bash; apphost uses Linux cert paths | Fail on native Windows | Use WSL2 |
 | AI Search Basic capacity not available in a region at recreate time | `demo-up.sh` fails after APIM is already created | Re-run with `--search-location <region>` (francecentral worked on 2026-11-04). Start `demo-up` early (T-60 min) to leave time |
 | VS subscription spending limit | Resources disabled | Budget alerts; monitor credit |

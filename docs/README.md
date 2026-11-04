@@ -55,7 +55,7 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 | 1 Repo infra changes + scripts | ✅ Done (2026-11-04) |
 | 2 Deploy to Azure | ✅ Done (2026-11-04) – APIM + Search are **running and billing** |
 | 3 Data seeding + permissions | ✅ Done (2026-11-04) |
-| 4 Challenge 1 agents | ⬜ Not started |
+| 4 Challenge 1 agents | ✅ Done (2026-11-04) |
 | 5 Challenge 2 Repair Planner | ⬜ Not started |
 | 6 Challenge 3 agents | ⬜ Not started |
 | 7 Challenge 4 end-to-end demo | ⬜ Not started |
