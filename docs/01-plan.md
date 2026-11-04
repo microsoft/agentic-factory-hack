@@ -26,10 +26,10 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Deploy ephemeral template (APIM in swedencentral, **AI Search in francecentral** – see [06-risks-and-decisions.md](06-risks-and-decisions.md)); `demo-up.sh --skip-seed --search-location francecentral` took 11 min
 - [x] `get-keys.sh` ran as part of `demo-up.sh` → `.env` generated; only `ACR_*` are empty (ACR intentionally removed)
 
-## Phase 3 – Data and permissions (Challenge 0)
-- [ ] `challenge-0/seed-data.sh` (Cosmos 7 containers, blob `machine-wiki`, APIM Machine + Maintenance APIs)
-- [ ] Assign roles to yourself: Azure AI Developer (project), Foundry User (AI Services), Cognitive Services OpenAI Contributor
-- [ ] Smoke test: `curl $APIM_GATEWAY_URL/machine/machine-001` with subscription key
+## Phase 3 – Data and permissions (Challenge 0)  ✅ (2026-11-04)
+- [x] `challenge-0/seed-data.sh` (Cosmos **10** containers in `FactoryOpsDB`, blob container `machine-wiki` with 5 articles, APIM Machine + Maintenance APIs)
+- [x] Assigned roles to alon.havivi@macaw.nl: Azure AI Developer (project), Foundry User (AI Services), Cognitive Services OpenAI Contributor (AI Services account)
+- [x] Smoke test: `GET /machine`, `/machine/machine-001`, `/maintenance/tire_curing_press` via APIM gateway → HTTP 200 with data (proves APIM → Cosmos via managed identity)
 
 ## Phase 4 – Challenge 1 agents
 - [ ] Run `agents/anomaly_classification_agent.py`
