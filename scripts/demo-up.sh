@@ -22,11 +22,13 @@ RESOURCE_GROUP="${RESOURCE_GROUP:-rg-tire-factory-demo}"
 LOCATION="${LOCATION:-swedencentral}"
 SKIP_SEED=false
 CORE_ONLY=false
+SEARCH_LOCATION="${SEARCH_LOCATION:-}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -g|--resource-group) RESOURCE_GROUP="$2"; shift 2 ;;
         -l|--location) LOCATION="$2"; shift 2 ;;
+        --search-location) SEARCH_LOCATION="$2"; shift 2 ;;
         --skip-seed) SKIP_SEED=true; shift ;;
         --core-only) CORE_ONLY=true; shift ;;
         -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
@@ -101,7 +103,7 @@ done
 log "Deploying EPHEMERAL resources (API Management + AI Search) - this takes 5-30 minutes"
 az deployment group create -g "$RESOURCE_GROUP" -n hack-deployment-ephemeral \
     --template-file "$INFRA_DIR/azuredeploy.demo-ephemeral.json" \
-    --parameters location="$LOCATION" -o none
+    --parameters location="$LOCATION" searchLocation="$SEARCH_LOCATION" -o none
 
 APIM_NAME=$(az deployment group show -g "$RESOURCE_GROUP" -n hack-deployment-ephemeral --query properties.outputs.apiManagementName.value -o tsv)
 APIM_PRINCIPAL=$(az deployment group show -g "$RESOURCE_GROUP" -n hack-deployment-ephemeral --query properties.outputs.apimPrincipalId.value -o tsv)

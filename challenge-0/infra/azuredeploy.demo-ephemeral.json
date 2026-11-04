@@ -17,6 +17,11 @@
       "allowedValues": [ "basic", "standard" ],
       "metadata": { "description": "SKU for Azure AI Search" }
     },
+    "searchLocation": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Optional region for AI Search when the main region has no capacity. Empty = same as location" }
+    },
     "apimSku": {
       "type": "string",
       "defaultValue": "BasicV2",
@@ -37,6 +42,7 @@
   "variables": {
     "prefix": "msagthack",
     "suffix": "[uniqueString(resourceGroup().id)]",
+    "searchLocation": "[if(empty(parameters('searchLocation')), parameters('location'), parameters('searchLocation'))]",
     "apimName": "[format('{0}-apim-{1}', variables('prefix'), variables('suffix'))]",
     "storageAccountName": "[replace(format('{0}-sa-{1}', variables('prefix'), variables('suffix')), '-', '')]",
     "logAnalyticsWorkspaceName": "[format('{0}-loganalytics-{1}', variables('prefix'), variables('suffix'))]",
@@ -67,7 +73,7 @@
       "type": "Microsoft.Search/searchServices",
       "apiVersion": "2023-11-01",
       "name": "[variables('searchServiceName')]",
-      "location": "[parameters('location')]",
+      "location": "[variables('searchLocation')]",
       "identity": { "type": "SystemAssigned" },
       "sku": { "name": "[parameters('searchServiceSku')]" },
       "properties": {
@@ -152,7 +158,7 @@
         "metadata": {
           "ApiType": "Azure",
           "ResourceId": "[resourceId('Microsoft.Search/searchServices', variables('searchServiceName'))]",
-          "location": "[parameters('location')]"
+          "location": "[variables('searchLocation')]"
         }
       },
       "dependsOn": [

@@ -11,9 +11,9 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | install-tools | WSL2, az, .NET 10, Aspire, uv, Node, Python | – | ✅ | 2026-11-04 | WSL Ubuntu-24.04 (user `alon`) set up via `scripts/setup-wsl-tools.sh`; Python venv `~/factory-venv` with `requirements.txt` |
 | split-templates | Core + ephemeral templates, deterministic names | – | ✅ | 2026-11-04 | `challenge-0/infra/azuredeploy.demo-core.json` (validated) and `azuredeploy.demo-ephemeral.json` (validated in Phase 2) |
 | demo-scripts | `demo-up.sh` / `demo-down.sh` | split-templates | ✅ | 2026-11-04 | `scripts/demo-up.sh`, `scripts/demo-down.sh`; syntax OK, down dry-run OK; real run in Phase 2 / 8. RG `rg-tire-factory-demo` created (empty, free) |
-| deploy-core | RG + core template | prep-account, check-quota, split-templates | ⬜ | | |
-| deploy-ephemeral | APIM + AI Search | deploy-core | ⬜ | | |
-| keys-seed | get-keys, seed-data, roles, smoke test | deploy-ephemeral, install-tools | ⬜ | | |
+| deploy-core | RG + core template | prep-account, check-quota, split-templates | ✅ | 2026-11-04 | Needed 2 template fixes (see troubleshooting #11, #12). Models: gpt-5.4 (50), gpt-5.4-mini (50), text-embedding-3-large (10) all Succeeded |
+| deploy-ephemeral | APIM + AI Search | deploy-core | ✅ | 2026-11-04 | APIM BasicV2 swedencentral; Search basic **francecentral** (swedencentral + germanywestcentral had no capacity, #13). **Billing started ~11:20 – run `demo-down.sh` when not demoing** |
+| keys-seed | get-keys, seed-data, roles, smoke test | deploy-ephemeral, install-tools | 🟡 | 2026-11-04 | `.env` generated (get-keys done). Remaining: seed-data, role assignments, smoke test |
 | challenge1 | Anomaly, MCP servers, KB, Fault Diagnosis | keys-seed | ⬜ | | |
 | challenge2 | C# Repair Planner via agentplanning | keys-seed | ⬜ | | |
 | challenge3 | Scheduler + Parts Ordering | keys-seed | ⬜ | | |
@@ -27,3 +27,4 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | 2026-11-03 | Wiki created, plan agreed (strategy A, local Aspire, Challenge 2 included) |
 | 2026-11-04 | Phase 0 complete: login, providers, budget, quota check, WSL tooling. Added `.gitattributes` (LF for `*.sh`) and `scripts/setup-wsl-tools.sh` |
 | 2026-11-04 | Phase 1 complete: core + ephemeral templates, `demo-up.sh` / `demo-down.sh`; RG `rg-tire-factory-demo` created |
+| 2026-11-04 | Phase 2 complete: core + ephemeral deployed; template fixes (project/model race, App Insights connection string, `searchLocation` parameter); `.env` generated |

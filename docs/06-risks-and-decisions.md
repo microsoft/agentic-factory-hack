@@ -11,6 +11,7 @@ Back to [wiki home](README.md)
 | 2026-11-03 | Remove ACR + placeholder Container App | Unused; ~$12/month saved |
 | 2026-11-03 | Include Challenge 2 | Requested; demo itself ships its own RepairPlanner |
 | 2026-11-03 | `docs/` is the source of truth | Requested |
+| 2026-11-04 | AI Search in **francecentral**, rest in swedencentral | swedencentral and germanywestcentral had no Basic Search capacity; France Central was the first region that worked. Cross-region use with Foundry is fine (key-based connection). `demo-up.sh --search-location` parameter added; capacity may differ on the next recreate |
 
 ## Open risks
 | Risk | Impact | Mitigation |
@@ -21,5 +22,6 @@ Back to [wiki home](README.md)
 | Stale Cosmos role assignment after APIM recreate (new managed identity) | APIM→Cosmos 403 | `demo-up.sh` removes old assignment and creates new |
 | APIM subscription key / MCP URL change after recreate | Foundry connections break | Deterministic names; re-save keys in project connections in `demo-up.sh` |
 | Repo scripts are bash; apphost uses Linux cert paths | Fail on native Windows | Use WSL2 |
+| AI Search Basic capacity not available in a region at recreate time | `demo-up.sh` fails after APIM is already created | Re-run with `--search-location <region>` (francecentral worked on 2026-11-04). Start `demo-up` early (T-60 min) to leave time |
 | VS subscription spending limit | Resources disabled | Budget alerts; monitor credit |
 | Key auth + public endpoints | Not production-grade | Acceptable for demo; mention in the demo |

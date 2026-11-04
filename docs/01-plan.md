@@ -20,11 +20,11 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Added `scripts/demo-up.sh` and `scripts/demo-down.sh` (syntax-checked; `demo-down.sh` dry-run OK on empty RG; full test happens in Phase 2 and Phase 8)
 - [x] Core template validated with `az deployment group validate` (ephemeral can only be validated after core exists, Phase 2)
 
-## Phase 2 – Deploy
-- [ ] `az group create -n rg-tire-factory-demo -l swedencentral --tags purpose=demo`
-- [ ] Deploy core template
-- [ ] Deploy ephemeral template (~5–10 min)
-- [ ] `challenge-0/get-keys.sh --resource-group rg-tire-factory-demo` → verify `.env` has no empty values
+## Phase 2 – Deploy  ✅ (2026-11-04)
+- [x] `az group create -n rg-tire-factory-demo -l swedencentral --tags purpose=demo`
+- [x] Deploy core template (via `demo-up.sh`)
+- [x] Deploy ephemeral template (APIM in swedencentral, **AI Search in francecentral** – see [06-risks-and-decisions.md](06-risks-and-decisions.md)); `demo-up.sh --skip-seed --search-location francecentral` took 11 min
+- [x] `get-keys.sh` ran as part of `demo-up.sh` → `.env` generated; only `ACR_*` are empty (ACR intentionally removed)
 
 ## Phase 3 – Data and permissions (Challenge 0)
 - [ ] `challenge-0/seed-data.sh` (Cosmos 7 containers, blob `machine-wiki`, APIM Machine + Maintenance APIs)

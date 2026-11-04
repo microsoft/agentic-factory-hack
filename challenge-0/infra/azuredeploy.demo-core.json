@@ -148,7 +148,7 @@
         "useWorkspaceManagedIdentity": false,
         "isSharedToAll": true,
         "credentials": {
-          "key": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
+          "key": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
         },
         "metadata": {
           "ApiType": "Azure",
@@ -165,7 +165,8 @@
         "model": { "name": "gpt-5.4-mini", "format": "OpenAI", "version": "2026-03-17" }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]"
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts/projects/connections', variables('aiFoundryName'), variables('aiProjectName'), variables('applicationInsightsName'))]"
       ]
     },
     {
