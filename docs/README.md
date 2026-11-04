@@ -58,7 +58,7 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 | 4 Challenge 1 agents | ✅ Done (2026-11-04) |
 | 5 Challenge 2 Repair Planner | ✅ Done (2026-11-04) |
 | 6 Challenge 3 agents | ✅ Done (2026-11-04) |
-| 7 Challenge 4 end-to-end demo | ⬜ Not started |
+| 7 Challenge 4 end-to-end demo | ✅ Done (2026-11-04) |
 | 8 Teardown / rebuild rehearsal | ⬜ Not started |
 | 9 Demo runbook finalised | ⬜ Not started |
 
@@ -67,7 +67,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done · ⛔ blocked
 ## Demo day quick start
 1. ~60 min before: run `scripts/demo-up.sh` (creates API Management + AI Search, re-seeds, refreshes `.env`) – *script is created in Phase 1*.
 2. ~15 min before: smoke test (see [05-demo-runbook.md](05-demo-runbook.md)).
-3. Demo: `cd challenge-4/agent-workflow && aspire run` → open the frontend → **Trigger Anomaly**.
+3. Demo: `scripts/start-workflow.sh` (WSL; first start ~3–4 min) → `aspire describe` shows the frontend URL (Vite, port varies) → open it → **Trigger anomaly** (takes ~60–75 s; default payload machine-001, curing_temperature 179.2, cycle_time 14.5).
 4. After the demo: run `scripts/demo-down.sh` to stop the spend.
 
 ## Rules

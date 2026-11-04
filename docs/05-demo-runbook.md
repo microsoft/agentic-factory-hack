@@ -13,7 +13,9 @@ Back to [wiki home](README.md)
 - [ ] `scripts/reset-demo-data.sh` (restores the seeded work orders, clears schedules / parts orders / agent memory from earlier tests)
 - [ ] `curl "$APIM_GATEWAY_URL/machine/machine-001" -H "Ocp-Apim-Subscription-Key: $APIM_SUBSCRIPTION_KEY"` returns JSON
 - [ ] Foundry portal → Build: agents visible; playground question works
-- [ ] `cd challenge-4/agent-workflow && aspire run`; Aspire dashboard shows all resources healthy
+- [ ] `scripts/start-workflow.sh` in a WSL terminal; wait until `aspire describe` (second WSL terminal: `export PATH=$HOME/.aspire/bin:$PATH; aspire describe`) shows `app`, `dotnetworkflow`, `frontend` as Running/Healthy; the dashboard login link is printed at startup
+- [ ] Open the frontend URL from `aspire describe`, click **Trigger anomaly** once and wait for "Workflow completed • 5 agents processed" (~60–75 s); verified 2026-11-04: all five agents Done, tool calls visible
+- [ ] Afterwards (or before the real demo) run `scripts/reset-demo-data.sh` again – a test run creates work orders, schedules and agent memory
 - [ ] Trigger Anomaly once end to end
 
 ## Demo script (~20 min)
