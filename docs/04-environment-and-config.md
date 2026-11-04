@@ -75,5 +75,14 @@ Names are deterministic (`msagthack-<service>-<uniqueString(resourceGroup().id)>
 | Foundry User | AI Services (Foundry account) |
 | Cognitive Services OpenAI Contributor | Azure OpenAI / AI Services resource |
 
+## Running the C# Repair Planner (Challenge 2)
+From Windows PowerShell (uses your `az login`; loads `.env` into this process only):
+```powershell
+cd challenge-2\RepairPlanner
+Get-Content ..\..\.env | ForEach-Object { if($_ -match '^([A-Z0-9_]+)="?(.*?)"?$'){ [Environment]::SetEnvironmentVariable($Matches[1],$Matches[2],'Process') } }
+dotnet run
+```
+It creates a work order in Cosmos DB (container `WorkOrders`, status `new`). For a clean demo/seed state delete it afterwards. Do not run `dotnet` for this project from both Windows and WSL against the same `obj/` folder (restore assets contain OS-specific paths).
+
 ## Pinned NuGet versions (Challenge 2)
 Azure.AI.Projects 2.1.0-beta.4 · Azure.Identity 1.21.0 · Microsoft.Agents.AI 1.20.0 · Microsoft.Agents.AI.Foundry 1.20.0-preview.260831.1 · Microsoft.Extensions.AI(+Abstractions) 10.9.0 · Microsoft.Azure.Cosmos 3.63.0 · Microsoft.Extensions.DependencyInjection / Logging / Logging.Console 10.0.12 · Newtonsoft.Json 13.0.4

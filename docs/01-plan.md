@@ -40,9 +40,10 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - Both scripts are also the optional post-up hooks of `demo-up.sh`
 - ⚠ Open for Phase 8: after an APIM recreate the APIM subscription key changes, so the project connections `machine-data-connection` / `maintenance-data-connection` (which store the key) must be refreshed – add a hook
 
-## Phase 5 – Challenge 2 Repair Planner
-- [ ] Build the C# RepairPlanner with the Copilot `agentplanning` agent (pinned NuGet versions, no `example-solution`)
-- [ ] Verify against Cosmos DB
+## Phase 5 – Challenge 2 Repair Planner  ✅ (2026-11-04)
+- [x] Built the C# RepairPlanner in `challenge-2/RepairPlanner/` following the spec in `.github/agents/agentplanning.agent.md` (pinned NuGet versions, `net10.0`, dual JSON attributes, hard-coded fault mappings, primary constructors). `challenge-2/example-solution` was **not** opened or used. Note: written by the Copilot CLI agent from the spec, not interactively with the VS Code `agentplanning` agent
+- [x] Verified against Azure: agent `RepairPlannerAgent` v1 registered in Foundry → found 3 technicians + 2 parts in Cosmos DB → work order generated and saved (status `new`, assigned to `tech-004`, parts `TCP-HTR-4KW` + `GEN-TS-K400`, 4+ ordered tasks). The test work order was deleted afterwards so the seed data stays at 5 work orders
+- How to run (Windows PowerShell): load `.env` into the process and `dotnet run` in `challenge-2/RepairPlanner` (see [04-environment-and-config.md](04-environment-and-config.md))
 
 ## Phase 6 – Challenge 3 agents
 - [ ] `python agents/maintenance_scheduler_agent.py wo-2024-456`
