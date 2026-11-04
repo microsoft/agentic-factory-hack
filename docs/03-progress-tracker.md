@@ -16,7 +16,7 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | keys-seed | get-keys, seed-data, roles, smoke test | deploy-ephemeral, install-tools | ✅ | 2026-11-04 | Seeded 10 Cosmos containers, 5 wiki blobs, 2 APIM APIs; 3 roles assigned; APIM `/machine`, `/maintenance` return 200 |
 | challenge1 | Anomaly, MCP servers, KB, Fault Diagnosis | keys-seed | ✅ | 2026-11-04 | All 3 steps verified. MCP servers + KB are scripted (`create-apim-mcp-servers.sh`, `create-knowledge-base.sh`). Agents in Foundry: `AnomalyClassificationAgent:1`, `FaultDiagnosisAgent:1`. TODO Phase 8: refresh project connections after APIM recreate |
 | challenge2 | C# Repair Planner via agentplanning | keys-seed | ✅ | 2026-11-04 | `challenge-2/RepairPlanner` builds (0 warnings) and runs end to end; work order saved to Cosmos (then removed). Spec-driven, `example-solution` untouched |
-| challenge3 | Scheduler + Parts Ordering | keys-seed | ⬜ | | |
+| challenge3 | Scheduler + Parts Ordering | keys-seed | ✅ | 2026-11-04 | Both agents run; `run-batch.py` 10/10; data reset afterwards with `scripts/reset-demo-data.sh`. Known quirk: parts ordering returns an empty order for wo-2024-456 (#22) |
 | challenge4 | `aspire run` end-to-end demo | challenge1, challenge3 | ⬜ | | |
 | rehearse-teardown | demo-down then demo-up, retest | challenge4, demo-scripts | ⬜ | | |
 | demo-runbook | Final runbook | rehearse-teardown | ⬜ | | |
@@ -31,3 +31,4 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | 2026-11-04 | Phase 3 complete: data seeded, roles assigned, APIM smoke test OK. Foundry portal check: project has AppInsights + AI Search connections, no agents yet (expected) |
 | 2026-11-04 | Phase 4 complete: MCP servers (scripted), knowledge base (scripted), Anomaly + Fault Diagnosis agents running in Foundry |
 | 2026-11-04 | Phase 5 complete: C# Repair Planner built and verified end to end |
+| 2026-11-04 | Phase 6 complete: Scheduler + Parts Ordering agents run, batch 10/10, `reset-demo-data.sh` added |

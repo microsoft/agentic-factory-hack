@@ -10,6 +10,7 @@ Back to [wiki home](README.md)
 3. `export $(cat .env | xargs)`
 
 ## T-15 min: smoke test
+- [ ] `scripts/reset-demo-data.sh` (restores the seeded work orders, clears schedules / parts orders / agent memory from earlier tests)
 - [ ] `curl "$APIM_GATEWAY_URL/machine/machine-001" -H "Ocp-Apim-Subscription-Key: $APIM_SUBSCRIPTION_KEY"` returns JSON
 - [ ] Foundry portal → Build: agents visible; playground question works
 - [ ] `cd challenge-4/agent-workflow && aspire run`; Aspire dashboard shows all resources healthy

@@ -57,7 +57,7 @@ Repo originals: [main README](../README.md) · [challenge-0](../challenge-0/READ
 | 3 Data seeding + permissions | ✅ Done (2026-11-04) |
 | 4 Challenge 1 agents | ✅ Done (2026-11-04) |
 | 5 Challenge 2 Repair Planner | ✅ Done (2026-11-04) |
-| 6 Challenge 3 agents | ⬜ Not started |
+| 6 Challenge 3 agents | ✅ Done (2026-11-04) |
 | 7 Challenge 4 end-to-end demo | ⬜ Not started |
 | 8 Teardown / rebuild rehearsal | ⬜ Not started |
 | 9 Demo runbook finalised | ⬜ Not started |

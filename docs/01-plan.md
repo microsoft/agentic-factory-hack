@@ -45,10 +45,11 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] Verified against Azure: agent `RepairPlannerAgent` v1 registered in Foundry → found 3 technicians + 2 parts in Cosmos DB → work order generated and saved (status `new`, assigned to `tech-004`, parts `TCP-HTR-4KW` + `GEN-TS-K400`, 4+ ordered tasks). The test work order was deleted afterwards so the seed data stays at 5 work orders
 - How to run (Windows PowerShell): load `.env` into the process and `dotnet run` in `challenge-2/RepairPlanner` (see [04-environment-and-config.md](04-environment-and-config.md))
 
-## Phase 6 – Challenge 3 agents
-- [ ] `python agents/maintenance_scheduler_agent.py wo-2024-456`
-- [ ] `python agents/parts_ordering_agent.py wo-2024-456`
-- [ ] Optional small `run-batch.py` for traces
+## Phase 6 – Challenge 3 agents  ✅ (2026-11-04)
+- [x] `python agents/maintenance_scheduler_agent.py wo-2024-456` → machine-004 / `load_cell_drift`: window 2026-11-05 22:00, risk 76/100, URGENT; schedule saved, work order updated
+- [x] `python agents/parts_ordering_agent.py wo-2024-456` → ran OK, but the model returned **no order items** (see troubleshooting #22: seed data says parts are in stock). `wo-2024-468` → "all parts available" path, status `Ready`; scheduler on `wo-2024-468` also OK
+- [x] `run-batch.py` → 10/10 successful in 103 s (5 work orders × 2 agents): traces are in App Insights / Foundry → Tracing
+- [x] Reset helper `scripts/reset-demo-data.sh` restores the 5 seeded work orders and clears `MaintenanceSchedules`, `PartsOrders`, `ChatHistories` (the agents change work order statuses and write these containers). Run it after testing and before a demo
 
 ## Phase 7 – Challenge 4 end-to-end
 - [ ] `cd challenge-4/agent-workflow && aspire run`
