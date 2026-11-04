@@ -11,6 +11,7 @@ Back to [wiki home](README.md)
 | 2026-11-03 | Remove ACR + placeholder Container App | Unused; ~$12/month saved |
 | 2026-11-03 | Include Challenge 2 | Requested; demo itself ships its own RepairPlanner |
 | 2026-11-03 | `docs/` is the source of truth | Requested |
+| 2026-11-04 | Patch APIM `get-threshold` policy to return all thresholds of a machine type (deviation from the workshop) | Original returns only the first threshold, so multi-metric anomalies (machine-001 pressure, machine-005 power/vibration, machine-003 throughput) were not validated; the demo scenario needs them. Done in `create-apim-mcp-servers.sh`, not in the original seed script |
 | 2026-11-04 | AI Search in **francecentral**, rest in swedencentral | swedencentral and germanywestcentral had no Basic Search capacity; France Central was the first region that worked. Cross-region use with Foundry is fine (key-based connection). `demo-up.sh --search-location` parameter added; capacity may differ on the next recreate |
 
 ## Open risks

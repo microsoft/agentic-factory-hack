@@ -30,6 +30,20 @@ Back to [wiki home](README.md)
 - `scripts/demo-down.sh` (deletes API Management + AI Search)
 - Log hours in [02-cost-and-budget.md](02-cost-and-budget.md)
 
+## Appendix – Test prompts for `AnomalyClassificationAgent` (Foundry playground)
+Verified 2026-11-04 against the seeded data (after the `get-threshold` patch). Paste as plain text.
+
+| # | Prompt | Observed result |
+|---|---|---|
+| 1 | `Classify the following anomalies for machine-001: [{"metric": "curing_temperature", "value": 183.5}, {"metric": "curing_pressure", "value": 207}]` | 2 critical (limits 182 / 205), status `high` |
+| 2 | `Classify the following anomalies for machine-001: [{"metric": "curing_temperature", "value": 179.2}, {"metric": "cycle_time", "value": 14.5}]` | 2 warnings (limits 178 / 14), status `medium` |
+| 3 | `Classify the following anomalies for machine-002: [{"metric": "drum_vibration", "value": 2.1}]` | no alerts |
+| 4 | `Classify the following anomalies for machine-005: [{"metric": "mixing_temperature", "value": 175}, {"metric": "power_consumption", "value": 290}, {"metric": "vibration", "value": 5.2}]` | temperature critical, power warning, vibration OK |
+| 5 | `Classify the following anomalies for machine-003: [{"metric": "throughput", "value": 640}]` | warning (below 650 = bad direction) |
+| 6 | `Classify the following anomalies for machine-999: [{"metric": "curing_temperature", "value": 180}]` | no alerts, explains the machine was not found |
+
+Fault Diagnosis agent test: `Hello, what can the issue be when machine-001 has curing temperature reading of 179.2°C that exceeds warning threshold of 178°C?` → `curing_temperature_excessive`, causes from the wiki.
+
 ## Fallbacks
 - Quota/network failure: use screenshots/recording (to be captured during Phase 7).
 - APIM/Search not ready: demo agents with direct Cosmos tools (`anomaly_classification_agent.py`).

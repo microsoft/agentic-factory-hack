@@ -58,8 +58,22 @@ create_mcp_server() {
 create_mcp_server "get-machine-data" "Get Machine Data" "Gets details about a specific machine" \
     "machine-api" "get-machine" "Gets details about a specific machine by id (type, status, maintenance history)"
 
+# The workshop's get-threshold policy returns only the FIRST threshold of a machine type (docs[0]), so agents
+# cannot validate machines with several metrics. Patch it to return all thresholds (idempotent, only this operation).
+echo "==> Patching get-threshold policy to return all thresholds of a machine type"
+POLICY_URL="${BASE_URL}/apis/maintenance-api/operations/get-threshold/policies/policy"
+az rest --method get --url "${POLICY_URL}?api-version=2024-05-01&format=rawxml" --query properties.value -o tsv > /tmp/get-threshold-policy.xml
+if grep -q 'docs\[0\]\.ToString()' /tmp/get-threshold-policy.xml; then
+    sed -i 's/docs\[0\]\.ToString()/docs.ToString()/' /tmp/get-threshold-policy.xml
+    jq -Rs '{properties:{format:"rawxml",value:.}}' /tmp/get-threshold-policy.xml > /tmp/get-threshold-policy.json
+    az rest --method put --url "${POLICY_URL}?api-version=2024-05-01" --headers "If-Match=*" --body @/tmp/get-threshold-policy.json -o none
+    echo "    policy patched"
+else
+    echo "    already patched (or unexpected policy) - skipped"
+fi
+
 create_mcp_server "get-maintenance-data" "Get Maintenance Data" "Gets maintenance data such as thresholds for maintenance alerts" \
-    "maintenance-api" "get-threshold" "Gets the metric thresholds (warning/critical) for a machine type"
+    "maintenance-api" "get-threshold" "Gets all metric thresholds (warning and critical) for a machine type, one entry per metric"
 
 set_env MACHINE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-machine-data/mcp"
 set_env MAINTENANCE_MCP_SERVER_ENDPOINT "${APIM_GATEWAY_URL}/get-maintenance-data/mcp"
