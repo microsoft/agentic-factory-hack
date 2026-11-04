@@ -43,6 +43,17 @@ Bash scripts and Aspire run inside WSL **Ubuntu-24.04** (user `alon`, passwordle
 ## Budget
 `budget-tire-factory-120` on the subscription: $120/month, alerts at 50 / 75 / 90 % actual and 100 % forecast to alon.havivi@macaw.nl.
 
+## Infrastructure files
+| File | Purpose |
+|---|---|
+| `challenge-0/infra/azuredeploy.demo-core.json` | Always-on: Foundry + project + models, Cosmos serverless, Storage, Log Analytics (0.1 GB/day cap), App Insights, Content Safety |
+| `challenge-0/infra/azuredeploy.demo-ephemeral.json` | Hourly-billed: API Management BasicV2, AI Search basic, role assignments, Foundry→Search connection |
+| `scripts/demo-up.sh` | Core (if missing) → cleanup orphans → ephemeral → Cosmos role for APIM → `get-keys.sh` → `seed-data.sh` → optional hooks |
+| `scripts/demo-down.sh` | Removes identity-bound role assignments, deletes Search + APIM, purges soft-deleted APIM |
+| `challenge-0/infra/azuredeploy.json` | Original workshop template (unchanged, not used) |
+
+Names are deterministic (`msagthack-<service>-<uniqueString(resourceGroup().id)>`), so URLs stay identical after every recreate. Deployments are named `hack-deployment-core` and `hack-deployment-ephemeral` (`get-keys.sh` finds deployments containing `hack-deployment`).
+
 ## Roles needed by the signed-in user
 | Role | Scope |
 |---|---|

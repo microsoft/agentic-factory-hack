@@ -1,0 +1,228 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Agentic Factory demo - CORE (always-on, ~zero idle cost): Foundry + project + models, Cosmos DB serverless, Storage, Log Analytics, App Insights, Content Safety. Derived from azuredeploy.json without APIM, AI Search, ACR and Container Apps. Resource names are deterministic per resource group."
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "swedencentral",
+      "allowedValues": [ "swedencentral", "francecentral", "eastus2", "germanywestcentral" ],
+      "metadata": { "description": "Azure location where resources should be deployed" }
+    },
+    "logAnalyticsDailyCapGb": {
+      "type": "string",
+      "defaultValue": "0.1",
+      "metadata": { "description": "Daily ingestion cap (GB) for Log Analytics, protects the budget" }
+    }
+  },
+  "variables": {
+    "prefix": "msagthack",
+    "suffix": "[uniqueString(resourceGroup().id)]",
+    "storageAccountName": "[replace(format('{0}-sa-{1}', variables('prefix'), variables('suffix')), '-', '')]",
+    "logAnalyticsWorkspaceName": "[format('{0}-loganalytics-{1}', variables('prefix'), variables('suffix'))]",
+    "searchServiceName": "[format('{0}-search-{1}', variables('prefix'), variables('suffix'))]",
+    "aiFoundryName": "[format('{0}-aifoundry-{1}', variables('prefix'), variables('suffix'))]",
+    "aiProjectName": "[format('{0}-aiproject-{1}', variables('prefix'), variables('suffix'))]",
+    "applicationInsightsName": "[format('{0}-appinsights-{1}', variables('prefix'), variables('suffix'))]",
+    "cosmosDbAccountName": "[format('{0}-cosmos-{1}', variables('prefix'), variables('suffix'))]",
+    "contentSafetyName": "[format('{0}-contentsafety-{1}', variables('prefix'), variables('suffix'))]",
+    "monitoringReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": { "name": "Standard_LRS" },
+      "kind": "StorageV2",
+      "properties": {
+        "allowBlobPublicAccess": true,
+        "publicNetworkAccess": "Enabled",
+        "allowSharedKeyAccess": true,
+        "networkAcls": { "defaultAction": "Allow", "bypass": "AzureServices" }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2021-06-01",
+      "name": "[variables('logAnalyticsWorkspaceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "retentionInDays": 30,
+        "features": { "searchVersion": 1 },
+        "sku": { "name": "PerGB2018" },
+        "workspaceCapping": { "dailyQuotaGb": "[json(parameters('logAnalyticsDailyCapGb'))]" }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-04-15",
+      "name": "[variables('cosmosDbAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "GlobalDocumentDB",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {
+        "consistencyPolicy": { "defaultConsistencyLevel": "Session" },
+        "locations": [
+          { "locationName": "[parameters('location')]", "failoverPriority": 0, "isZoneRedundant": false }
+        ],
+        "databaseAccountOfferType": "Standard",
+        "enableAutomaticFailover": false,
+        "enableMultipleWriteLocations": false,
+        "publicNetworkAccess": "Enabled",
+        "disableLocalAuth": false,
+        "capabilities": [ { "name": "EnableServerless" } ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('applicationInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('contentSafetyName')]",
+      "location": "[parameters('location')]",
+      "identity": { "type": "SystemAssigned" },
+      "sku": { "name": "S0" },
+      "kind": "ContentSafety",
+      "properties": {
+        "customSubDomainName": "[variables('contentSafetyName')]",
+        "disableLocalAuth": false,
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[variables('aiFoundryName')]",
+      "location": "[parameters('location')]",
+      "identity": { "type": "SystemAssigned" },
+      "sku": { "name": "S0" },
+      "kind": "AIServices",
+      "properties": {
+        "allowProjectManagement": true,
+        "customSubDomainName": "[variables('aiFoundryName')]",
+        "disableLocalAuth": false,
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": { "defaultAction": "Allow" }
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/projects",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), variables('aiProjectName'))]",
+      "location": "[parameters('location')]",
+      "identity": { "type": "SystemAssigned" },
+      "properties": {},
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/projects/connections",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}/{2}', variables('aiFoundryName'), variables('aiProjectName'), variables('applicationInsightsName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
+      ],
+      "properties": {
+        "authType": "ApiKey",
+        "category": "AppInsights",
+        "target": "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
+        "useWorkspaceManagedIdentity": false,
+        "isSharedToAll": true,
+        "credentials": {
+          "key": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
+        },
+        "metadata": {
+          "ApiType": "Azure",
+          "ResourceId": "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4-mini')]",
+      "sku": { "capacity": 50, "name": "GlobalStandard" },
+      "properties": {
+        "model": { "name": "gpt-5.4-mini", "format": "OpenAI", "version": "2026-03-17" }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'gpt-5.4')]",
+      "sku": { "capacity": 50, "name": "GlobalStandard" },
+      "properties": {
+        "model": { "name": "gpt-5.4", "format": "OpenAI", "version": "2026-03-05" }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4-mini')]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('aiFoundryName'), 'text-embedding-3-large')]",
+      "sku": { "capacity": 10, "name": "Standard" },
+      "properties": {
+        "model": { "name": "text-embedding-3-large", "format": "OpenAI", "version": "1" }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', variables('aiFoundryName'), 'gpt-5.4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), variables('monitoringReaderRoleId'))]",
+      "scope": "[format('Microsoft.Insights/components/{0}', variables('applicationInsightsName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('monitoringReaderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')), '2025-04-01-preview', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "storageAccountName": { "type": "string", "value": "[variables('storageAccountName')]" },
+    "logAnalyticsWorkspaceName": { "type": "string", "value": "[variables('logAnalyticsWorkspaceName')]" },
+    "searchServiceName": { "type": "string", "value": "[variables('searchServiceName')]" },
+    "aiFoundryHubName": { "type": "string", "value": "[variables('aiFoundryName')]" },
+    "aiFoundryProjectName": { "type": "string", "value": "[variables('aiProjectName')]" },
+    "applicationInsightsName": { "type": "string", "value": "[variables('applicationInsightsName')]" },
+    "searchServiceEndpoint": { "type": "string", "value": "[format('https://{0}.search.windows.net/', variables('searchServiceName'))]" },
+    "aiFoundryHubEndpoint": { "type": "string", "value": "[format('https://ml.azure.com/home?wsid={0}', resourceId('Microsoft.CognitiveServices/accounts', variables('aiFoundryName')))]" },
+    "aiFoundryProjectEndpoint": { "type": "string", "value": "[format('https://ai.azure.com/build/overview?wsid={0}', resourceId('Microsoft.CognitiveServices/accounts/projects', variables('aiFoundryName'), variables('aiProjectName')))]" },
+    "cosmosDbAccountName": { "type": "string", "value": "[variables('cosmosDbAccountName')]" },
+    "cosmosDbEndpoint": { "type": "string", "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName')), '2023-04-15').documentEndpoint]" },
+    "contentSafetyName": { "type": "string", "value": "[variables('contentSafetyName')]" },
+    "contentSafetyEndpoint": { "type": "string", "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('contentSafetyName')), '2023-05-01').endpoint]" }
+  }
+}

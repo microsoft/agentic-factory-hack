@@ -9,8 +9,8 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 | prep-account | Account, providers, budget + alerts | – | ✅ | 2026-11-04 | Logged in (Windows + WSL), Owner confirmed, providers registered (DocumentDB still finishing in background), budget `budget-tire-factory-120` ($120/month; alerts 50/75/90 % actual + 100 % forecast → alon.havivi@macaw.nl) |
 | check-quota | Model quota in swedencentral | – | ✅ | 2026-11-04 | GlobalStandard gpt-5.4 limit 250 (need 50), gpt-5.4-mini 1000 (need 50), text-embedding-3-large Standard 350 (need 10). OK |
 | install-tools | WSL2, az, .NET 10, Aspire, uv, Node, Python | – | ✅ | 2026-11-04 | WSL Ubuntu-24.04 (user `alon`) set up via `scripts/setup-wsl-tools.sh`; Python venv `~/factory-venv` with `requirements.txt` |
-| split-templates | Core + ephemeral templates, deterministic names | – | ⬜ | | |
-| demo-scripts | `demo-up.sh` / `demo-down.sh` | split-templates | ⬜ | | |
+| split-templates | Core + ephemeral templates, deterministic names | – | ✅ | 2026-11-04 | `challenge-0/infra/azuredeploy.demo-core.json` (validated) and `azuredeploy.demo-ephemeral.json` (validated in Phase 2) |
+| demo-scripts | `demo-up.sh` / `demo-down.sh` | split-templates | ✅ | 2026-11-04 | `scripts/demo-up.sh`, `scripts/demo-down.sh`; syntax OK, down dry-run OK; real run in Phase 2 / 8. RG `rg-tire-factory-demo` created (empty, free) |
 | deploy-core | RG + core template | prep-account, check-quota, split-templates | ⬜ | | |
 | deploy-ephemeral | APIM + AI Search | deploy-core | ⬜ | | |
 | keys-seed | get-keys, seed-data, roles, smoke test | deploy-ephemeral, install-tools | ⬜ | | |
@@ -26,3 +26,4 @@ Status: ⬜ pending · 🟡 in progress · ✅ done · ⛔ blocked
 |---|---|
 | 2026-11-03 | Wiki created, plan agreed (strategy A, local Aspire, Challenge 2 included) |
 | 2026-11-04 | Phase 0 complete: login, providers, budget, quota check, WSL tooling. Added `.gitattributes` (LF for `*.sh`) and `scripts/setup-wsl-tools.sh` |
+| 2026-11-04 | Phase 1 complete: core + ephemeral templates, `demo-up.sh` / `demo-down.sh`; RG `rg-tire-factory-demo` created |

@@ -10,13 +10,15 @@ Back to [wiki home](README.md) · Track progress in [03-progress-tracker.md](03-
 - [x] **Quota check** in `swedencentral`: gpt-5.4, gpt-5.4-mini (GlobalStandard), text-embedding-3-large. If 0: request quota, or change region/model (`MODEL_DEPLOYMENT_NAME`)
 - [x] Install tooling: WSL2 Ubuntu, Azure CLI, .NET SDK 10, Aspire CLI, uv, Node LTS, Python 3.11+, `pip install -r requirements.txt`, VS Code + Jupyter
 
-## Phase 1 – Repo infra changes
-- [ ] Split `challenge-0/infra/azuredeploy.json` into **core** and **ephemeral** templates (original left untouched)
-  - core: Foundry + project + model deployments, Cosmos (serverless), Storage, Log Analytics (daily cap), App Insights, Content Safety
-  - ephemeral: API Management, AI Search, their role assignments, Foundry→Search connection, Cosmos role for APIM identity
-- [ ] Deterministic suffix (`uniqueString(resourceGroup().id)`) so names/URLs survive recreate
-- [ ] Remove ACR + Container App; make `get-keys.sh` tolerate missing ACR
-- [ ] Add `scripts/demo-up.sh` and `scripts/demo-down.sh`
+## Phase 1 – Repo infra changes  ✅ (2026-11-04)
+- [x] Split `challenge-0/infra/azuredeploy.json` into **core** (`azuredeploy.demo-core.json`) and **ephemeral** (`azuredeploy.demo-ephemeral.json`) templates (original left untouched)
+  - core: Foundry + project + model deployments, Cosmos (serverless), Storage, Log Analytics (daily cap 0.1 GB), App Insights, Content Safety
+  - ephemeral: API Management (BasicV2), AI Search (basic), their role assignments, Foundry→Search connection
+  - The Cosmos data role for the APIM identity is **not** in the template: it is created/removed by `demo-up.sh` / `demo-down.sh` (the identity changes on every recreate and an ARM role assignment with a changed principalId cannot be updated)
+- [x] Deterministic suffix (`uniqueString(resourceGroup().id)`) so names/URLs survive recreate
+- [x] ACR + Container App dropped from the new templates; `get-keys.sh` already tolerates a missing ACR (warning only) and falls back to resource discovery, so it was not changed
+- [x] Added `scripts/demo-up.sh` and `scripts/demo-down.sh` (syntax-checked; `demo-down.sh` dry-run OK on empty RG; full test happens in Phase 2 and Phase 8)
+- [x] Core template validated with `az deployment group validate` (ephemeral can only be validated after core exists, Phase 2)
 
 ## Phase 2 – Deploy
 - [ ] `az group create -n rg-tire-factory-demo -l swedencentral --tags purpose=demo`
