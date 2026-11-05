@@ -22,6 +22,10 @@ maintenance_data_connection_name = "maintenance-data-connection"
 machine_data_mcp_endpoint = os.environ.get("MACHINE_MCP_SERVER_ENDPOINT")
 maintenance_data_mcp_endpoint = os.environ.get(
     "MAINTENANCE_MCP_SERVER_ENDPOINT")
+# Auth header of the MCP connections: APIM subscription key by default; scripts/deploy-mcp-function.sh sets
+# MCP_AUTH_HEADER=x-functions-key and MCP_AUTH_KEY=<function key> when the MCP tools run on Azure Functions
+mcp_auth_header = os.environ.get("MCP_AUTH_HEADER", "Ocp-Apim-Subscription-Key")
+mcp_auth_key = os.environ.get("MCP_AUTH_KEY") or apim_subscription_key
 
 
 def create_apim_mcp_connection(connection_name, mcp_endpoint):
@@ -48,7 +52,7 @@ def create_apim_mcp_connection(connection_name, mcp_endpoint):
                 "category": "RemoteTool",
                 "target": mcp_endpoint,
                 "isSharedToAll": True,
-                "credentials":  {"keys": {"Ocp-Apim-Subscription-Key": os.environ.get("APIM_SUBSCRIPTION_KEY")}},
+                "credentials":  {"keys": {mcp_auth_header: mcp_auth_key}},
                 "metadata": {"type": "custom_MCP"}
             }
         }
@@ -107,12 +111,15 @@ async def main():
                         server_label="machine-data",
                         server_url=machine_data_mcp_endpoint,
                         require_approval="never",
+                        # One tool per label: the Functions MCP server exposes both tools on one endpoint
+                        allowed_tools=["get-machine"],
                         project_connection_id=machine_data_connection_name
                     ),
                     MCPTool(
                         server_label="maintenance-data",
                         server_url=maintenance_data_mcp_endpoint,
                         require_approval="never",
+                        allowed_tools=["get-threshold"],
                         project_connection_id=maintenance_data_connection_name
                     )
 
