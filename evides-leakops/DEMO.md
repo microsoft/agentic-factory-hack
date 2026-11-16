@@ -108,6 +108,13 @@ flow 121 m3/h against 48 m3/h expected, no planned works, frost). For the false 
 5. Back on the technicians page (it refreshes every 5 seconds) Samira is selected automatically: her state turns to **Assigned**, the reading pane shows the work order like a calendar event, and the planning timeline shows her blue work-order bar from leave to completion.
 (The portraits are AI-generated, fictional people; the page says so.)
 
+**Pause before Procurement (show the warehouse first, then what the repair takes from it):**
+1. Press **Reset demo data**, then open the **warehouse app** (`/warehouse` on the Waterstoring site; linked from the technicians page and the pause panel) in a second tab: 23 items in two depots, nothing reserved, nothing on order. Point out the low stock (DN300 flexible coupling: 1 left, reorder level 2) and the DN300 gate valve (none) and the 14 t excavator (in maintenance).
+2. Tick **Pause before step 5 Procurement** (the earlier pauses can be combined) and run. After the Matchmaker the console shows step 5 **Paused**: a technician is proposed, but nothing is reserved yet.
+3. Refresh the warehouse app: still nothing is reserved or ordered.
+4. Press **Resume**. Procurement reserves 9 items (clamp, gasket, bolts, disinfection kit, pipe section, excavator, traffic kit, pump), orders the missing DN300 coupling express (675 EUR) and places replenishment orders for what the repair used; the clamp restock (4,110 EUR, above 2,500) waits for approval.
+5. The warehouse app (refreshes every 5 seconds) lights up the changed rows (purple), the form jumps to the ordered coupling, the Purchase orders view shows the three orders with their status (one pending approval), and Recent changes lists everything Procurement wrote.
+
 ## 4. Tracing (portal, Tracing, or Build > Agents > agent > Traces)
 Every agent call is traced to Application Insights: `invoke_agent <Agent>`, `chat gpt-5.4`, `execute_tool leakops_mcp.<tool>` and `execute_tool leakops_kb.knowledge_base_retrieve`, with
 duration and tokens. Open the burst run and follow Triage > its MCP calls. Traces can take a few minutes to appear.

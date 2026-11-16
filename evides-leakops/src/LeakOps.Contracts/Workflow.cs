@@ -39,8 +39,8 @@ public static class WorkflowEventTypes
 /// </summary>
 public record PauseGate(IReadOnlyCollection<string> Steps, Func<string, Func<ValueTask>, CancellationToken, Task<bool>> Wait)
 {
-    /// <summary>The steps an operator may pause before: Communications (nothing published yet) and Matchmaker (nobody assigned yet).</summary>
-    public static readonly IReadOnlyList<string> Allowed = [WorkflowSteps.Communications, WorkflowSteps.Matchmaker];
+    /// <summary>The steps an operator may pause before: Communications (nothing published yet), Matchmaker (nobody assigned yet) and Procurement (nothing reserved yet).</summary>
+    public static readonly IReadOnlyList<string> Allowed = [WorkflowSteps.Communications, WorkflowSteps.Matchmaker, WorkflowSteps.Procurement];
 
     public bool Applies(string step) => Steps.Contains(step);
 }

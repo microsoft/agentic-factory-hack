@@ -14,22 +14,34 @@ public interface IDemoData
 {
     Task<IReadOnlyList<Technician>> TechniciansAsync();
     Task<IReadOnlyList<WorkOrder>> WorkOrdersAsync();
+    Task<IReadOnlyList<InventoryItem>> InventoryAsync();
+    Task<IReadOnlyList<Warehouse>> WarehousesAsync();
+    Task<IReadOnlyList<Supplier>> SuppliersAsync();
+    Task<IReadOnlyList<StockReservation>> ReservationsAsync();
+    Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync();
 
     /// <summary>Deletes incidents, work orders, purchase orders and stock reservations of the workflow, and restores the stock levels.</summary>
     Task ResetAsync();
 }
 
-/// <summary>Reads the shipped data/*.json files. Used on a laptop and in tests: the roster is the seed roster and there are no work orders.</summary>
+/// <summary>Reads the shipped data/*.json files. Used on a laptop and in tests: the roster and stock are the seed data and nothing is reserved, ordered or assigned.</summary>
 public class FileDemoData(string dataDirectory) : IDemoData
 {
-    public Task<IReadOnlyList<Technician>> TechniciansAsync() => Task.FromResult<IReadOnlyList<Technician>>(DemoJson.ReadList<Technician>(dataDirectory, "technicians.json"));
+    private Task<IReadOnlyList<T>> Seed<T>(string file) => Task.FromResult<IReadOnlyList<T>>(DemoJson.ReadList<T>(dataDirectory, file));
+
+    public Task<IReadOnlyList<Technician>> TechniciansAsync() => Seed<Technician>("technicians.json");
     public Task<IReadOnlyList<WorkOrder>> WorkOrdersAsync() => Task.FromResult<IReadOnlyList<WorkOrder>>([]);
+    public Task<IReadOnlyList<InventoryItem>> InventoryAsync() => Seed<InventoryItem>("inventory.json");
+    public Task<IReadOnlyList<Warehouse>> WarehousesAsync() => Seed<Warehouse>("warehouses.json");
+    public Task<IReadOnlyList<Supplier>> SuppliersAsync() => Seed<Supplier>("suppliers.json");
+    public Task<IReadOnlyList<StockReservation>> ReservationsAsync() => Task.FromResult<IReadOnlyList<StockReservation>>([]);
+    public Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => Task.FromResult<IReadOnlyList<PurchaseOrder>>([]);
     public Task ResetAsync() => Task.CompletedTask;
 }
 
 /// <summary>
-/// Reads the roster and the work orders from the LeakOps Cosmos database, the same data the Resource Matchmaker and Scheduling agents use,
-/// so this page and the agents always agree. The reset writes: the web app's managed identity has data access to the whole account.
+/// Reads the roster, stock, reservations, orders and work orders from the LeakOps Cosmos database, the same data the agents' tools use,
+/// so these pages and the agents always agree. The reset writes: the web app's managed identity has data access to the whole account.
 /// </summary>
 public class CosmosDemoData(CosmosClient client, string database, string dataDirectory) : IDemoData
 {
@@ -37,6 +49,11 @@ public class CosmosDemoData(CosmosClient client, string database, string dataDir
 
     public async Task<IReadOnlyList<Technician>> TechniciansAsync() => await QueryAsync<Technician>(LeakOpsContainers.Technicians);
     public async Task<IReadOnlyList<WorkOrder>> WorkOrdersAsync() => await QueryAsync<WorkOrder>(LeakOpsContainers.WorkOrders);
+    public async Task<IReadOnlyList<InventoryItem>> InventoryAsync() => await QueryAsync<InventoryItem>(LeakOpsContainers.Inventory);
+    public async Task<IReadOnlyList<Warehouse>> WarehousesAsync() => await QueryAsync<Warehouse>(LeakOpsContainers.Warehouses);
+    public async Task<IReadOnlyList<Supplier>> SuppliersAsync() => await QueryAsync<Supplier>(LeakOpsContainers.Suppliers);
+    public async Task<IReadOnlyList<StockReservation>> ReservationsAsync() => await QueryAsync<StockReservation>(LeakOpsContainers.StockReservations);
+    public async Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => await QueryAsync<PurchaseOrder>(LeakOpsContainers.PurchaseOrders);
 
     public async Task ResetAsync()
     {

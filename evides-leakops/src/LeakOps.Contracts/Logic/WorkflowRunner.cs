@@ -103,6 +103,11 @@ public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
         if (match is null) return await Finish(WorkflowOutcomes.Failed, WorkflowSteps.Matchmaker, [steps[^1].Headline]);
         if (match.NeedsReview || match.Primary is null) return await Finish(WorkflowOutcomes.NeedsReview, WorkflowSteps.Matchmaker, match.ReviewReasons);
 
+        // A technician is proposed, but no stock is reserved, nothing is ordered and there is no work order yet.
+        if (!await PauseBefore(WorkflowSteps.Procurement, "Paused before Procurement: nothing is reserved or ordered yet"))
+            return await Finish(WorkflowOutcomes.Cancelled, WorkflowSteps.Matchmaker,
+                [$"Paused before Procurement and not resumed: residents were already informed ({incidentId}) and {match.Primary.Name} was proposed, but no stock was reserved, nothing was ordered and no work order was made."]);
+
         var package = await Step<ProcurementResult>(WorkflowSteps.Procurement, new ProcurementRequest(report), p =>
             $"{p.Lines.Count(l => l.Reserved > 0)} items reserved, {p.Lines.Count(l => l.Short > 0)} short, {p.PurchaseOrders.Count} purchase orders"
             + (p.PackageComplete ? "" : " - package not complete"));

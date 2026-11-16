@@ -133,13 +133,13 @@ public class WorkflowHostTests
     }
 
     [Fact]
-    public async Task A_run_can_pause_before_Matchmaker_and_before_Communications_in_one_go()
+    public async Task A_run_can_pause_before_Communications_Matchmaker_and_Procurement_in_one_go()
     {
         var gateway = WorkflowRunnerTests.FakeGateway.Happy();
         using var factory = HostWith(gateway);
         var client = factory.CreateClient();
 
-        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications", "matchmaker" } }) }, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id,         pauseBefore = new[] { "procurement", "communications", "matchmaker" } }) }, HttpCompletionOption.ResponseHeadersRead);
         using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
         var paused = new List<string>();
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -153,12 +153,14 @@ public class WorkflowHostTests
                 paused.Add(data.GetProperty("step").GetString()!);
                 if (paused[^1] == WorkflowSteps.Matchmaker)   // residents have been told, nobody is matched yet
                     Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Matchmaker);
+                if (paused[^1] == WorkflowSteps.Procurement)   // a technician is proposed, but nothing is reserved yet
+                    Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Procurement);
                 Assert.Equal(HttpStatusCode.OK, (await client.PostAsync($"/api/runs/{data.GetProperty("runId").GetString()}/resume", null)).StatusCode);
             }
             if (line == "event: run_completed") break;
         }
 
-        Assert.Equal([WorkflowSteps.Communications, WorkflowSteps.Matchmaker], paused);
+        Assert.Equal([WorkflowSteps.Communications, WorkflowSteps.Matchmaker, WorkflowSteps.Procurement], paused);
         Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
     }
 

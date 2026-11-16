@@ -33,6 +33,7 @@ app.UseStaticFiles();
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy", service = "waterstoring" }));
 app.MapGet("/evides", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "index.html"), "text/html"));
 app.MapGet("/technicians", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "technicians.html"), "text/html"));
+app.MapGet("/warehouse", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "warehouse.html"), "text/html"));
 
 // ---- Public, read-only ------------------------------------------------------------------------------------------
 
@@ -50,10 +51,15 @@ app.MapGet("/api/search", async (IncidentStore store, string? q) =>
 // The simulated roster of the Evides field technicians and who is assigned to which job (demo data, no real people).
 // "at" overrides the moment the state is shown for; by default it is the simulation clock, the time of the demo alarm.
 app.MapGet("/api/technicians", async (IDemoData data, IConfiguration config, DateTimeOffset? at) =>
-{
-    var clock = at ?? (DateTimeOffset.TryParse(config["DEMO_CLOCK_UTC"], out var configured) ? configured : DateTimeOffset.Parse("2026-11-14T03:10:00Z"));
-    return Results.Ok(TechnicianBoard.Build(await data.TechniciansAsync(), await data.WorkOrdersAsync(), clock));
-});
+    Results.Ok(TechnicianBoard.Build(await data.TechniciansAsync(), await data.WorkOrdersAsync(), SimulationClock(config, at))));
+
+// The simulated stock of the two Evides depots: what is on hand, reserved for an incident and on order (demo data).
+app.MapGet("/api/warehouse", async (IDemoData data, IConfiguration config, DateTimeOffset? at) =>
+    Results.Ok(WarehouseBoard.Build(await data.InventoryAsync(), await data.WarehousesAsync(), await data.SuppliersAsync(),
+        await data.ReservationsAsync(), await data.PurchaseOrdersAsync(), SimulationClock(config, at))));
+
+static DateTimeOffset SimulationClock(IConfiguration config, DateTimeOffset? at) =>
+    at ?? (DateTimeOffset.TryParse(config["DEMO_CLOCK_UTC"], out var configured) ? configured : DateTimeOffset.Parse("2026-11-14T03:10:00Z"));
 
 // ---- Protected: header "X-Api-Key" ------------------------------------------------------------------------------
 

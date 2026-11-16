@@ -108,6 +108,11 @@ const PAUSES = {
     text: "Open the technicians page and show everyone on the roster and who is available. Nobody is assigned to this incident yet. Then come back and resume: the agent picks one and Scheduling books them.",
     link: ["Open the technicians page \u2197", () => new URL("/technicians", $("site-link").href).href],
   },
+  procurement: {
+    headline: "A technician is proposed. Nothing is reserved or ordered yet.",
+    text: "Open the warehouse app and show the parts and equipment we have. Nothing is reserved for this incident yet. Then come back and resume: Procurement reserves what the repair needs and orders what is short.",
+    link: ["Open the warehouse app \u2197", () => new URL("/warehouse", $("site-link").href).href],
+  },
 };
 
 function showPause(event) {
@@ -216,7 +221,7 @@ async function run() {
   $("banner").hidden = true;
   buildSteps();
   try {
-    const pauseBefore = [$("pause-comms").checked && "communications", $("pause-match").checked && "matchmaker"].filter(Boolean);
+    const pauseBefore = [$("pause-comms").checked && "communications", $("pause-match").checked && "matchmaker", $("pause-proc").checked && "procurement"].filter(Boolean);
     const response = await fetch("api/runs", { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ alarm, pauseBefore }) });
     if (response.status === 401) { $("key-row").hidden = false; throw new Error("The operator key is missing or wrong. Enter it above and run again."); }
     if (!response.ok) {
@@ -238,7 +243,7 @@ async function run() {
 
 // While a run is going the options and the reset are locked (the host refuses a reset then anyway).
 function setControlsDisabled(disabled) {
-  ["pause-comms", "pause-match", "run", "reset-demo"].forEach((id) => { $(id).disabled = disabled; });
+  ["pause-comms", "pause-match", "pause-proc", "run", "reset-demo"].forEach((id) => { $(id).disabled = disabled; });
 }
 
 async function resetDemo() {

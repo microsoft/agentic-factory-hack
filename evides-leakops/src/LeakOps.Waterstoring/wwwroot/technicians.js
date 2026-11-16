@@ -5,7 +5,7 @@
 const TEXT = {
   nl: {
     app: "Resource planning", search: "Zoek technici, certificaten of straten", demo: "DEMO - gesimuleerd",
-    navTech: "Technici", navIncidents: "Meldingen",
+    navTech: "Technici", navWarehouse: "Magazijn", navIncidents: "Meldingen",
     title: "Technici", live: "Live", clock: "Simulatieklok",
     plannerTitle: "Planning (alle technici)", legendShift: "Dienst", legendBusy: "Bezet", legendJob: "Werkbon", legendNow: "Nu (simulatieklok)",
     statusNote: "Alle gegevens zijn gesimuleerd. De portretten zijn door AI gemaakt: fictieve personen, geen echte medewerkers.",
@@ -20,7 +20,7 @@ const TEXT = {
   },
   en: {
     app: "Resource planning", search: "Search technicians, certifications or streets", demo: "DEMO - simulated",
-    navTech: "Technicians", navIncidents: "Incidents",
+    navTech: "Technicians", navWarehouse: "Warehouse", navIncidents: "Incidents",
     title: "Technicians", live: "Live", clock: "Simulation clock",
     plannerTitle: "Planning (all technicians)", legendShift: "Shift", legendBusy: "Busy", legendJob: "Work order", legendNow: "Now (simulation clock)",
     statusNote: "All data is simulated. The portraits are AI-generated: fictional people, not real employees.",

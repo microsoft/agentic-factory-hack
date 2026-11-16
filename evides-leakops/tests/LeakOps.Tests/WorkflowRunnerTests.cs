@@ -313,6 +313,48 @@ public class WorkflowRunnerTests
     }
 
     [Fact]
+    public async Task A_pause_before_Procurement_waits_after_the_technician_is_proposed_and_before_anything_is_reserved()
+    {
+        var gateway = FakeGateway.Happy();
+        var seenWhileWaiting = new List<string>();
+        var gate = Gate(true, [], () => { seenWhileWaiting.AddRange(gateway.Calls.Select(c => c.Step)); return Task.CompletedTask; }, WorkflowSteps.Procurement);
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None, gate);
+
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic, WorkflowSteps.Communications, WorkflowSteps.Matchmaker], seenWhileWaiting);
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
+    }
+
+    [Fact]
+    public async Task Cancelling_a_pause_before_Procurement_says_nothing_was_reserved_ordered_or_scheduled()
+    {
+        var gateway = FakeGateway.Happy();
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(
+            Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None, Gate(false, [], null, WorkflowSteps.Procurement));
+
+        Assert.Equal(WorkflowOutcomes.Cancelled, summary.Outcome);
+        Assert.Equal(WorkflowSteps.Matchmaker, summary.StoppedAt);
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic, WorkflowSteps.Communications, WorkflowSteps.Matchmaker], gateway.Calls.Select(c => c.Step));
+        Assert.Contains("no stock was reserved", string.Join(' ', summary.Reasons));
+    }
+
+    [Fact]
+    public async Task All_three_pauses_can_be_used_in_one_run_in_workflow_order()
+    {
+        var log = new List<string>();
+        var events = new List<WorkflowEvent>();
+
+        var summary = await new WorkflowRunner(FakeGateway.Happy(), TimeProvider.System).RunAsync(
+            Burst.Alarm, e => { events.Add(e); return ValueTask.CompletedTask; }, CancellationToken.None,
+            Gate(true, log, null, WorkflowSteps.Procurement, WorkflowSteps.Communications, WorkflowSteps.Matchmaker));
+
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        Assert.Equal([WorkflowSteps.Communications, WorkflowSteps.Matchmaker, WorkflowSteps.Procurement], events.Where(e => e.Type == WorkflowEventTypes.RunPaused).Select(e => e.Step));
+    }
+
+    [Fact]
     public async Task A_pause_is_not_reached_when_the_run_stops_earlier()
     {
         var gateway = FakeGateway.Happy("false_alarm");

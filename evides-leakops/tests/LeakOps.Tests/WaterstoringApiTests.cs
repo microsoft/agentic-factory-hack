@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using LeakOps.Contracts;
+using LeakOps.Contracts.Logic;
 using LeakOps.Waterstoring;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -270,10 +271,81 @@ public class WaterstoringApiTests
 
     private sealed class FakeDemoData(params WorkOrder[] orders) : IDemoData
     {
+        private readonly FileDemoData _seed = new(LeakOps.Seeder.SeedDataLoader.FindDataDirectory());
         public int Resets;
-        public Task<IReadOnlyList<Technician>> TechniciansAsync() => new FileDemoData(LeakOps.Seeder.SeedDataLoader.FindDataDirectory()).TechniciansAsync();
+        public List<InventoryItem>? Stock;   // when set, replaces the seed stock (the test's "after Procurement" state)
+        public List<StockReservation> Reservations = [];
+        public List<PurchaseOrder> Orders = [];
+
+        public Task<IReadOnlyList<Technician>> TechniciansAsync() => _seed.TechniciansAsync();
         public Task<IReadOnlyList<WorkOrder>> WorkOrdersAsync() => Task.FromResult<IReadOnlyList<WorkOrder>>(orders);
+        public async Task<IReadOnlyList<InventoryItem>> InventoryAsync() => Stock ?? await _seed.InventoryAsync();
+        public Task<IReadOnlyList<Warehouse>> WarehousesAsync() => _seed.WarehousesAsync();
+        public Task<IReadOnlyList<Supplier>> SuppliersAsync() => _seed.SuppliersAsync();
+        public Task<IReadOnlyList<StockReservation>> ReservationsAsync() => Task.FromResult<IReadOnlyList<StockReservation>>(Reservations);
+        public Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => Task.FromResult<IReadOnlyList<PurchaseOrder>>(Orders);
         public Task ResetAsync() { Resets++; return Task.CompletedTask; }
+    }
+
+    [Fact]
+    public async Task The_warehouse_api_is_public_and_shows_the_seed_stock_with_nothing_reserved_or_ordered()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+
+        var board = await NewClient(factory, withKey: false).GetFromJsonAsync<WarehouseBoardResult>("/api/warehouse");
+
+        Assert.Equal(23, board!.Summary.Items);
+        Assert.Equal(4, board.Summary.Equipment);
+        Assert.Equal(0, board.Summary.OpenOrders);
+        Assert.Empty(board.Changes);
+        var coupling = board.Items.Single(i => i.Sku == "CPL-FLEX-300");
+        Assert.Equal(1, coupling.Available);
+        Assert.Equal("low", coupling.Level);              // 1 available, reorder level 2
+        Assert.Equal("out", board.Items.Single(i => i.Sku == "VLV-GATE-300").Level);
+        var heavy = board.Items.Single(i => i.Sku == "EQP-EXC-14T");
+        Assert.Equal(0, heavy.Available);                 // still in maintenance at the time of the alarm
+        Assert.Equal("out", heavy.Level);
+        Assert.Equal("ok", board.Items.Single(i => i.Sku == "GSK-300").Level);
+    }
+
+    [Fact]
+    public async Task Reservations_and_orders_show_up_as_reserved_stock_open_orders_and_changes()
+    {
+        var seed = new FileDemoData(LeakOps.Seeder.SeedDataLoader.FindDataDirectory());
+        var stock = (await seed.InventoryAsync()).Select(i => i.Id == "CLP-CI-300" ? i with { QuantityReserved = 1 } : i).ToList();
+        var coupling = stock.Single(i => i.Id == "CPL-FLEX-300");
+        var supplier = (await seed.SuppliersAsync()).Single(s => s.Id == coupling.SupplierId);
+        var order = Procurement.BuildOrder(coupling, supplier, "INC-1", 4, express: true, "Short for this repair", AlarmTime.AddMinutes(16));
+        var data = new FakeDemoData
+        {
+            Stock = stock,
+            Reservations = [new StockReservation("INC-1-CLP-CI-300", "INC-1", "CLP-CI-300", "Clamp", "part", 1, "WH-01", AlarmTime.AddMinutes(15))],
+            Orders = [order],
+        };
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.ConfigureServices(s => s.AddSingleton<IDemoData>(data)));
+
+        var board = await factory.CreateClient().GetFromJsonAsync<WarehouseBoardResult>("/api/warehouse");
+
+        var clamp = board!.Items.Single(i => i.Sku == "CLP-CI-300");
+        Assert.Equal(1, clamp.Reserved);
+        Assert.Equal(1, clamp.Available);                 // 2 on hand, 1 reserved
+        Assert.Equal("INC-1", Assert.Single(clamp.Reservations).IncidentId);
+        var ordered = Assert.Single(board.Items.Single(i => i.Sku == "CPL-FLEX-300").Orders);
+        Assert.True(ordered.Express);
+        Assert.Equal(1, board.Summary.OpenOrders);
+        Assert.Equal(order.Status == "pending_approval" ? 1 : 0, board.Summary.PendingApproval);
+        Assert.Equal(["order", "reservation"], board.Changes.Select(c => c.Kind));   // newest first
+    }
+
+    [Fact]
+    public async Task The_warehouse_page_is_served()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+
+        var response = await factory.CreateClient().GetAsync("/warehouse");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("id=\"grid-wrap\"", await response.Content.ReadAsStringAsync());
     }
 
     [Fact]
