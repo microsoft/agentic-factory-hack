@@ -230,7 +230,12 @@ function pickScenario(scenario, button) {
 
 async function loadScenarios() {
   const response = await fetch("api/scenarios", { headers: authHeaders() });
-  if (response.status === 401) { $("key-row").hidden = false; return; }
+  if (response.status === 401) {
+    $("key-row").hidden = false;
+    $("run").disabled = true;
+    showError(sessionStorage.getItem("operatorKey") ? "That operator key is not right. Check it and try again." : "The Run button is off until you enter the operator key above.");
+    return;
+  }
   const scenarios = await response.json();
   const box = $("scenarios");
   box.replaceChildren();
@@ -274,15 +279,23 @@ function authHeaders(extra = {}) {
 }
 
 function start() {
+  $("run-error").hidden = true;
   loadScenarios().catch((e) => showError("Could not load the scenarios: " + e.message));
   loadRecent();
 }
 
+// The key is applied as soon as it is typed or pasted (after a short pause), not only when the field loses focus.
+let keyTimer = null;
+function applyKey() {
+  clearTimeout(keyTimer);
+  const key = $("operator-key").value.trim();
+  if (key === (sessionStorage.getItem("operatorKey") || "")) return;
+  sessionStorage.setItem("operatorKey", key);
+  start();
+}
+
 buildSteps();
 $("run").addEventListener("click", run);
-$("operator-key").addEventListener("change", () => {
-  sessionStorage.setItem("operatorKey", $("operator-key").value.trim());
-  $("run-error").hidden = true;
-  start();
-});
+$("operator-key").addEventListener("input", () => { clearTimeout(keyTimer); keyTimer = setTimeout(applyKey, 400); });
+$("operator-key").addEventListener("change", applyKey);
 loadConfig().then(start);
