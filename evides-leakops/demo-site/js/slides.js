@@ -297,7 +297,8 @@
           ],
           zones: withKnowledge('communications', ['hostNL', 'agents', 'foundry']),
           json: { incidentId: r.incidentId, usedFallbackText: r.usedFallbackText, rejectedDraftIssues: r.rejectedDraftIssues, titleNl: r.notice.titleNl, titleEn: r.notice.titleEn, published: { status: p.timeline[0].status, place: p.place, affectedStreets: p.affectedStreets, customersAffected: p.customersAffected } },
-          side: `<div class="sec-label">${T({ en: 'What residents see on the (fake) Waterstoring.nl', nl: 'Wat bewoners zien op de (nep) Waterstoring.nl' }, ctx.lang)}</div>${phone(ctx, 'first')}`,
+          side: `<div class="sec-label">${T({ en: 'What residents see on the (fake) Waterstoring.nl', nl: 'Wat bewoners zien op de (nep) Waterstoring.nl' }, ctx.lang)}</div>
+            <a class="live-link" href="https://leakops-waterstoring-88546e.azurewebsites.net/" target="_blank" rel="noopener noreferrer"><b>\u2197 ${T({ en: 'Open the live Waterstoring (demo) site', nl: 'Open de live Waterstoring (demo)-site' }, ctx.lang)}</b><small>${T({ en: 'The real page residents would see, with the incident the agents published. It has a Clear alerts button (operator key) to start again.', nl: 'De echte pagina die bewoners zouden zien, met het incident dat de agents publiceerden. Met een knop Meldingen wissen (operatorsleutel) om opnieuw te beginnen.' }, ctx.lang)}</small></a>${phone(ctx, 'first')}`,
           value: { en: `Dutch and English notice for ${nf(p.customersAffected)} households, drafted, checked and published in ${sec(s.durationMs)} s.`, nl: `Nederlands en Engels bericht voor ${nf(p.customersAffected)} huishoudens, opgesteld, gecontroleerd en gepubliceerd in ${sec(s.durationMs)} s.` }
         });
       }
