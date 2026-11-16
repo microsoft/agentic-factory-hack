@@ -55,6 +55,23 @@ public class TriageRulesTests
     }
 
     [Fact]
+    public void A_knowledge_document_can_inform_a_verdict_but_never_close_an_alarm()
+    {
+        // The playbook (knowledge base) says valve work looks like a false alarm. Even when the model counts that document as a
+        // reason for "no leak", only a planned work that the register shows as active can close the alarm.
+        var playbook = new EvidenceItem("PLAY-TRIAGE-01", "The playbook says valve replacement lowers pressure and inflow and looks like a false alarm.", "no_leak");
+
+        var onlyDocument = TriageRules.Normalize(Verdict("false_alarm", 0.95, Leak, playbook), Alarm);
+        var closed = TriageRules.RequireDocumentedExplanation(onlyDocument, []);
+
+        Assert.Equal("uncertain", closed.Verdict);
+        Assert.Equal("manual_review", closed.NextStep);
+
+        var withRegister = TriageRules.Normalize(Verdict("false_alarm", 0.95, NoLeak, Leak, playbook), Alarm);
+        Assert.Equal("false_alarm", TriageRules.RequireDocumentedExplanation(withRegister, [Work("in_progress", true)]).Verdict);
+    }
+
+    [Fact]
     public void A_well_supported_leak_keeps_its_verdict_and_gets_identity_and_next_step_from_the_rules()
     {
         var result = TriageRules.Normalize(Verdict("genuine_leak", 0.93, Leak, MoreLeak), Alarm);

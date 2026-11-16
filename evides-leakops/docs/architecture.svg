@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="800" viewBox="0 0 1480 800" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="920" viewBox="0 0 1480 920" font-family="Segoe UI, Arial, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
@@ -25,13 +25,13 @@
     </style>
   </defs>
 
-  <rect width="1480" height="800" fill="#f6f8fc"/>
+  <rect width="1480" height="920" fill="#f6f8fc"/>
 
-  <text x="740" y="42" text-anchor="middle" class="title">Evides LeakOps — six Foundry agents with C# MCP tools</text>
-  <text x="740" y="68" text-anchor="middle" class="subtitle">Agents registered in Microsoft Foundry · MCP tools on Azure Functions (Flex Consumption) · code owns the facts and the rules</text>
+  <text x="740" y="42" text-anchor="middle" class="title">Evides LeakOps — six Foundry agents with MCP tools, knowledge and skills</text>
+  <text x="740" y="68" text-anchor="middle" class="subtitle">Agents registered in Microsoft Foundry · MCP tools on Azure Functions · knowledge in Foundry IQ · versioned skills · code owns the facts and the rules</text>
 
   <!-- resource group -->
-  <rect x="130" y="92" width="1330" height="648" rx="22" fill="none" stroke="#3a9a4a" stroke-width="2" stroke-dasharray="9 7"/>
+  <rect x="130" y="92" width="1330" height="756" rx="22" fill="none" stroke="#3a9a4a" stroke-width="2" stroke-dasharray="9 7"/>
   <text x="152" y="119" class="zone">Resource group rg-evides-ai-demo · Sweden Central · Entra ID only on Foundry · managed identities between Azure services</text>
 
   <!-- user and Entra -->
@@ -183,8 +183,8 @@
   <rect x="826" y="590" width="268" height="76" rx="12" class="card"/>
   <rect x="842" y="610" width="34" height="34" rx="8" fill="#0ea5e9"/><text x="859" y="632" class="ico">PC</text>
   <text x="886" y="620" class="ct">Project connections</text>
-  <text x="886" y="638" class="cs">leakops-mcp (MCP key)</text>
-  <text x="886" y="653" class="cs">evides-appinsights (tracing)</text>
+  <text x="886" y="638" class="cs">leakops-mcp · evides-appinsights</text>
+  <text x="886" y="653" class="cs">leakops-kb-ops · leakops-kb-comms</text>
 
   <rect x="1164" y="590" width="268" height="76" rx="12" class="card"/>
   <rect x="1180" y="610" width="34" height="34" rx="8" fill="#0369a1"/><text x="1197" y="632" class="ico">DB</text>
@@ -192,16 +192,50 @@
   <text x="1224" y="638" class="cs">LeakOpsDB · 19 containers</text>
   <text x="1224" y="653" class="cs">simulated data · also Waterstoring</text>
 
+  <!-- knowledge row: Foundry IQ and skills -->
+  <path d="M1298 706 V690 H1010 V666" class="dash"/>
+  <text x="1030" y="684" class="lbl" style="fill:#6d28d9;font-weight:600;text-anchor:start">MCP: knowledge_base_retrieve (Foundry signs in with the project identity)</text>
+
+  <rect x="150" y="706" width="268" height="76" rx="12" class="card"/>
+  <rect x="166" y="726" width="34" height="34" rx="8" fill="#7c3aed"/><text x="183" y="748" class="ico">SK</text>
+  <text x="210" y="736" class="ct">Foundry Skills (preview)</text>
+  <text x="210" y="754" class="cs">3 versioned how-to's, published and</text>
+  <text x="210" y="769" class="cs">injected by the registry tool</text>
+
+  <rect x="488" y="706" width="268" height="76" rx="12" class="card"/>
+  <rect x="504" y="726" width="34" height="34" rx="8" fill="#16a34a"/><text x="521" y="748" class="ico">Bl</text>
+  <text x="548" y="736" class="ct">Knowledge documents</text>
+  <text x="548" y="754" class="cs">blob container, 8 simulated docs</text>
+  <text x="548" y="769" class="cs">folders ops/ and comms/</text>
+
+  <rect x="826" y="706" width="268" height="76" rx="12" class="card"/>
+  <rect x="842" y="726" width="34" height="34" rx="8" fill="#0369a1"/><text x="859" y="748" class="ico">AS</text>
+  <text x="886" y="736" class="ct">Azure AI Search · Basic</text>
+  <text x="886" y="754" class="cs">knowledge sources · index · ranker</text>
+  <text x="886" y="769" class="cs">embeddings · Entra ID only, no keys</text>
+
+  <rect x="1164" y="706" width="268" height="76" rx="12" class="card"/>
+  <rect x="1180" y="726" width="34" height="34" rx="8" fill="#2563eb"/><text x="1197" y="748" class="ico">IQ</text>
+  <text x="1224" y="736" class="ct">Foundry IQ knowledge bases</text>
+  <text x="1224" y="754" class="cs" style="font-size:11px">ops-kb: Triage, Diagnostic, Procurement</text>
+  <text x="1224" y="769" class="cs" style="font-size:11px">comms-kb: Communications</text>
+
+  <path d="M756 744 H826" class="line"/>
+  <text x="791" y="735" class="lbl">indexed</text>
+  <path d="M1094 744 H1164" class="line"/>
+  <text x="1129" y="735" class="lbl">retrieve</text>
+
   <!-- demo strip -->
-  <text x="152" y="705" class="ct">Demo in the Foundry portal:</text>
+  <text x="152" y="824" class="ct">Demo in the Foundry portal:</text>
   <g>
-    <rect x="360" y="688" width="150" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="435" y="706" class="chip">Agents &amp; versions</text>
-    <rect x="524" y="688" width="150" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="599" y="706" class="chip">Playground per agent</text>
-    <rect x="688" y="688" width="100" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="738" y="706" class="chip">Tracing</text>
-    <rect x="802" y="688" width="190" height="26" rx="13" fill="#dcfce7" stroke="#86efac"/><text x="897" y="706" class="chip">Evaluations: 4/4 and 1/1 pass</text>
-    <rect x="1006" y="688" width="210" height="26" rx="13" fill="#dcfce7" stroke="#86efac"/><text x="1111" y="706" class="chip">Prompt-shield injection block</text>
-    <rect x="1230" y="688" width="200" height="26" rx="13" fill="#fef3c7" stroke="#fcd34d"/><text x="1330" y="706" class="chip">48/48 end-to-end checks</text>
+    <rect x="360" y="806" width="135" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="427.5" y="824" class="chip">Agents &amp; versions</text>
+    <rect x="509" y="806" width="150" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="584" y="824" class="chip">Playground per agent</text>
+    <rect x="673" y="806" width="90" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/><text x="718" y="824" class="chip">Tracing</text>
+    <rect x="777" y="806" width="150" height="26" rx="13" fill="#ede9fe" stroke="#c4b5fd"/><text x="852" y="824" class="chip">Knowledge &amp; skills</text>
+    <rect x="941" y="806" width="190" height="26" rx="13" fill="#dcfce7" stroke="#86efac"/><text x="1036" y="824" class="chip">Evaluations: 5 suites pass</text>
+    <rect x="1145" y="806" width="150" height="26" rx="13" fill="#dcfce7" stroke="#86efac"/><text x="1220" y="824" class="chip">Prompt-shield block</text>
+    <rect x="1309" y="806" width="140" height="26" rx="13" fill="#fef3c7" stroke="#fcd34d"/><text x="1379" y="824" class="chip">48/48 end-to-end</text>
   </g>
 
-  <text x="740" y="772" text-anchor="middle" class="cs">All data is simulated · Waterstoring is a fake, not waterstoring.nl · Keys only where a key is needed: the MCP tools, the agent functions, the Waterstoring ingest API and the operator console</text>
+  <text x="740" y="892" text-anchor="middle" class="cs">All data is simulated · Waterstoring is a fake, not waterstoring.nl · Keys only where a key is needed: the MCP tools, the agent functions, the Waterstoring ingest API and the operator console</text>
 </svg>

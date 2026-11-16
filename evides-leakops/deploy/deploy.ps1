@@ -37,6 +37,7 @@ param(
     [ValidateSet('B1', 'F1')] [string] $WebSku = 'B1',
     [string] $WebLocation = 'westeurope',
     [switch] $WhatIfOnly,
+    [switch] $SkipInfra,
     [switch] $SkipPublish,
     [switch] $SkipSeed,
     [switch] $RunE2E
@@ -137,12 +138,27 @@ $parameters = Join-Path ([IO.Path]::GetTempPath()) "leakops-params-$([guid]::New
 
 try {
     Write-Host "`n== 1. Infrastructure" -ForegroundColor Cyan
-    $whatIf = Az deployment group what-if --subscription $SubscriptionId -g $ResourceGroup --template-file $template --parameters "@$parameters" --only-show-errors
-    ($whatIf | Out-String) -split "`n" | Where-Object { $_ -match '^\s*\+ Microsoft|Resource changes' } | ForEach-Object { Write-Host "   $($_.Trim())" }
-    if ($WhatIfOnly) { Write-Host "`nWhat-if only: no resources were created (only the empty resource group)."; return }
+    if ($SkipInfra) {
+        # Code-only redeploy: the infrastructure is not touched. Names and URLs follow from the suffix (see main.bicep), so nothing is looked up.
+        $SkipSeed = $true
+        $outputs = [pscustomobject]@{
+            mcpUrl                 = [pscustomobject]@{ value = "https://$($names.Mcp).azurewebsites.net" }
+            agentsUrl              = [pscustomobject]@{ value = "https://$($names.Agents).azurewebsites.net" }
+            waterstoringUrl        = [pscustomobject]@{ value = "https://$($names.Waterstoring).azurewebsites.net" }
+            workflowUrl            = [pscustomobject]@{ value = "https://$($names.Workflow).azurewebsites.net" }
+            foundryProjectEndpoint = [pscustomobject]@{ value = "https://evides-foundry-$Suffix.services.ai.azure.com/api/projects/evides-leakops" }
+            modelDeployment        = [pscustomobject]@{ value = 'gpt-5.4' }
+        }
+        Write-Host "   skipped (code-only redeploy; the data is not seeded again either)"
+    }
+    else {
+        $whatIf = Az deployment group what-if --subscription $SubscriptionId -g $ResourceGroup --template-file $template --parameters "@$parameters" --only-show-errors
+        ($whatIf | Out-String) -split "`n" | Where-Object { $_ -match '^\s*\+ Microsoft|Resource changes' } | ForEach-Object { Write-Host "   $($_.Trim())" }
+        if ($WhatIfOnly) { Write-Host "`nWhat-if only: no resources were created (only the empty resource group)."; return }
 
-    $outputs = (Az deployment group create --subscription $SubscriptionId -g $ResourceGroup --template-file $template --parameters "@$parameters" --only-show-errors --query properties.outputs -o json | Out-String | ConvertFrom-Json)
-    Write-Host "   ok   resources deployed"
+        $outputs = (Az deployment group create --subscription $SubscriptionId -g $ResourceGroup --template-file $template --parameters "@$parameters" --only-show-errors --query properties.outputs -o json | Out-String | ConvertFrom-Json)
+        Write-Host "   ok   resources deployed"
+    }
 }
 finally {
     Remove-Item $parameters -ErrorAction SilentlyContinue   # the parameters file held the keys
@@ -218,6 +234,12 @@ $env:AZURE_AI_PROJECT_ENDPOINT = $outputs.foundryProjectEndpoint.value
 $env:MCP_SERVER_URL = "$($url.Mcp)/runtime/webhooks/mcp"
 $env:MODEL_DEPLOYMENT_NAME = $outputs.modelDeployment.value
 $env:AZURE_TENANT_ID = (Az account show --subscription $SubscriptionId --query tenantId -o tsv | Out-String).Trim()
+# When the knowledge layer exists (deploy/deploy-knowledge.ps1) the agents are registered with their knowledge tool too.
+$searchService = "evides-search-$Suffix"
+if ((& $azExe search service show --subscription $SubscriptionId -g $ResourceGroup -n $searchService --query name -o tsv 2>$null | Out-String).Trim() -eq $searchService) {
+    $env:KNOWLEDGE_SEARCH_ENDPOINT = "https://$searchService.search.windows.net"
+    Write-Host "   knowledge layer found: agents are registered with their knowledge base"
+}
 Invoke-WithRetry 'register the Foundry agents' {
     & dotnet run --project (Join-Path $root 'src/LeakOps.AgentRegistry') -c Release
     if ($LASTEXITCODE -ne 0) { throw 'Registering the agents failed.' }

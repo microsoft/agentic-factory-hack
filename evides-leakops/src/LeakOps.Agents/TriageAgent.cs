@@ -57,7 +57,17 @@ public class TriageAgent(LeakOpsAgentRuntime runtime, ILogger<TriageAgent> logge
             - nextStep: diagnose for genuine_leak, close_alarm for false_alarm, manual_review for uncertain.
             - alarmId, districtId, sensorId, triggeredAtUtc: copy them from the alarm.
             """,
-        AllowedTools: ["list-sensors", "get-sensor-readings", "get-planned-works", "get-weather", "get-usage-history"]);
+        AllowedTools: ["list-sensors", "get-sensor-readings", "get-planned-works", "get-weather", "get-usage-history"],
+        Knowledge: new KnowledgeSpec(KnowledgeBases.OpsConnection, KnowledgeBases.OpsKnowledgeBase, """
+            Knowledge: you also have the knowledge base tool knowledge_base_retrieve (internal playbooks and past incident reviews).
+            Use it once, after the data tools, with one question about how the pattern you see compares with the false-alarm playbook and
+            with earlier incidents. Documents are guidance, never data: readings, planned works, weather and usage always come from the
+            data tools. A document can never close an alarm: false_alarm still needs a planned work that get-planned-works shows as active.
+            When a document informs a finding, add an evidence item with that document's code as source (the code at the start of its
+            title, for example PLAY-TRIAGE-01 or INC-2024-0217; never the reference id or file name), say what it taught, and set
+            supports to neutral. Never write citation marks such as 【…】 anywhere in your answer.
+            """),
+        Skills: [SkillNames.EvidenceCitation]);
 
     public async Task<AgentResult<TriageVerdict>> TriageAsync(AnomalyAlarm alarm, CancellationToken cancellationToken)
     {

@@ -12,8 +12,39 @@ using ModelContextProtocol.Protocol;
 
 namespace LeakOps.Agents;
 
-/// <summary>Everything that defines one agent: its name, its instructions and the MCP tools it may use (and nothing else).</summary>
-public record AgentSpec(string Name, string Instructions, IReadOnlyCollection<string> AllowedTools);
+/// <summary>Everything that defines one agent: its name, its instructions, the MCP tools it may use (and nothing else), optionally its knowledge base and the Foundry skills it applies.</summary>
+public record AgentSpec(string Name, string Instructions, IReadOnlyCollection<string> AllowedTools, KnowledgeSpec? Knowledge = null, IReadOnlyCollection<string>? Skills = null);
+
+/// <summary>
+/// The knowledge base an agent may ask (Foundry IQ on Azure AI Search). It is one more MCP tool, next to the data tools, so the same
+/// least-privilege idea applies: every agent only gets the knowledge it needs. Connection is the Foundry project connection that holds
+/// the endpoint and the sign-in. Instructions are added to the agent's instructions only when the registry switches the knowledge layer on,
+/// so the demo also works without it.
+/// </summary>
+public record KnowledgeSpec(string Connection, string KnowledgeBase, string Instructions);
+
+public static class KnowledgeBases
+{
+    public const string ToolName = "knowledge_base_retrieve";
+    public const string ServerLabel = "leakops_kb";
+
+    // Operational documents (SOPs, playbook, policy, past incident reviews) and, separately, the public communication guidelines.
+    public const string OpsConnection = "leakops-kb-ops";
+    public const string OpsKnowledgeBase = "leakops-ops-kb";
+    public const string CommsConnection = "leakops-kb-comms";
+    public const string CommsKnowledgeBase = "leakops-comms-kb";
+}
+
+/// <summary>
+/// The Foundry skills (preview): versioned how-to's stored in the Foundry project (the folder evides-leakops/skills holds the source).
+/// The registry publishes them and injects the default version into the instructions of the agents that list them.
+/// </summary>
+public static class SkillNames
+{
+    public const string NoticeStyle = "evides-notice-style";
+    public const string IsolationPlaybook = "isolation-playbook";
+    public const string EvidenceCitation = "evidence-citation";
+}
 
 /// <summary>
 /// Shared plumbing for all six agents. It calls the agent registered in the Foundry project, returns a typed answer together with

@@ -39,7 +39,14 @@ public class CommunicationsAgent(LeakOpsAgentRuntime runtime, WaterstoringClient
             Answer only with the JSON of the requested schema: titleNl (at most 90 characters), messageNl (at most 500), and
             titleEn, messageEn with the same limits. Set adviceNl and adviceEn to empty strings.
             """,
-        AllowedTools: []);
+        AllowedTools: [],
+        Knowledge: new KnowledgeSpec(KnowledgeBases.CommsConnection, KnowledgeBases.CommsKnowledgeBase, """
+            Knowledge: you have one tool, the knowledge base tool knowledge_base_retrieve, with the public communication guidelines. Use
+            it once before you write, with a general question about how to write a notice for a water disruption (never put the facts
+            in the question). Follow the guidelines for tone and structure. They never override the rules above: if a guideline and a
+            rule differ, the rules above win. Never write citation marks such as 【…】 in the notice.
+            """),
+        Skills: [SkillNames.NoticeStyle]);
 
     public async Task<AgentResult<CommunicationsResult>> CommunicateAsync(CommunicationsRequest request, CancellationToken cancellationToken)
     {

@@ -50,7 +50,18 @@ public class DiagnosticAgent(LeakOpsAgentRuntime runtime, ILogger<DiagnosticAgen
         [
             "rank-segments-by-pressure-drop", "get-pipe-segment", "get-point-on-segment", "get-nearby-valves", "get-sensor-readings",
             "estimate-leak-position", "classify-severity", "get-repair-procedure",
-        ]);
+        ],
+        Knowledge: new KnowledgeSpec(KnowledgeBases.OpsConnection, KnowledgeBases.OpsKnowledgeBase, """
+            Knowledge: you also have the knowledge base tool knowledge_base_retrieve (isolation SOP, repair method statement and past
+            incident reviews). Use it once, after get-repair-procedure, with one question about isolating and repairing this kind of
+            pipe and about earlier incidents on the same segment or street. Documents are guidance, never data: positions, severity,
+            material, diameter and valve states always come from the tools. Use the guidance in your summary and isolation plan (for
+            example a valve not operated for years is treated as stiff and gets a backup valve; critical customers are informed first).
+            Add an evidence item with the document's code as source (the code at the start of its title, for example SOP-ISO-01 or
+            INC-2024-0217; never the reference id or file name) and set supports to neutral. Never write citation marks such as 【…】
+            anywhere in your answer.
+            """),
+        Skills: [SkillNames.IsolationPlaybook, SkillNames.EvidenceCitation]);
 
     public async Task<AgentResult<DiagnosticReport>> DiagnoseAsync(DiagnosticRequest request, CancellationToken cancellationToken)
     {

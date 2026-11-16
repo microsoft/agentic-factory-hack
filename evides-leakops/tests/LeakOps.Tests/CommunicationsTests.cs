@@ -62,6 +62,7 @@ public class CommunicationsTests
     [InlineData("Rond 14:30 is het water terug.", "time or duration")]
     [InlineData("Dit is de schuld van de aannemer.", "blame")]
     [InlineData("Zorgcentrum De Hoven krijgt voorrang.", "names a specific customer")]
+    [InlineData("Zie het draaiboek【21:2†source】.", "citation mark")]
     public void Drafts_with_internal_details_promises_or_blame_are_rejected(string sentence, string expectedIssue)
     {
         var report = BurstReport;

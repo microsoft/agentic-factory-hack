@@ -22,7 +22,7 @@ param(
     [string] $SubscriptionId = 'a39be7cd-9ae9-42cf-b42f-dc6e45a82464',
     [string] $ProjectEndpoint = 'https://evides-foundry-88546e.services.ai.azure.com/api/projects/evides-leakops',
     [string] $JudgeModel = 'gpt-5.4',
-    [ValidateSet('triage', 'diagnostic', 'all')] [string] $Only = 'all'
+    [ValidateSet('triage', 'diagnostic', 'knowledge', 'all')] [string] $Only = 'all'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -101,4 +101,18 @@ if ($Only -in 'triage', 'all') {
 if ($Only -in 'diagnostic', 'all') {
     Start-Evaluation 'leakops-diagnostic-burst' $data.diagnostic @('expected_segment', 'expected_breach') @(
         (New-Check 'segment_correct' 'expected_segment'), (New-Check 'breach_correct' 'expected_breach'), (New-Judge 'task_adherence'))
+}
+# The knowledge layer (Foundry IQ): the agents must use the documents, and the tool calls to the knowledge base must work.
+# The guardrails are tested by the unit tests and by the cases above, which must keep passing with knowledge switched on.
+if ($Only -in 'knowledge', 'all') {
+    Start-Evaluation 'leakops-diagnostic-knowledge' $data.diagnostic_knowledge @('expected_segment', 'expected_breach', 'expected_backup', 'expected_care') @(
+        (New-Check 'segment_correct' 'expected_segment'), (New-Check 'breach_correct' 'expected_breach'),
+        (New-Check 'backup_valve_named' 'expected_backup'), (New-Check 'care_home_first' 'expected_care'),
+        (New-Judge 'task_adherence'), (New-Judge 'tool_call_success'))
+    Start-Evaluation 'leakops-communications-knowledge' $data.communications_knowledge @('expected_hedge', 'expected_advice') @(
+        (New-Check 'cause_only_suspected' 'expected_hedge'), (New-Check 'advice_left_to_the_system' 'expected_advice'),
+        (New-Judge 'task_adherence'), (New-Judge 'tool_call_success'))
+    Start-Evaluation 'leakops-procurement-knowledge' $data.procurement_knowledge @('expected_package', 'expected_policy') @(
+        (New-Check 'section_and_couplings' 'expected_package'), (New-Check 'policy_cited' 'expected_policy'),
+        (New-Judge 'task_adherence'), (New-Judge 'tool_call_success'))
 }

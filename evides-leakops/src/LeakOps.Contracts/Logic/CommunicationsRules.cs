@@ -41,6 +41,7 @@ public static class CommunicationsRules
         (Rx(@"\bDN\s?\d{2,3}\b"), "a pipe diameter"),
         (Rx(@"gietijzer|cast[ -]?iron|asbest|ductile|nodulair|\bPVC\b"), "the pipe material"),
         (Rx(@"€|\bEUR\b|\beuro"), "a cost"),
+        (Rx(@"【|†source"), "a citation mark from the knowledge base"),
         (Rx(@"\b\d{1,2}[:.]\d{2}\b|\b\d+\s*(uur|uren|hours?|minuten|minutes?)\b"), "a time or duration (no repair time is known yet)"),
         (Rx(@"schuld|nalatig|verwijtbaar|aansprakelijk|negligen|\bblame|\bliable\b|fault of"), "blame"),
         // Anything about whether the water is safe, contaminated or what to do about it is health advice. That is not for a model to write.

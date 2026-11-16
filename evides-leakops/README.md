@@ -37,11 +37,14 @@ facts the rules compare the answer with. Nothing the model says is published, bo
 | `src/LeakOps.Seeder` | Seeds Cosmos DB `LeakOpsDB` |
 | `src/LeakOps.Mcp` | Azure Functions app exposing the MCP tools |
 | `src/LeakOps.Agents` | Azure Functions app with the six agent HTTP functions; calls the agents registered in Foundry |
-| `src/LeakOps.AgentRegistry` | Console tool that creates or updates the six agents in the Foundry project (instructions, tools, answer schema) |
-| `evals/` | Foundry evaluation dataset (`leakops-evals.json`) and runner (`run-evals.ps1`) |
-| `deploy/` | Bicep and scripts: deploy, scale the web plan, tear down |
+| `src/LeakOps.AgentRegistry` | Console tool that creates or updates the six agents in the Foundry project (instructions, tools, knowledge, skills, answer schema); `SkillStore.cs` publishes and injects the skills |
+| `knowledge/` | The 8 synthetic documents behind Foundry IQ (`ops/` for the ops knowledge base, `comms/` for the public guidelines). Simulated, not real Evides documents |
+| `skills/` | Three Foundry Skills (preview) as `SKILL.md` files: `evides-notice-style`, `isolation-playbook`, `evidence-citation` |
+| `evals/` | Foundry evaluation dataset (`leakops-evals.json`, 5 evaluations) and runner (`run-evals.ps1`, `-Only knowledge`) |
+| `deploy/` | Bicep and scripts: deploy, add or remove the knowledge layer (`deploy-knowledge.ps1`, `knowledge.bicep`), scale the web plan, tear down |
 | `DEMO.md` | Demo runbook: storyline, portal tour, troubleshooting |
 | `docs/` | Architecture diagram (`architecture.svg`/`.png`) and functional flow (`functional-flow.html`/`.png`) |
+| `demo-site/` | Interactive demo website (static): each slide shows the functional need, then reveals the technical solution; the finale replays the whole workflow. See [demo-site/README.md](demo-site/README.md) |
 | `src/LeakOps.Waterstoring` | Fake Waterstoring.nl (ingest API + public map) |
 | `src/LeakOps.Workflow` | ASP.NET workflow host: runs the six agents in order, streams progress (SSE), operator console |
 | `src/LeakOps.AppHost` | Aspire AppHost: starts everything locally with one command |
@@ -190,6 +193,31 @@ about. The instructions and allow-lists live in the agent classes (`TriageAgent.
 change one, run `deploy.ps1` (or `dotnet run --project src/LeakOps.AgentRegistry`) and the new version is registered.
 `MaxOutputTokens` is capped at 8000 per call: without a cap Foundry reserves a very large output budget per call against the
 deployment's tokens-per-minute limit and runs one after another get HTTP 429.
+
+### Tools, knowledge, skills (what an agent is connected to)
+Three things sit around the model, each scoped per agent. **Tools** (MCP, Cosmos DB) give exact data and do the actions. **Knowledge**
+(Foundry IQ) gives what the documents say: two knowledge bases on Azure AI Search, reached through the project connections
+`leakops-kb-ops` and `leakops-kb-comms`, called by Foundry as the MCP tool `knowledge_base_retrieve`. **Skills** (Foundry Skills,
+preview) give how to do something. Memory: none by design; the workflow runner passes each result to the next agent.
+
+| Agent | Data tools | Knowledge base | Skills |
+|---|---|---|---|
+| Triage | 5 | `leakops-ops-kb` | `evidence-citation` |
+| Diagnostic | 8 | `leakops-ops-kb` | `isolation-playbook`, `evidence-citation` |
+| Communications | none | `leakops-comms-kb` (public guidelines only) | `evides-notice-style` |
+| Resource Matchmaker | 2 | none | none |
+| Procurement | 2 | `leakops-ops-kb` | none |
+| Scheduling | none | none | none |
+
+- Documents are guidance, never data: readings, planned works and stock come from tools, and the code rules still decide. A knowledge
+  document can never close an alarm (unit test in `TriageRulesTests`). Agents cite the document code (for example `SOP-ISO-01`); the
+  communications check rejects citation marks.
+- Communications gets its own knowledge base so it can never retrieve an internal procedure.
+- Skills are published from `skills/` to the Foundry Skills API by `LeakOps.AgentRegistry` (a new version only when the text changed) and
+  **injected into the agent's instructions** at registration. That is the "direct injection" mode of the docs; native loading through a
+  toolbox needs a client that supports MCP resources, which a registered agent does not document. Skills and Foundry IQ query planning
+  are preview features.
+- Add or remove the layer with `deploy/deploy-knowledge.ps1` and `-Remove` (see Deploy to Azure). Without it the agents work as before.
 
 | Agent | Function | Status |
 |---|---|---|
@@ -358,8 +386,8 @@ dotnet run --project evides-leakops\src\LeakOps.AppHost
 ```
 Then open http://localhost:5090 (operator console) and http://localhost:5080/evides (what residents see). Reservations and orders
 stay in Cosmos between runs; clear them with `dotnet run --project evides-leakops\src\LeakOps.Seeder -- --reset-runtime`, and
-clear the fake site with `POST /api/admin/reset` (or restart it). Measured: the burst takes about 50 s from alarm to work order
-when the agents run in Foundry, the false alarm about 20 s.
+clear the fake site with `POST /api/admin/reset` (or restart it). Measured with knowledge and skills on: the burst takes about 66 s from alarm to work order
+when the agents run in Foundry, the false alarm about 18 s (without the knowledge layer about 47 s and 20 s).
 
 ## Deploy to Azure (`deploy/`)
 The demo has its **own resource group `rg-evides-ai-demo`** (Sweden Central; the web plan in West Europe), separate from the
@@ -374,18 +402,25 @@ The suffix in the names (for example `88546e`) is derived from the subscription 
 | `leakops-waterstoring-<suffix>`, `leakops-workflow-<suffix>` | Web apps on that plan (fake Waterstoring.nl; workflow host with the operator console) | included in the plan |
 | `evides-cosmos-<suffix>` | Cosmos DB serverless, database `LeakOpsDB` (19 containers, seeded) | cents at this scale |
 | `evidessa<suffix>`, `evides-logs-<suffix>`, `evides-appinsights-<suffix>` | Storage (no shared keys), Log Analytics, Application Insights | cents to a few euros |
-| Model | gpt-5.4: one full six-agent run is about 22,000 tokens in and 3,000 out | about 0.02 per run |
+| `leakops-demo-<suffix>` | **Interactive demo website** (Azure Static Web App, Free tier, West Europe; deployed by `deploy-demosite.ps1`) | 0 |
+| `evides-search-<suffix>` | **Azure AI Search Basic** (Sweden Central, Entra ID only) with a `text-embedding-3-small` deployment, the blob container `knowledge`, two knowledge sources and two knowledge bases (`deploy-knowledge.ps1`). It cannot be paused | about 70 (use `-Remove` between demos) |
+| Model | gpt-5.4: one full six-agent run with knowledge is about 35,000 tokens in and 3,600 out (measured by the traces; the price is an estimate from the token counts) | cents per run |
 
 There is no Container Registry, Key Vault or network resource. Budget: a Visual Studio subscription with about 100 EUR a month; the
-standing cost is the web plan (11.80, or 0 on F1) plus cents. Run `scale-web.ps1 -Sku F1` when you are not demoing.
+standing cost is the web plan (11.80, or 0 on F1) plus cents, **plus about 70 for Azure AI Search while the knowledge layer is deployed**.
+Run `scale-web.ps1 -Sku F1` and `deploy-knowledge.ps1 -Remove` when you are not demoing.
 
 ```powershell
 $env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"            # when your default az login is another tenant (see above)
 ./evides-leakops/deploy/deploy.ps1 -WhatIfOnly          # creates only the empty resource group and stops
 ./evides-leakops/deploy/deploy.ps1                      # deploys infrastructure, seeds the data, publishes the code, sets the keys, registers the Foundry agents, checks health
 ./evides-leakops/deploy/deploy.ps1 -RunE2E              # same, then runs the 48 end-to-end checks against Azure
-./evides-leakops/evals/run-evals.ps1                    # Foundry evaluations (results appear in the portal)
+./evides-leakops/deploy/deploy.ps1 -SkipInfra           # code only: builds and publishes the four apps again and registers the agents, no Bicep
+./evides-leakops/deploy/deploy-knowledge.ps1            # Foundry IQ and skills: Search, embeddings, documents, knowledge bases, connections, then registers the agents with them
+./evides-leakops/deploy/deploy-knowledge.ps1 -Remove    # removes the layer again (stops the Search cost) and registers the agents without knowledge
+./evides-leakops/evals/run-evals.ps1                    # Foundry evaluations (results appear in the portal); -Only knowledge for the three knowledge suites
 ./evides-leakops/deploy/scale-web.ps1 -Sku F1           # not demoing: web plan to free (B1 again with -Sku B1)
+./evides-leakops/deploy/deploy-demosite.ps1             # the interactive demo website (Static Web App, Free): infrastructure + upload; -SkipInfra only uploads new content
 ./evides-leakops/deploy/teardown.ps1 -WhatIf            # what would be removed (the whole resource group, then the Foundry purge); without -WhatIf it removes it
 ```
 `deploy.ps1` needs PowerShell 7 and is safe to run again: keys that exist are kept, an agent only gets a new version when its definition changed. A full
@@ -395,6 +430,7 @@ deployment takes 15 to 20 minutes. If the Basic plan has no capacity in the web 
 How it is secured:
 - **No keys between Azure services:** the MCP app and the Waterstoring site reach Cosmos with their managed identity (Cosmos data role), the function apps reach storage with theirs (shared-key access is switched off), and the agents reach Foundry with theirs (role Foundry User). The Foundry resource has local (key) authentication disabled: Entra ID only. The person who deploys gets Foundry User too, to register agents and use the portal.
 - **Keys where a key is needed**, generated by the script and kept only in app settings (never in git): the `mcp_extension` key that Foundry (through the project connection `leakops-mcp`) and the agents app send to the MCP tools, a function key from the workflow host to the agents, an API key from the agents to the Waterstoring ingest API, and an **operator key** the console asks for once (kept in that browser tab only). The workflow API refuses calls without it; `/health`, the page and `/api/config` stay open so the page can ask for the key.
+- **Knowledge without keys too:** Azure AI Search has local authentication disabled. Its identity reads the blobs and calls the models; the Foundry project identity (Search Index Data Reader) queries the knowledge bases through the project connections. The knowledge documents are synthetic.
 - **Residents' page is public** (that is the point of it); writing needs the API key.
 - **Guardrails in Foundry:** the gpt-5.4 deployment uses the `Microsoft.DefaultV2` content filter, which blocks jailbreak and indirect-attack prompts (prompt shields) before the model sees them.
 - HTTPS only, TLS 1.2, FTP off, health check on the web apps. Telemetry from all four apps goes to this demo's Application Insights, which the Foundry project uses for tracing.
@@ -406,4 +442,4 @@ The first request after a quiet period is slow (Flex Consumption cold start and 
 restart or a new deployment does not empty the residents' page.
 
 ## Status
-All steps done: the six agents run as Foundry agents in their own resource group `rg-evides-ai-demo`, deployed and verified end to end in Azure (48 of 48 checks), with Foundry tracing and evaluations (Triage 4 of 4, Diagnostic 1 of 1) and the Foundry content filter in front of the model. Demo script and troubleshooting: [DEMO.md](DEMO.md).
+All steps done: the six agents run as Foundry agents in their own resource group `rg-evides-ai-demo`, deployed and verified end to end in Azure (48 of 48 checks, also with knowledge and skills), with Foundry tracing, Foundry IQ knowledge bases for four agents, three skills (preview), five Foundry evaluations that pass (Triage 4 of 4, Diagnostic 1 of 1, three knowledge suites 1 of 1 each) and the Foundry content filter in front of the model. About 174 unit tests. Demo script and troubleshooting: [DEMO.md](DEMO.md).

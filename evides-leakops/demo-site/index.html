@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evides LeakOps - AI demo</title>
+<meta name="description" content="Interactive demo: six AI agents in Microsoft Foundry handle a drinking-water burst, from pressure alarm to residents informed. Simulated data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 34'%3E%3Cpath d='M13 1C13 1 2 15.5 2 22a11 11 0 0022 0C24 15.5 13 1 13 1z' fill='%233cbecf'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="drop" viewBox="0 0 26 34"><path d="M13 1C13 1 2 15.5 2 22a11 11 0 0022 0C24 15.5 13 1 13 1z" fill="#3cbecf"/><path d="M8 22a5 5 0 005 5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/></symbol>
+  </defs>
+</svg>
+
+<div id="app">
+  <header class="bar">
+    <div class="logo"><svg width="22" height="29"><use href="#drop"/></svg><span>evides</span><em>LeakOps</em></div>
+    <nav id="dots" class="dots" aria-label="Slides"></nav>
+    <div class="tools">
+      <button id="btn-lang" class="ghost" title="Language (L)" aria-label="Switch language">EN | NL</button>
+      <button id="btn-full" class="ghost" title="Fullscreen (F)" aria-label="Fullscreen">&#x26F6;</button>
+    </div>
+  </header>
+
+  <main id="stage" tabindex="-1" aria-live="polite"></main>
+
+  <footer class="foot">
+    <button id="btn-prev" class="nav-btn" aria-label="Previous slide">&larr; <span data-i18n="back">Back</span></button>
+    <div id="hint" class="hint"></div>
+    <button id="btn-next" class="nav-btn primary" aria-label="Reveal or next"></button>
+  </footer>
+</div>
+
+<script src="js/captured.js"></script>
+<script src="js/art.js"></script>
+<script src="js/technical.js"></script>
+<script src="js/slides.js"></script>
+<script src="js/tech-text.js"></script>
+<script src="js/technical-ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

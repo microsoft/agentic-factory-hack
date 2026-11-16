@@ -16,7 +16,7 @@ public static class AgentCatalog
     [
         new(TriageAgent.Spec, typeof(TriageVerdict), "Decides whether a SCADA alarm is a genuine leak, a false alarm or unclear. Read-only."),
         new(DiagnosticAgent.Spec, typeof(DiagnosisJudgement), "Locates the breach on the pipe segment and chooses the isolation valves."),
-        new(CommunicationsAgent.Spec, typeof(PublicNotice), "Writes the public notice for residents in Dutch and English. No tools."),
+        new(CommunicationsAgent.Spec, typeof(PublicNotice), "Writes the public notice for residents in Dutch and English. No data tools; only the public communication guidelines."),
         new(ResourceMatchmakerAgent.Spec, typeof(MatchJudgement), "Chooses the primary and backup technician for the repair."),
         new(ProcurementAgent.Spec, typeof(ProcurementJudgement), "Decides which parts and equipment to reserve or order."),
         new(SchedulingAgent.Spec, typeof(SchedulingJudgement), "Plans the work order timing and the message to the technician. No tools."),
