@@ -86,6 +86,21 @@ textarea:focus, button:focus-visible, .scenario:focus-visible, summary:focus-vis
 .step.failed .badge { background: var(--bad); color: #fff; }
 .step.failed .status { color: var(--bad); }
 .step.skipped { opacity: .5; }
+.step.paused { border-color: var(--warn); box-shadow: 0 0 0 3px rgba(183, 121, 31, .18); background: #fffaf0; }
+.step.paused .badge { background: var(--warn); color: #fff; }
+.step.paused .status { color: var(--warn); }
+.pausebox { grid-column: 2 / span 2; margin-top: 6px; border-top: 1px dashed #ecce91; padding-top: 10px; font-size: 14px; }
+.pausebox p { margin: 0 0 10px; }
+.pausebox .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pausebox button, .pausebox a { border-radius: 999px; padding: 9px 18px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; border: 2px solid var(--teal); background: #fff; color: var(--teal); }
+.pausebox button.go { background: var(--teal); color: #fff; }
+.pausebox button.stop { border-color: var(--line); color: var(--muted); }
+.pausebox button:disabled { opacity: .55; cursor: wait; }
+.pausebox .count { font-size: 13px; color: var(--muted); margin-left: auto; }
+.check { display: block; font-size: 14px; font-weight: 600; margin: 0 0 12px; cursor: pointer; }
+.check input { margin-right: 6px; }
+.check span { display: block; font-weight: 400; color: var(--muted); font-size: 13px; margin: 2px 0 0 24px; }
+.banner.cancelled { background: #f1f2f4; border-color: #ccd1d8; color: #3d4652; }
 @keyframes pulse { 50% { transform: scale(1.1); } }
 @media (prefers-reduced-motion: reduce) { .step.running .badge { animation: none; } }
 .foot { color: var(--muted); font-size: 13px; padding-bottom: 28px; }

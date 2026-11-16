@@ -15,12 +15,15 @@ const OUTCOME_TEXT = {
   closed_false_alarm: "Closed: no leak, so nothing else was started.",
   needs_review: "Stopped: a person has to decide.",
   failed: "Failed: an agent could not do its job.",
+  cancelled: "Cancelled: the run was paused and not resumed. Nothing was published or booked.",
 };
 
 const $ = (id) => document.getElementById(id);
 const stepEls = {};
 let running = false;
 let timer = null;
+let pauseTimer = null;
+let currentRunId = null;
 
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -92,8 +95,50 @@ function startTimer(step) {
 }
 function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
 
+// Paused before Communications: nothing has been sent to Waterstoring yet. The operator checks the site, then resumes or cancels.
+function showPause(event) {
+  const step = event.step;
+  setStep(step, "paused", "Paused", "Residents have not been told yet. Nothing has been sent to Waterstoring.");
+  clearPauseBox();
+  const deadline = Date.parse(event.data?.deadlineUtc) || Date.now() + 900000;
+  const count = el("span", { class: "count" }, "");
+  const open = el("a", { href: $("site-link").href, target: "_blank", rel: "noopener" }, "Open Waterstoring \u2197");
+  const go = el("button", { type: "button", class: "go" }, "Resume the workflow");
+  const stop = el("button", { type: "button", class: "stop" }, "Cancel the run");
+  const msg = el("p", { class: "error", role: "alert", hidden: "" }, "");
+  const act = async (kind, button) => {
+    go.disabled = stop.disabled = true;
+    msg.hidden = true;
+    const response = await fetch(`api/runs/${encodeURIComponent(currentRunId)}/${kind}`, { method: "POST", headers: authHeaders() }).catch(() => null);
+    if (!response || !response.ok) { go.disabled = stop.disabled = false; msg.textContent = "That did not work (the run may have ended). Try again."; msg.hidden = false; }
+  };
+  go.addEventListener("click", () => act("resume", go));
+  stop.addEventListener("click", () => act("cancel", stop));
+  const box = el("div", { class: "pausebox" },
+    el("p", {}, "Open Waterstoring and show that there is no notice for this incident. Then come back and resume."),
+    el("div", { class: "row" }, open, go, stop, count), msg);
+  stepEls[step].append(box);
+  const tick = () => { const left = Math.max(0, Math.round((deadline - Date.now()) / 1000)); count.textContent = `Cancels itself in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; };
+  tick();
+  pauseTimer = setInterval(tick, 1000);
+}
+function clearPauseBox() {
+  if (pauseTimer) { clearInterval(pauseTimer); pauseTimer = null; }
+  document.querySelectorAll(".pausebox").forEach((b) => b.remove());
+}
+
 function handle(type, event) {
   switch (type) {
+    case "run_started":
+      currentRunId = event.runId;
+      break;
+    case "run_paused":
+      showPause(event);
+      break;
+    case "run_resumed":
+      clearPauseBox();
+      setStep(event.step, "waiting", "Resuming", "");
+      break;
     case "step_started":
       setStep(event.step, "running", "Working 0 s", "");
       startTimer(event.step);
@@ -109,6 +154,7 @@ function handle(type, event) {
       break;
     case "run_completed": {
       stopTimer();
+      clearPauseBox();
       const done = new Set((event.summary?.steps || []).map((s) => s.step));
       ORDER.filter((s) => !done.has(s)).forEach((s) => setStep(s, "skipped", "Not run", ""));
       showBanner(event.summary, event.reasons);
@@ -150,12 +196,14 @@ async function run() {
   catch (e) { return showError("The alarm is not valid JSON: " + e.message); }
 
   running = true;
+  $("pause-comms").disabled = true;
   $("run").disabled = true;
   $("run").textContent = "Running...";
   $("banner").hidden = true;
   buildSteps();
   try {
-    const response = await fetch("api/runs", { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ alarm }) });
+    const pauseBefore = $("pause-comms").checked ? "communications" : undefined;
+    const response = await fetch("api/runs", { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ alarm, pauseBefore }) });
     if (response.status === 401) { $("key-row").hidden = false; throw new Error("The operator key is missing or wrong. Enter it above and run again."); }
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
@@ -164,9 +212,11 @@ async function run() {
     await readEvents(response);
   } catch (e) {
     stopTimer();
+    clearPauseBox();
     showError(e.message);
   } finally {
     running = false;
+    $("pause-comms").disabled = false;
     $("run").disabled = false;
     $("run").textContent = "Run the workflow again";
     loadRecent();

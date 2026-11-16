@@ -217,4 +217,59 @@ public class WorkflowRunnerTests
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => runner.RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, cts.Token));
     }
+
+    private static PauseGate Gate(bool answer, List<string> log, Func<Task>? whileWaiting = null) => new(WorkflowSteps.Communications, async (runId, announce, ct) =>
+    {
+        await announce();
+        log.Add("waiting");
+        if (whileWaiting is not null) await whileWaiting();
+        return answer;
+    });
+
+    [Fact]
+    public async Task A_pause_before_Communications_waits_after_Diagnostic_and_publishes_nothing_until_resumed()
+    {
+        var gateway = FakeGateway.Happy();
+        var events = new List<WorkflowEvent>();
+        var seenWhileWaiting = new List<string>();
+        var gate = Gate(true, [], () => { seenWhileWaiting.AddRange(gateway.Calls.Select(c => c.Step)); return Task.CompletedTask; });
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(Burst.Alarm, e => { events.Add(e); return ValueTask.CompletedTask; }, CancellationToken.None, gate);
+
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic], seenWhileWaiting);   // Communications had not been called when the run waited
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
+        var order = events.Select(e => e.Type + ":" + e.Step).ToList();
+        Assert.True(order.IndexOf("step_completed:diagnostic") < order.IndexOf("run_paused:communications"));
+        Assert.True(order.IndexOf("run_paused:communications") < order.IndexOf("run_resumed:communications"));
+        Assert.True(order.IndexOf("run_resumed:communications") < order.IndexOf("step_started:communications"));
+    }
+
+    [Fact]
+    public async Task Cancelling_a_pause_ends_the_run_as_cancelled_without_telling_residents_or_booking_anything()
+    {
+        var gateway = FakeGateway.Happy();
+        var events = new List<WorkflowEvent>();
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(Burst.Alarm, e => { events.Add(e); return ValueTask.CompletedTask; }, CancellationToken.None, Gate(false, []));
+
+        Assert.Equal(WorkflowOutcomes.Cancelled, summary.Outcome);
+        Assert.Equal(WorkflowSteps.Diagnostic, summary.StoppedAt);
+        Assert.Null(summary.IncidentId);
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic], gateway.Calls.Select(c => c.Step));
+        Assert.DoesNotContain(events, e => e.Type == WorkflowEventTypes.RunResumed);
+        Assert.DoesNotContain("already been informed", string.Join(' ', summary.Reasons));
+    }
+
+    [Fact]
+    public async Task A_pause_is_not_reached_when_the_run_stops_earlier()
+    {
+        var gateway = FakeGateway.Happy("false_alarm");
+        var log = new List<string>();
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None, Gate(true, log));
+
+        Assert.Equal(WorkflowOutcomes.ClosedFalseAlarm, summary.Outcome);
+        Assert.Empty(log);
+    }
 }

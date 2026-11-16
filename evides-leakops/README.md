@@ -361,6 +361,7 @@ calls the HTTP functions of the Agents app (`AGENTS_BASE_URL`, `AGENTS_FUNCTION_
 | Triage is `uncertain`, or any agent says `needsReview` (diagnosis, no technician, package cannot be equipped) | `needs_review`: the run stops there with the reasons; a note says when residents were already informed |
 | An agent errors, times out or is blocked by the content filter | `failed`: the run says which step and why (the host never throws) |
 | All six agents finish | `completed` with incident id, work order id and the expected resolution time |
+| The operator pauses before Communications and cancels, never resumes (15 minutes), or closes the page | `cancelled`: the run ends after step 2, nothing is published or booked |
 
 Every agent is idempotent, so an operator simply runs the same alarm again after a failure or after fixing the cause.
 
@@ -370,6 +371,8 @@ Every agent is idempotent, so an operator simply runs the same alarm again after
 | `GET /api/scenarios` | The scenarios with their alarms (never the hidden ground truth of the simulation) |
 | `POST /api/runs` `{ "scenarioId": ... }` or `{ "alarm": {...} }` | Runs the workflow and streams server-sent events: `run_started`, `step_started`, `step_completed` (with the agent's answer and trace), `step_failed`, `run_completed` |
 | `POST /api/runs?wait=true` | Same, but waits and returns the run summary as JSON (for scripts) |
+| `POST /api/runs` with `"pauseBefore": "communications"` | The stream sends `run_paused` after Diagnostic (nothing has been published) and waits; `run_resumed` follows when the run goes on. Streaming only (400 with `wait=true`). The console has a checkbox for it. A pause that nobody answers cancels itself after 15 minutes (`PAUSE_TIMEOUT_SECONDS`), and so does a pause whose page was closed |
+| `POST /api/runs/{runId}/resume`, `POST /api/runs/{runId}/cancel` | Let a paused run go on, or end it as `cancelled` (404 when that run is not paused). The run id is in every event |
 | `GET /api/runs`, `GET /api/runs/{id}` | The last 25 runs (in memory) |
 
 A run keeps going when the browser tab is closed, so a half-booked incident is never left behind.

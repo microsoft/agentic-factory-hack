@@ -48,6 +48,97 @@ public class WorkflowHostTests
     }
 
     [Fact]
+    public async Task A_paused_run_waits_before_Communications_and_a_resume_lets_it_finish()
+    {
+        var gateway = WorkflowRunnerTests.FakeGateway.Happy();
+        using var factory = HostWith(gateway);
+        var client = factory.CreateClient();
+
+        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }) }, HttpCompletionOption.ResponseHeadersRead);
+        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        string? runId = null;
+        var seen = new List<string>();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        while (await reader.ReadLineAsync(timeout.Token) is { } line)
+        {
+            if (line.StartsWith("event: ")) seen.Add(line[7..]);
+            if (line.StartsWith("data: ") && seen[^1] == "run_paused")
+            {
+                runId = JsonDocument.Parse(line[6..]).RootElement.GetProperty("runId").GetString();
+                // The run is paused: Communications has not been called, so nothing has reached Waterstoring.
+                Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Communications);
+                Assert.Equal(HttpStatusCode.OK, (await client.PostAsync($"/api/runs/{runId}/resume", null)).StatusCode);
+            }
+            if (line.StartsWith("event: ") && line == "event: run_completed") break;
+        }
+
+        Assert.Equal(["run_started", "step_started", "step_completed", "step_started", "step_completed", "run_paused", "run_resumed",
+            .. Enumerable.Repeat(new[] { "step_started", "step_completed" }, 4).SelectMany(x => x), "run_completed"], seen);
+        Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
+        Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync($"/api/runs/{runId}/resume", null)).StatusCode);   // no longer paused
+    }
+
+    [Fact]
+    public async Task A_cancel_ends_a_paused_run_and_a_pause_nobody_answers_cancels_itself()
+    {
+        var gateway = WorkflowRunnerTests.FakeGateway.Happy();
+        using var factory = HostWith(gateway).WithWebHostBuilder(b => b.UseSetting("PAUSE_TIMEOUT_SECONDS", "1"));
+        var client = factory.CreateClient();
+
+        // Nobody answers: after the time limit the run ends as cancelled and the alarm can be run again.
+        var text = await (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }))).Content.ReadAsStringAsync();
+        var events = Parse(text);
+        Assert.Equal("cancelled", events[^1].Data.GetProperty("outcome").GetString());
+        Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Communications);
+        Assert.Equal(HttpStatusCode.OK, (await client.PostAsync("/api/runs?wait=true", Json(new { scenarioId = Burst.Id }))).StatusCode);
+    }
+
+    [Fact]
+    public async Task Closing_the_page_while_paused_cancels_the_pause_and_frees_the_alarm()
+    {
+        var gateway = WorkflowRunnerTests.FakeGateway.Happy();
+        using var factory = HostWith(gateway);
+        var client = factory.CreateClient();
+
+        var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }) }, HttpCompletionOption.ResponseHeadersRead);
+        using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            while (await reader.ReadLineAsync(timeout.Token) is { } line && line != "event: run_paused") { }
+        }
+        response.Dispose();   // the operator closes the page
+
+        HttpStatusCode status = default;
+        for (var i = 0; i < 50 && status != HttpStatusCode.OK; i++)
+        {
+            status = (await client.PostAsync("/api/runs?wait=true", Json(new { scenarioId = Burst.Id }))).StatusCode;
+            if (status != HttpStatusCode.OK) await Task.Delay(100);
+        }
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Single(gateway.Calls, c => c.Step == WorkflowSteps.Communications);   // only the second, normal run reached Communications
+    }
+
+    [Fact]
+    public async Task Cancel_and_resume_of_a_run_that_is_not_paused_are_404_and_pausing_needs_a_valid_streaming_request()
+    {
+        using var factory = HostWith(WorkflowRunnerTests.FakeGateway.Happy());
+        var client = factory.CreateClient();
+
+        Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync("/api/runs/run-nope/cancel", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync("/api/runs/run-nope/resume", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = "matchmaker" }))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs?wait=true", Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }))).StatusCode);
+    }
+
+    [Fact]
+    public async Task Resuming_needs_the_operator_key_too()
+    {
+        using var factory = HostWith(WorkflowRunnerTests.FakeGateway.Happy()).WithWebHostBuilder(b => b.UseSetting("OPERATOR_KEY", "s3cret"));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await factory.CreateClient().PostAsync("/api/runs/run-x/resume", null)).StatusCode);
+    }
+
+    [Fact]
     public async Task A_run_streams_one_event_per_step_in_order_over_server_sent_events()
     {
         using var factory = HostWith(WorkflowRunnerTests.FakeGateway.Happy());

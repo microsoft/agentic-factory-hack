@@ -19,6 +19,7 @@ public static class WorkflowOutcomes
     public const string ClosedFalseAlarm = "closed_false_alarm";   // Triage found no leak: nothing else happens
     public const string NeedsReview = "needs_review";              // an agent says a person must decide before the workflow can go on
     public const string Failed = "failed";                         // an agent could not do its job (error, timeout, content filter)
+    public const string Cancelled = "cancelled";                   // the operator paused the run and cancelled it (or never resumed it); nothing further was done
 }
 
 public static class WorkflowEventTypes
@@ -27,8 +28,16 @@ public static class WorkflowEventTypes
     public const string StepStarted = "step_started";
     public const string StepCompleted = "step_completed";
     public const string StepFailed = "step_failed";
+    public const string RunPaused = "run_paused";       // the run waits before a step until the operator resumes or cancels
+    public const string RunResumed = "run_resumed";
     public const string RunCompleted = "run_completed";
 }
+
+/// <summary>
+/// An operator-requested pause before a step. <see cref="Wait"/> is given the run id and an "announce" callback that it must call once the
+/// run is registered as paused (so a resume can never arrive before it is registered); it returns true to go on, false to cancel the run.
+/// </summary>
+public record PauseGate(string Step, Func<string, Func<ValueTask>, CancellationToken, Task<bool>> Wait);
 
 /// <summary>One progress message of a run. Sent to the operator page as a server-sent event.</summary>
 public record WorkflowEvent(

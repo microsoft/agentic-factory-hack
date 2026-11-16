@@ -93,6 +93,13 @@ flow 121 m3/h against 48 m3/h expected, no planned works, frost). For the false 
 3. Open **what residents see** (`/evides`): the incident on the map, status "repair planned", the expected time as an estimate, nothing internal.
 4. Run the burst again: nothing is booked or ordered twice (every step is idempotent).
 
+**Pause before Communications (show that residents have not been told yet):**
+1. On the residents' page click **Meldingen wissen / Clear alerts** (operator key) so the page is empty. Keep that page open in a second tab.
+2. In the console pick the burst, tick **Pause before step 3 Communications**, and run. Triage and Diagnostic run (about 50 s), then step 3 shows **Paused**.
+3. Go to the Waterstoring tab: there is no notice for the incident (the list says there are no known disruptions). Nothing has been written yet.
+4. Back in the console press **Resume the workflow**. Communications publishes; switch to the Waterstoring tab and the notice appears within 5 seconds, then the rest of the run finishes.
+5. **Cancel the run** ends it instead (outcome `cancelled`, nothing published or booked). Leave it alone for 15 minutes, or close the page, and it cancels itself.
+
 ## 4. Tracing (portal, Tracing, or Build > Agents > agent > Traces)
 Every agent call is traced to Application Insights: `invoke_agent <Agent>`, `chat gpt-5.4`, `execute_tool leakops_mcp.<tool>` and `execute_tool leakops_kb.knowledge_base_retrieve`, with
 duration and tokens. Open the burst run and follow Triage > its MCP calls. Traces can take a few minutes to appear.
@@ -144,6 +151,7 @@ example a PI Web API tool for SCADA); the real waterstoring.nl has no public API
 | The `knowledge_base_retrieve` call fails or the agent says it has no knowledge | The knowledge layer is not deployed, was removed, or the agents were registered without it. Run `deploy-knowledge.ps1` (it registers the agents with knowledge again). Check the project connections `leakops-kb-ops` and `leakops-kb-comms`, and that the Foundry project identity has Search Index Data Reader on `evides-search-88546e` (role assignments can take a few minutes). |
 | Knowledge answers are empty right after deployment | The indexer is still running. `deploy-knowledge.ps1` waits for it; in the portal check the knowledge source status (all 8 documents indexed, 0 failed). |
 | Skills publish fails | Skills are a preview API and need the header `Foundry-Features: Skills=V1Preview`; `SkillStore.cs` sets it. A SKILL.md description must be unquoted and contain no `: `. |
+| A run says "already in progress" (409) | The same alarm is still running or paused. A paused run cancels itself after 15 minutes or when its page closes; to free it at once press Cancel in the console, or restart `leakops-workflow-88546e`. |
 | `az` uses the wrong tenant | Sign in with a separate profile: `$env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"; az login --tenant 05baed4d-e049-45c7-b47d-c99c66fdb589`. |
 | Incident data is old | Run the clean-state step in "Before the demo". |
 | Deploy: Basic plan has no capacity | `deploy.ps1 -WebLocation northeurope`. |

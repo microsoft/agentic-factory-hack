@@ -11,7 +11,7 @@ namespace LeakOps.Contracts.Logic;
 /// </summary>
 public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
 {
-    public async Task<WorkflowSummary> RunAsync(AnomalyAlarm alarm, Func<WorkflowEvent, ValueTask> emit, CancellationToken cancellationToken)
+    public async Task<WorkflowSummary> RunAsync(AnomalyAlarm alarm, Func<WorkflowEvent, ValueTask> emit, CancellationToken cancellationToken, PauseGate? pause = null)
     {
         var started = time.GetUtcNow();
         var runId = $"run-{started:yyyyMMdd-HHmmss}-{Guid.NewGuid().ToString("N")[..6]}";
@@ -72,6 +72,16 @@ public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
             + (r.NeedsReview ? " - needs review" : ""));
         if (report is null) return await Finish(WorkflowOutcomes.Failed, WorkflowSteps.Diagnostic, [steps[^1].Headline]);
         if (report.NeedsReview) return await Finish(WorkflowOutcomes.NeedsReview, WorkflowSteps.Diagnostic, report.ReviewReasons);
+
+        // The operator may ask to pause here, so the audience can see that residents have not been told yet. Nothing has been written.
+        if (pause is { Step: WorkflowSteps.Communications })
+        {
+            var go = await pause.Wait(runId, () => Emit(WorkflowEventTypes.RunPaused, WorkflowSteps.Communications,
+                headline: "Paused before Communications: residents have not been told yet"), cancellationToken);
+            if (!go)
+                return await Finish(WorkflowOutcomes.Cancelled, WorkflowSteps.Diagnostic, ["Paused before Communications and not resumed: nothing was published or booked."]);
+            await Emit(WorkflowEventTypes.RunResumed, WorkflowSteps.Communications, headline: "Resumed");
+        }
 
         var communications = await Step<CommunicationsResult>(WorkflowSteps.Communications, new CommunicationsRequest(report), c =>
             $"Published {c.IncidentId} on Waterstoring" + (c.UsedFallbackText ? " (safe template text)" : ""));
