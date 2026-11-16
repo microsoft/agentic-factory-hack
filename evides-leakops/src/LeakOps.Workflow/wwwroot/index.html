@@ -34,13 +34,22 @@
         <p class="hint">This deployment is protected. Enter the key once; it is kept in this browser tab only.</p>
       </div>
 
-      <label class="check" for="pause-comms"><input id="pause-comms" type="checkbox"> Pause before step 3 Communications <span>(first show that Waterstoring has no notice, then resume)</span></label>
+      <fieldset class="pause-options">
+        <legend>Pause the workflow (for the audience)</legend>
+        <label class="check" for="pause-comms"><input id="pause-comms" type="checkbox"> Pause before step 3 Communications <span>(first show that Waterstoring has no notice, then resume)</span></label>
+        <label class="check" for="pause-match"><input id="pause-match" type="checkbox"> Pause before step 4 Resource Matchmaker <span>(first show all technicians and who is available, then resume)</span></label>
+      </fieldset>
 
       <button id="run" class="primary" type="button" disabled>Run the workflow</button>
       <p id="run-error" class="error" role="alert" hidden></p>
 
       <h3>Recent runs</h3>
       <ul id="recent" class="recent"><li class="muted">None yet.</li></ul>
+
+      <div class="reset-box">
+        <button id="reset-demo" class="ghost-danger" type="button">Reset demo data</button>
+        <p id="reset-msg" class="hint" role="status">Clears the Waterstoring page, work orders, orders and reservations and restores the stock, so every technician is free again.</p>
+      </div>
     </section>
 
     <section class="panel flow" aria-labelledby="h-flow">

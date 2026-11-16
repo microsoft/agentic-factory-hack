@@ -19,7 +19,7 @@ public static class WorkflowOutcomes
     public const string ClosedFalseAlarm = "closed_false_alarm";   // Triage found no leak: nothing else happens
     public const string NeedsReview = "needs_review";              // an agent says a person must decide before the workflow can go on
     public const string Failed = "failed";                         // an agent could not do its job (error, timeout, content filter)
-    public const string Cancelled = "cancelled";                   // the operator paused the run and cancelled it (or never resumed it); nothing further was done
+    public const string Cancelled = "cancelled";                   // the operator paused the run and cancelled it (or never resumed it); no later step was done
 }
 
 public static class WorkflowEventTypes
@@ -37,7 +37,13 @@ public static class WorkflowEventTypes
 /// An operator-requested pause before a step. <see cref="Wait"/> is given the run id and an "announce" callback that it must call once the
 /// run is registered as paused (so a resume can never arrive before it is registered); it returns true to go on, false to cancel the run.
 /// </summary>
-public record PauseGate(string Step, Func<string, Func<ValueTask>, CancellationToken, Task<bool>> Wait);
+public record PauseGate(IReadOnlyCollection<string> Steps, Func<string, Func<ValueTask>, CancellationToken, Task<bool>> Wait)
+{
+    /// <summary>The steps an operator may pause before: Communications (nothing published yet) and Matchmaker (nobody assigned yet).</summary>
+    public static readonly IReadOnlyList<string> Allowed = [WorkflowSteps.Communications, WorkflowSteps.Matchmaker];
+
+    public bool Applies(string step) => Steps.Contains(step);
+}
 
 /// <summary>One progress message of a run. Sent to the operator page as a server-sent event.</summary>
 public record WorkflowEvent(

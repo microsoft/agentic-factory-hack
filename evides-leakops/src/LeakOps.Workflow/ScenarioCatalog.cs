@@ -26,9 +26,13 @@ public class ScenarioCatalog
 public class RunGuard
 {
     private readonly ConcurrentDictionary<string, byte> _active = new(StringComparer.OrdinalIgnoreCase);
+    private int _resetting;
 
-    public bool TryEnter(string alarmId) => _active.TryAdd(alarmId, 0);
+    // A reset waits for no run at all: it refuses while any run is active (or paused, which also holds the lock), and blocks new runs while it works.
+    public bool TryEnter(string alarmId) => Volatile.Read(ref _resetting) == 0 && _active.TryAdd(alarmId, 0);
     public void Exit(string alarmId) => _active.TryRemove(alarmId, out _);
+    public bool TryBeginReset() => _active.IsEmpty && Interlocked.CompareExchange(ref _resetting, 1, 0) == 0;
+    public void EndReset() => Volatile.Write(ref _resetting, 0);
 }
 
 /// <summary>The last runs, in memory, newest first. A restart empties it.</summary>
@@ -44,5 +48,6 @@ public class RunLog
     }
 
     public IReadOnlyList<WorkflowSummary> Recent() => _runs.Reverse().ToList();
+    public void Clear() => _runs.Clear();
     public WorkflowSummary? Find(string runId) => _runs.FirstOrDefault(r => r.RunId == runId);
 }

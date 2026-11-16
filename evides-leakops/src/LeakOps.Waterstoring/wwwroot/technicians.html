@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Technici (demo) | Evides LeakOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/technicians.css">
+</head>
+<body>
+  <div class="demo-bar"><span data-i18n="ribbon"></span></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="/" aria-label="Waterstoring demo">
+        <svg class="logo-drop" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C12 1 2 13.5 2 21a10 10 0 0 0 20 0C22 13.5 12 1 12 1Z"/></svg>
+        <span class="logo-text">WATERSTORING<small>.NL</small></span>
+        <span class="logo-demo">demo</span>
+      </a>
+      <nav class="main-nav" aria-label="Menu">
+        <a href="/" data-i18n="back"></a>
+      </nav>
+      <div class="lang-switch">
+        <button id="lang-nl" class="lang active" type="button">NL</button>
+        <button id="lang-en" class="lang" type="button">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="tech-hero">
+      <div class="container">
+        <p class="eyebrow"><span class="dot"></span><span data-i18n="eyebrow"></span></p>
+        <h1 data-i18n="title"></h1>
+        <p class="lead" data-i18n="subtitle"></p>
+        <p id="clock" class="tech-clock"></p>
+        <ul id="summary" class="tech-summary" aria-live="polite"></ul>
+      </div>
+    </section>
+
+    <section class="container tech-body">
+      <p id="error" class="tech-error" role="alert" hidden></p>
+      <ul id="grid" class="tech-grid"></ul>
+      <p class="tech-note" data-i18n="note"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p data-i18n="footer"></p>
+    </div>
+  </footer>
+
+  <script src="/technicians.js"></script>
+</body>
+</html>

@@ -9,6 +9,7 @@ using LeakOps.Seeder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using WorkflowHost::LeakOps.Workflow;
 using Xunit;
 
 namespace LeakOps.Tests;
@@ -54,7 +55,7 @@ public class WorkflowHostTests
         using var factory = HostWith(gateway);
         var client = factory.CreateClient();
 
-        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }) }, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications" } }) }, HttpCompletionOption.ResponseHeadersRead);
         using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
         string? runId = null;
         var seen = new List<string>();
@@ -86,7 +87,7 @@ public class WorkflowHostTests
         var client = factory.CreateClient();
 
         // Nobody answers: after the time limit the run ends as cancelled and the alarm can be run again.
-        var text = await (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }))).Content.ReadAsStringAsync();
+        var text = await (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications" } }))).Content.ReadAsStringAsync();
         var events = Parse(text);
         Assert.Equal("cancelled", events[^1].Data.GetProperty("outcome").GetString());
         Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Communications);
@@ -100,7 +101,7 @@ public class WorkflowHostTests
         using var factory = HostWith(gateway);
         var client = factory.CreateClient();
 
-        var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }) }, HttpCompletionOption.ResponseHeadersRead);
+        var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications" } }) }, HttpCompletionOption.ResponseHeadersRead);
         using (var reader = new StreamReader(await response.Content.ReadAsStreamAsync()))
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -126,8 +127,84 @@ public class WorkflowHostTests
 
         Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync("/api/runs/run-nope/cancel", null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync("/api/runs/run-nope/resume", null)).StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = "matchmaker" }))).StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs?wait=true", Json(new { scenarioId = Burst.Id, pauseBefore = "communications" }))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "scheduling" } }))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs", Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications", "nope" } }))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/runs?wait=true", Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications" } }))).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_run_can_pause_before_Matchmaker_and_before_Communications_in_one_go()
+    {
+        var gateway = WorkflowRunnerTests.FakeGateway.Happy();
+        using var factory = HostWith(gateway);
+        var client = factory.CreateClient();
+
+        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "communications", "matchmaker" } }) }, HttpCompletionOption.ResponseHeadersRead);
+        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        var paused = new List<string>();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        string? lastEvent = null;
+        while (await reader.ReadLineAsync(timeout.Token) is { } line)
+        {
+            if (line.StartsWith("event: ")) lastEvent = line[7..];
+            if (line.StartsWith("data: ") && lastEvent == "run_paused")
+            {
+                var data = JsonDocument.Parse(line[6..]).RootElement;
+                paused.Add(data.GetProperty("step").GetString()!);
+                if (paused[^1] == WorkflowSteps.Matchmaker)   // residents have been told, nobody is matched yet
+                    Assert.DoesNotContain(gateway.Calls, c => c.Step == WorkflowSteps.Matchmaker);
+                Assert.Equal(HttpStatusCode.OK, (await client.PostAsync($"/api/runs/{data.GetProperty("runId").GetString()}/resume", null)).StatusCode);
+            }
+            if (line == "event: run_completed") break;
+        }
+
+        Assert.Equal([WorkflowSteps.Communications, WorkflowSteps.Matchmaker], paused);
+        Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
+    }
+
+    private sealed class FakeReset : IDemoReset
+    {
+        public int Calls;
+        public Task ResetAsync(CancellationToken cancellationToken) { Calls++; return Task.CompletedTask; }
+    }
+
+    [Fact]
+    public async Task Reset_demo_needs_the_operator_key_and_is_refused_while_a_run_is_paused()
+    {
+        var reset = new FakeReset();
+        using var factory = HostWith(WorkflowRunnerTests.FakeGateway.Happy()).WithWebHostBuilder(b =>
+        {
+            b.UseSetting("OPERATOR_KEY", "s3cret");
+            b.ConfigureServices(services => services.AddSingleton<IDemoReset>(reset));
+        });
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Operator-Key", "s3cret");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await factory.CreateClient().PostAsync("/api/admin/reset-demo", null)).StatusCode);
+        Assert.Equal(0, reset.Calls);
+
+        using var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Post, "/api/runs") { Content = Json(new { scenarioId = Burst.Id, pauseBefore = new[] { "matchmaker" } }) }, HttpCompletionOption.ResponseHeadersRead);
+        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        string? runId = null, lastEvent = null;
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        while (runId is null && await reader.ReadLineAsync(timeout.Token) is { } line)
+        {
+            if (line.StartsWith("event: ")) lastEvent = line[7..];
+            if (line.StartsWith("data: ") && lastEvent == "run_paused") runId = JsonDocument.Parse(line[6..]).RootElement.GetProperty("runId").GetString();
+        }
+
+        Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsync("/api/admin/reset-demo", null)).StatusCode);   // paused runs hold the lock
+        Assert.Equal(0, reset.Calls);
+
+        await client.PostAsync($"/api/runs/{runId}/cancel", null);
+        HttpStatusCode status = default;
+        for (var i = 0; i < 50 && status != HttpStatusCode.OK; i++)
+        {
+            status = (await client.PostAsync("/api/admin/reset-demo", null)).StatusCode;
+            if (status != HttpStatusCode.OK) await Task.Delay(100);
+        }
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Equal(1, reset.Calls);
     }
 
     [Fact]

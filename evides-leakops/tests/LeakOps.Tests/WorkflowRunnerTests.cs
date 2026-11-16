@@ -218,13 +218,14 @@ public class WorkflowRunnerTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => runner.RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, cts.Token));
     }
 
-    private static PauseGate Gate(bool answer, List<string> log, Func<Task>? whileWaiting = null) => new(WorkflowSteps.Communications, async (runId, announce, ct) =>
-    {
-        await announce();
-        log.Add("waiting");
-        if (whileWaiting is not null) await whileWaiting();
-        return answer;
-    });
+    private static PauseGate Gate(bool answer, List<string> log, Func<Task>? whileWaiting = null, params string[] steps) =>
+        new(steps.Length == 0 ? [WorkflowSteps.Communications] : steps, async (runId, announce, ct) =>
+        {
+            await announce();
+            log.Add("waiting");
+            if (whileWaiting is not null) await whileWaiting();
+            return answer;
+        });
 
     [Fact]
     public async Task A_pause_before_Communications_waits_after_Diagnostic_and_publishes_nothing_until_resumed()
@@ -259,6 +260,56 @@ public class WorkflowRunnerTests
         Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic], gateway.Calls.Select(c => c.Step));
         Assert.DoesNotContain(events, e => e.Type == WorkflowEventTypes.RunResumed);
         Assert.DoesNotContain("already been informed", string.Join(' ', summary.Reasons));
+    }
+
+    [Fact]
+    public async Task A_pause_before_Matchmaker_waits_after_residents_are_informed_and_before_anyone_is_assigned()
+    {
+        var gateway = FakeGateway.Happy();
+        var events = new List<WorkflowEvent>();
+        var seenWhileWaiting = new List<string>();
+        var gate = Gate(true, [], () => { seenWhileWaiting.AddRange(gateway.Calls.Select(c => c.Step)); return Task.CompletedTask; }, WorkflowSteps.Matchmaker);
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(Burst.Alarm, e => { events.Add(e); return ValueTask.CompletedTask; }, CancellationToken.None, gate);
+
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic, WorkflowSteps.Communications], seenWhileWaiting);   // residents told, nobody matched yet
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        var order = events.Select(e => e.Type + ":" + e.Step).ToList();
+        Assert.True(order.IndexOf("step_completed:communications") < order.IndexOf("run_paused:matchmaker"));
+        Assert.True(order.IndexOf("run_resumed:matchmaker") < order.IndexOf("step_started:matchmaker"));
+        Assert.DoesNotContain("run_paused:communications", order);
+    }
+
+    [Fact]
+    public async Task Cancelling_a_pause_before_Matchmaker_says_residents_were_informed_but_nothing_was_booked()
+    {
+        var gateway = FakeGateway.Happy();
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(
+            Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None, Gate(false, [], null, WorkflowSteps.Matchmaker));
+
+        Assert.Equal(WorkflowOutcomes.Cancelled, summary.Outcome);
+        Assert.Equal(WorkflowSteps.Communications, summary.StoppedAt);
+        Assert.NotNull(summary.IncidentId);
+        Assert.Equal([WorkflowSteps.Triage, WorkflowSteps.Diagnostic, WorkflowSteps.Communications], gateway.Calls.Select(c => c.Step));
+        Assert.Contains("already informed", string.Join(' ', summary.Reasons));
+        Assert.DoesNotContain("nothing was published", string.Join(' ', summary.Reasons));
+    }
+
+    [Fact]
+    public async Task Both_pauses_can_be_used_in_one_run_in_workflow_order()
+    {
+        var gateway = FakeGateway.Happy();
+        var log = new List<string>();
+        var events = new List<WorkflowEvent>();
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System).RunAsync(
+            Burst.Alarm, e => { events.Add(e); return ValueTask.CompletedTask; }, CancellationToken.None,
+            Gate(true, log, null, WorkflowSteps.Matchmaker, WorkflowSteps.Communications));
+
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        Assert.Equal(2, log.Count);
+        Assert.Equal([WorkflowSteps.Communications, WorkflowSteps.Matchmaker], events.Where(e => e.Type == WorkflowEventTypes.RunPaused).Select(e => e.Step));
     }
 
     [Fact]

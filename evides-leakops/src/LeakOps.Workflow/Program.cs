@@ -17,6 +17,7 @@ builder.Services.AddSingleton<RunGuard>();
 builder.Services.AddSingleton<RunControl>();
 // The agents take a while (a model call each), so the HTTP timeout is generous.
 builder.Services.AddHttpClient<IAgentGateway, AgentGateway>(client => client.Timeout = TimeSpan.FromMinutes(5));
+builder.Services.AddHttpClient<IDemoReset, WaterstoringDemoReset>(client => client.Timeout = TimeSpan.FromSeconds(60));
 builder.Services.AddTransient<WorkflowRunner>();
 
 // Telemetry goes to Application Insights when the app runs in Azure (the connection string is an app setting there).
@@ -57,10 +58,10 @@ app.MapGet("/api/scenarios", (ScenarioCatalog catalog) => Results.Ok(catalog.Sce
 app.MapGet("/api/runs", (RunLog log) => Results.Ok(log.Recent()));
 app.MapGet("/api/runs/{runId}", (string runId, RunLog log) => log.Find(runId) is { } run ? Results.Ok(run) : Results.NotFound());
 
-// POST /api/runs  { "scenarioId": "..." } or { "alarm": { ... } }, optionally "pauseBefore": "communications"
+// POST /api/runs  { "scenarioId": "..." } or { "alarm": { ... } }, optionally "pauseBefore": ["communications", "matchmaker"]
 //   default       -> a text/event-stream with one event per step (run_started, step_started, step_completed, step_failed, run_completed)
 //   ?wait=true    -> waits for the run and returns the summary as JSON (handy for scripts)
-//   pauseBefore   -> the stream sends run_paused before that step and waits for POST /api/runs/{runId}/resume or /cancel (streaming only)
+//   pauseBefore   -> the stream sends run_paused before each of those steps and waits for POST /api/runs/{runId}/resume or /cancel (streaming only)
 app.MapPost("/api/runs", async (HttpContext context, RunRequest request, ScenarioCatalog catalog, WorkflowRunner runner, RunLog log, RunGuard guard,
     RunControl control, IHostApplicationLifetime lifetime, bool? wait) =>
 {
@@ -68,9 +69,10 @@ app.MapPost("/api/runs", async (HttpContext context, RunRequest request, Scenari
     if (alarm is null) return Results.BadRequest(new { error = "Give a scenarioId of /api/scenarios, or an alarm." });
     var problem = ValidateAlarm(alarm);
     if (problem is not null) return Results.BadRequest(new { error = problem });
-    if (request.PauseBefore is not null && request.PauseBefore != WorkflowSteps.Communications)
-        return Results.BadRequest(new { error = $"pauseBefore can only be '{WorkflowSteps.Communications}'." });
-    if (request.PauseBefore is not null && wait == true)
+    var pauseSteps = (request.PauseBefore ?? []).Distinct().ToList();
+    if (pauseSteps.Any(s => !PauseGate.Allowed.Contains(s)))
+        return Results.BadRequest(new { error = $"pauseBefore can only contain: {string.Join(", ", PauseGate.Allowed)}." });
+    if (pauseSteps.Count > 0 && wait == true)
         return Results.BadRequest(new { error = "pauseBefore needs the event stream; it cannot be combined with wait=true." });
     if (!guard.TryEnter(alarm.AlarmId))
         return Results.Conflict(new { error = $"A run for alarm {alarm.AlarmId} is already in progress. Wait for it to finish." });
@@ -110,7 +112,7 @@ app.MapPost("/api/runs", async (HttpContext context, RunRequest request, Scenari
             Write($"event: {e.Type}\ndata: {JsonSerializer.Serialize(e with { Data = e.Type == WorkflowEventTypes.RunPaused ? new { timeoutSeconds = (int)control.Timeout.TotalSeconds, deadlineUtc = DateTimeOffset.UtcNow + control.Timeout } : e.Data }, json)}\n\n");
 
         // While paused nothing is sent, and Azure closes an idle response after about 4 minutes, so a comment line goes out every 15 s.
-        PauseGate? pause = request.PauseBefore is null ? null : new PauseGate(request.PauseBefore, async (runId, announce, ct) =>
+        PauseGate? pause = pauseSteps.Count == 0 ? null : new PauseGate(pauseSteps, async (runId, announce, ct) =>
         {
             using var stop = CancellationTokenSource.CreateLinkedTokenSource(ct);
             Task? keepAlive = null;
@@ -148,6 +150,29 @@ app.MapPost("/api/runs/{runId}/resume", (string runId, RunControl control) =>
 app.MapPost("/api/runs/{runId}/cancel", (string runId, RunControl control) =>
     control.Cancel(runId) ? Results.Ok(new { runId, status = "cancelled" }) : Results.NotFound(new { error = $"Run {runId} is not paused." }));
 
+// Puts the whole demo back to the start (public page, incidents, work orders, purchase orders, reservations, stock) through Waterstoring.
+// Refused while any run is active or paused, so a running demo is never pulled out from under itself.
+app.MapPost("/api/admin/reset-demo", async (IDemoReset reset, RunGuard guard, RunLog log, ILogger<Program> logger, CancellationToken cancellationToken) =>
+{
+    if (!guard.TryBeginReset())
+        return Results.Conflict(new { error = "A run is in progress (or paused). Finish or cancel it first, then reset." });
+    try
+    {
+        await reset.ResetAsync(cancellationToken);
+        log.Clear();
+        logger.LogInformation("Demo data reset");
+        return Results.Ok(new { status = "reset" });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status502BadGateway);
+    }
+    finally
+    {
+        guard.EndReset();
+    }
+});
+
 app.Run();
 
 static string? ValidateAlarm(AnomalyAlarm alarm)
@@ -160,6 +185,6 @@ static string? ValidateAlarm(AnomalyAlarm alarm)
     return null;
 }
 
-record RunRequest(string? ScenarioId, AnomalyAlarm? Alarm, string? PauseBefore = null);
+record RunRequest(string? ScenarioId, AnomalyAlarm? Alarm, string[]? PauseBefore = null);
 
 public partial class Program;   // makes the entry point visible to the integration tests

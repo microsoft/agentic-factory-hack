@@ -131,6 +131,14 @@ tiles load from the internet (Leaflet and OpenStreetMap); the list works offline
 | `POST /api/incidents` | `X-Api-Key` | Create an incident. Posting the same `incidentId` again replaces it (safe to retry) |
 | `PATCH /api/incidents/{id}` | `X-Api-Key` | Change `status`, `message`, `messageEn` and/or `expectedResolutionUtc`; adds a timeline entry |
 | `POST /api/admin/reset` | `X-Api-Key` or `X-Operator-Key` | Clear all incidents (demo reset). The "Meldingen wissen / Clear alerts" button in the yellow demo bar of the page calls it with the operator key you type in (the key is not stored; the app has the setting `OPERATOR_KEY`, the same value as the workflow host) |
+| `GET /api/technicians[?at=<ISO time>]` | public | The simulated roster of all technicians with a state: `available`, `assigned` (a scheduled work order names them, with the job details), `busy` (a job from the roster) or `off_shift`. `at` defaults to the simulation clock, the time of the demo alarm (`DEMO_CLOCK_UTC` overrides it). Same logic as the Resource Matchmaker (`WorkforceAvailability`), so page and agent agree |
+| `POST /api/admin/reset-demo` | `X-Api-Key` or `X-Operator-Key` | Back to the start: clears the incidents, the work orders (so nobody is assigned), purchase orders and stock reservations of the workflow, and restores the stock from `data/inventory.json`. Behind the console's **Reset demo data** button |
+
+**Technicians page:** `/technicians` (NL/EN, refreshes every 5 seconds) shows a card per technician with portrait, state, certifications,
+vehicle, shift and, when assigned, the work order with leave, arrival and completion time. The roster and the seed stock ship with the app
+(`data/*.json`, linked in `LeakOps.Waterstoring.csproj`); in Azure the roster and work orders are read from Cosmos DB with the web app's
+managed identity. The page is public and shows simulated data only. The portraits (`wwwroot/technicians/T-0x.jpg`) are **AI-generated
+fictional people**, made once with `deploy/generate-technician-photos.ps1` (a temporary `gpt-image-1.5` deployment, removed afterwards; the JPGs are committed, so a normal deploy needs no image model). A missing portrait falls back to initials.
 
 Statuses: `reported`, `repair_planned`, `repair_in_progress`, `resolved` (resolved incidents leave the search but stay in the list).
 Request and response shapes are the records in `src/LeakOps.Contracts/Waterstoring.cs`. Outside Development the app refuses to
@@ -361,7 +369,7 @@ calls the HTTP functions of the Agents app (`AGENTS_BASE_URL`, `AGENTS_FUNCTION_
 | Triage is `uncertain`, or any agent says `needsReview` (diagnosis, no technician, package cannot be equipped) | `needs_review`: the run stops there with the reasons; a note says when residents were already informed |
 | An agent errors, times out or is blocked by the content filter | `failed`: the run says which step and why (the host never throws) |
 | All six agents finish | `completed` with incident id, work order id and the expected resolution time |
-| The operator pauses before Communications and cancels, never resumes (15 minutes), or closes the page | `cancelled`: the run ends after step 2, nothing is published or booked |
+| The operator pauses before Communications or before Matchmaker and cancels, never resumes (15 minutes), or closes the page | `cancelled`: the run ends there. Before Communications nothing is published or booked; before Matchmaker residents were already informed, but no technician, stock or work order was booked |
 
 Every agent is idempotent, so an operator simply runs the same alarm again after a failure or after fixing the cause.
 
@@ -371,8 +379,9 @@ Every agent is idempotent, so an operator simply runs the same alarm again after
 | `GET /api/scenarios` | The scenarios with their alarms (never the hidden ground truth of the simulation) |
 | `POST /api/runs` `{ "scenarioId": ... }` or `{ "alarm": {...} }` | Runs the workflow and streams server-sent events: `run_started`, `step_started`, `step_completed` (with the agent's answer and trace), `step_failed`, `run_completed` |
 | `POST /api/runs?wait=true` | Same, but waits and returns the run summary as JSON (for scripts) |
-| `POST /api/runs` with `"pauseBefore": "communications"` | The stream sends `run_paused` after Diagnostic (nothing has been published) and waits; `run_resumed` follows when the run goes on. Streaming only (400 with `wait=true`). The console has a checkbox for it. A pause that nobody answers cancels itself after 15 minutes (`PAUSE_TIMEOUT_SECONDS`), and so does a pause whose page was closed |
+| `POST /api/runs` with `"pauseBefore": ["communications", "matchmaker"]` | The stream sends `run_paused` (with the `step`) before each listed step (nothing published yet / nobody assigned yet) and waits; `run_resumed` follows when the run goes on. Any other step name is a 400, and so is `wait=true` (streaming only). The console has a checkbox per pause. A pause that nobody answers cancels itself after 15 minutes (`PAUSE_TIMEOUT_SECONDS`), and so does a pause whose page was closed |
 | `POST /api/runs/{runId}/resume`, `POST /api/runs/{runId}/cancel` | Let a paused run go on, or end it as `cancelled` (404 when that run is not paused). The run id is in every event |
+| `POST /api/admin/reset-demo` | The console's **Reset demo data** button: asks Waterstoring (`POST /api/admin/reset-demo`, same operator key) to clear the page, work orders, orders and reservations and restore the stock. 409 while any run is active or paused; 502 when Waterstoring refuses or cannot be reached |
 | `GET /api/runs`, `GET /api/runs/{id}` | The last 25 runs (in memory) |
 
 A run keeps going when the browser tab is closed, so a half-booked incident is never left behind.

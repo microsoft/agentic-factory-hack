@@ -1,0 +1,40 @@
+/* Technicians page: cards for the simulated field roster. Builds on style.css of the Waterstoring demo. */
+.tech-hero { background: var(--light-blue); padding: 36px 0 28px; }
+.tech-hero h1 { color: var(--teal); font-size: 34px; font-weight: 800; margin-bottom: 8px; }
+.tech-hero .lead { max-width: 760px; color: var(--gray); }
+.tech-clock { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--teal); }
+.tech-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.tech-summary li { background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 14px; }
+.tech-summary li strong { font-size: 18px; margin-right: 4px; }
+.tech-summary .s-available strong { color: var(--solved); }
+.tech-summary .s-assigned strong { color: var(--teal); }
+.tech-summary .s-busy strong { color: var(--planned); }
+.tech-summary .s-off_shift strong { color: var(--gray); }
+
+.tech-body { padding: 28px 0 48px; }
+.tech-error { background: var(--active-bg); color: var(--active); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-weight: 600; }
+.tech-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+.tech-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.tech-card.assigned { border: 2px solid var(--teal); box-shadow: 0 6px 24px rgba(0, 106, 130, .22); animation: pop .6s ease-out; }
+.tech-card.off_shift { opacity: .8; }
+@keyframes pop { from { transform: scale(.97); } to { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .tech-card.assigned { animation: none; } }
+
+.tech-head { display: flex; gap: 14px; align-items: center; }
+.tech-photo { position: relative; width: 84px; height: 84px; flex: none; border-radius: 50%; overflow: hidden; background: var(--light-blue-2); color: var(--teal); display: grid; place-items: center; font-weight: 800; font-size: 28px; }
+.tech-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tech-head h2 { font-size: 18px; line-height: 1.2; }
+.tech-id { color: var(--gray); font-size: 13px; }
+.tech-badge { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.tech-badge.available { background: var(--solved-bg); color: var(--solved); }
+.tech-badge.assigned { background: var(--teal); color: #fff; }
+.tech-badge.busy { background: var(--planned-bg); color: var(--planned); }
+.tech-badge.off_shift { background: #eceff1; color: var(--gray); }
+
+.tech-facts { font-size: 14px; color: var(--gray); display: grid; gap: 2px; }
+.tech-certs { display: flex; flex-wrap: wrap; gap: 5px; }
+.tech-certs li { background: var(--light-blue); color: var(--teal); border-radius: 6px; padding: 1px 8px; font-size: 12px; font-weight: 600; }
+.tech-job { background: var(--progress-bg); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.tech-job strong { display: block; color: var(--teal); }
+.tech-job a { color: var(--teal); font-weight: 700; }
+.tech-note { margin-top: 22px; font-size: 13px; color: var(--gray); }

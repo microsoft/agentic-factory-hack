@@ -9,6 +9,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
+  <!-- The roster (technicians page) and the seed stock (Reset demo data) ship with the app, in a data folder next to it. -->
+  <ItemGroup>
+    <Content Include="..\..\data\technicians.json;..\..\data\inventory.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\LeakOps.Contracts\LeakOps.Contracts.csproj" />
   </ItemGroup>

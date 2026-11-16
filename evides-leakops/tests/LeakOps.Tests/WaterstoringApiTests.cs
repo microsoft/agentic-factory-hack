@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using LeakOps.Contracts;
+using LeakOps.Waterstoring;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace LeakOps.Tests;
@@ -256,5 +258,100 @@ public class WaterstoringApiTests
         using var empty = new HttpRequestMessage(HttpMethod.Post, "/api/admin/reset");
         empty.Headers.Add("X-Operator-Key", "");
         Assert.Equal(HttpStatusCode.Unauthorized, (await unset.CreateClient().SendAsync(empty)).StatusCode);
+    }
+
+    // ---- Technicians page and reset-demo ----
+
+    private static readonly DateTimeOffset AlarmTime = DateTimeOffset.Parse("2026-11-14T03:10:00Z");
+
+    private static WorkOrder OrderFor(string technicianId, string incidentId = "INC-ALM-2026-1114-0001") => new(
+        "WO-" + incidentId, incidentId, "SEG-0412", "Dorpsweg (Spijkenisse)", 160, new GeoPoint(51.86, 4.33), "burst", "S1", "Burst on a cast-iron main",
+        technicianId, "Name", "PROC-1", [], [], [], AlarmTime.AddMinutes(15), 20, 30, 0, 5, AlarmTime.AddMinutes(65), AlarmTime.AddHours(6), "scheduled", AlarmTime, null, AlarmTime);
+
+    private sealed class FakeDemoData(params WorkOrder[] orders) : IDemoData
+    {
+        public int Resets;
+        public Task<IReadOnlyList<Technician>> TechniciansAsync() => new FileDemoData(LeakOps.Seeder.SeedDataLoader.FindDataDirectory()).TechniciansAsync();
+        public Task<IReadOnlyList<WorkOrder>> WorkOrdersAsync() => Task.FromResult<IReadOnlyList<WorkOrder>>(orders);
+        public Task ResetAsync() { Resets++; return Task.CompletedTask; }
+    }
+
+    [Fact]
+    public async Task The_technicians_api_is_public_and_shows_the_roster_at_the_time_of_the_alarm()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+
+        var board = await NewClient(factory, withKey: false).GetFromJsonAsync<TechnicianBoardResult>("/api/technicians");
+
+        Assert.Equal(8, board!.Summary.Total);
+        Assert.Equal(AlarmTime, board.AtUtc);
+        var states = board.Technicians.ToDictionary(t => t.Id, t => t.State);
+        Assert.Equal("available", states["T-02"]);
+        Assert.Equal("busy", states["T-03"]);       // a job from the roster
+        Assert.Equal("off_shift", states["T-04"]);  // day shift, starts at 05:00
+        Assert.Equal(0, board.Summary.Assigned);
+        Assert.All(board.Technicians, t => Assert.Null(t.Assignment));
+        Assert.Equal("/technicians/T-02.jpg", board.Technicians.Single(t => t.Id == "T-02").Photo);
+    }
+
+    [Fact]
+    public async Task The_technicians_api_can_show_another_moment()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+
+        var board = await factory.CreateClient().GetFromJsonAsync<TechnicianBoardResult>("/api/technicians?at=2026-11-14T08:00:00Z");
+
+        Assert.Equal("available", board!.Technicians.Single(t => t.Id == "T-04").State);
+        Assert.Equal("off_shift", board.Technicians.Single(t => t.Id == "T-01").State);
+    }
+
+    [Fact]
+    public async Task A_scheduled_work_order_makes_its_technician_assigned_with_the_job_details()
+    {
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b =>
+            b.ConfigureServices(s => s.AddSingleton<IDemoData>(new FakeDemoData(OrderFor("T-02")))));
+
+        var board = await factory.CreateClient().GetFromJsonAsync<TechnicianBoardResult>("/api/technicians");
+
+        var samira = board!.Technicians.Single(t => t.Id == "T-02");
+        Assert.Equal("assigned", samira.State);
+        Assert.Equal("WO-INC-ALM-2026-1114-0001", samira.Assignment!.WorkOrderId);
+        Assert.Equal("Dorpsweg", samira.Assignment.Street);
+        Assert.Equal(1, board.Summary.Assigned);
+        Assert.Equal(4 - 1, board.Summary.Available);   // T-01, T-05, T-07 are still free
+    }
+
+    [Fact]
+    public async Task The_technicians_page_is_served()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+
+        var response = await factory.CreateClient().GetAsync("/technicians");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("tech-grid", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Reset_demo_needs_a_key_and_clears_the_page_and_the_demo_data()
+    {
+        var data = new FakeDemoData();
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b =>
+        {
+            b.UseSetting("OPERATOR_KEY", "op-key");
+            b.ConfigureServices(s => s.AddSingleton<IDemoData>(data));
+        });
+        var writer = NewClient(factory);
+        await writer.PostAsJsonAsync("/api/incidents", Sample());
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await factory.CreateClient().PostAsync("/api/admin/reset-demo", null)).StatusCode);
+        Assert.Equal(0, data.Resets);
+        Assert.Single((await writer.GetFromJsonAsync<List<WaterstoringIncident>>("/api/incidents"))!);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/reset-demo");
+        request.Headers.Add("X-Operator-Key", "op-key");
+        Assert.Equal(HttpStatusCode.NoContent, (await factory.CreateClient().SendAsync(request)).StatusCode);
+        Assert.Equal(1, data.Resets);
+        Assert.Empty((await writer.GetFromJsonAsync<List<WaterstoringIncident>>("/api/incidents"))!);
     }
 }

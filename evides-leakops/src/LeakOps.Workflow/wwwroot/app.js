@@ -15,7 +15,7 @@ const OUTCOME_TEXT = {
   closed_false_alarm: "Closed: no leak, so nothing else was started.",
   needs_review: "Stopped: a person has to decide.",
   failed: "Failed: an agent could not do its job.",
-  cancelled: "Cancelled: the run was paused and not resumed. Nothing was published or booked.",
+  cancelled: "Cancelled: the run was paused and not resumed.",
 };
 
 const $ = (id) => document.getElementById(id);
@@ -95,14 +95,29 @@ function startTimer(step) {
 }
 function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
 
-// Paused before Communications: nothing has been sent to Waterstoring yet. The operator checks the site, then resumes or cancels.
+// The run waits before a step the operator chose. Communications: nothing has been sent to Waterstoring yet. Matchmaker: residents know,
+// but nobody is assigned. The operator shows the outside world (a page), then resumes or cancels.
+const PAUSES = {
+  communications: {
+    headline: "Residents have not been told yet. Nothing has been sent to Waterstoring.",
+    text: "Open Waterstoring and show that there is no notice for this incident. Then come back and resume.",
+    link: ["Open Waterstoring \u2197", () => $("site-link").href],
+  },
+  matchmaker: {
+    headline: "Residents have been told. No technician is assigned yet.",
+    text: "Open the technicians page and show everyone on the roster and who is available. Nobody is assigned to this incident yet. Then come back and resume: the agent picks one and Scheduling books them.",
+    link: ["Open the technicians page \u2197", () => new URL("/technicians", $("site-link").href).href],
+  },
+};
+
 function showPause(event) {
   const step = event.step;
-  setStep(step, "paused", "Paused", "Residents have not been told yet. Nothing has been sent to Waterstoring.");
+  const pause = PAUSES[step];
+  setStep(step, "paused", "Paused", pause.headline);
   clearPauseBox();
   const deadline = Date.parse(event.data?.deadlineUtc) || Date.now() + 900000;
   const count = el("span", { class: "count" }, "");
-  const open = el("a", { href: $("site-link").href, target: "_blank", rel: "noopener" }, "Open Waterstoring \u2197");
+  const open = el("a", { href: pause.link[1](), target: "_blank", rel: "noopener" }, pause.link[0]);
   const go = el("button", { type: "button", class: "go" }, "Resume the workflow");
   const stop = el("button", { type: "button", class: "stop" }, "Cancel the run");
   const msg = el("p", { class: "error", role: "alert", hidden: "" }, "");
@@ -115,7 +130,7 @@ function showPause(event) {
   go.addEventListener("click", () => act("resume", go));
   stop.addEventListener("click", () => act("cancel", stop));
   const box = el("div", { class: "pausebox" },
-    el("p", {}, "Open Waterstoring and show that there is no notice for this incident. Then come back and resume."),
+    el("p", {}, pause.text),
     el("div", { class: "row" }, open, go, stop, count), msg);
   stepEls[step].append(box);
   const tick = () => { const left = Math.max(0, Math.round((deadline - Date.now()) / 1000)); count.textContent = `Cancels itself in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`; };
@@ -196,13 +211,12 @@ async function run() {
   catch (e) { return showError("The alarm is not valid JSON: " + e.message); }
 
   running = true;
-  $("pause-comms").disabled = true;
-  $("run").disabled = true;
+  setControlsDisabled(true);
   $("run").textContent = "Running...";
   $("banner").hidden = true;
   buildSteps();
   try {
-    const pauseBefore = $("pause-comms").checked ? "communications" : undefined;
+    const pauseBefore = [$("pause-comms").checked && "communications", $("pause-match").checked && "matchmaker"].filter(Boolean);
     const response = await fetch("api/runs", { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ alarm, pauseBefore }) });
     if (response.status === 401) { $("key-row").hidden = false; throw new Error("The operator key is missing or wrong. Enter it above and run again."); }
     if (!response.ok) {
@@ -216,10 +230,36 @@ async function run() {
     showError(e.message);
   } finally {
     running = false;
-    $("pause-comms").disabled = false;
-    $("run").disabled = false;
+    setControlsDisabled(false);
     $("run").textContent = "Run the workflow again";
     loadRecent();
+  }
+}
+
+// While a run is going the options and the reset are locked (the host refuses a reset then anyway).
+function setControlsDisabled(disabled) {
+  ["pause-comms", "pause-match", "run", "reset-demo"].forEach((id) => { $(id).disabled = disabled; });
+}
+
+async function resetDemo() {
+  const msg = $("reset-msg");
+  if (!confirm("Reset the demo?\n\nThis clears the Waterstoring page, all work orders, orders and reservations, and restores the stock.")) return;
+  $("reset-demo").disabled = true;
+  msg.className = "hint";
+  msg.textContent = "Resetting...";
+  try {
+    const response = await fetch("api/admin/reset-demo", { method: "POST", headers: authHeaders() });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || `The workflow host answered ${response.status}.`);
+    msg.textContent = "Done: the demo is back at its start. Every technician is free and Waterstoring is empty.";
+    $("banner").hidden = true;
+    buildSteps();
+    loadRecent();
+  } catch (e) {
+    msg.className = "hint bad";
+    msg.textContent = e.message;
+  } finally {
+    $("reset-demo").disabled = running;
   }
 }
 
@@ -296,6 +336,7 @@ function applyKey() {
 
 buildSteps();
 $("run").addEventListener("click", run);
+$("reset-demo").addEventListener("click", resetDemo);
 $("operator-key").addEventListener("input", () => { clearTimeout(keyTimer); keyTimer = setTimeout(applyKey, 400); });
 $("operator-key").addEventListener("change", applyKey);
 loadConfig().then(start);

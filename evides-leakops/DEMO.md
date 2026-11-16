@@ -31,7 +31,7 @@ The names above are for the current deployment; the suffix `88546e` is derived f
 1. **Web plan on:** `./evides-leakops/deploy/scale-web.ps1 -Sku B1` (the Free plan is slow and sleeps). Costs 0.0162 EUR an hour.
 2. **Warm up:** open the operator console and run the false-alarm scenario once. The first request after a quiet period is slow
    (function cold start, token acquisition). It also checks that the model answers.
-3. **Clean state** (only if the burst was run before and you want to show a fresh incident): on the residents' page click **Meldingen wissen / Clear alerts** (yellow bar at the top) and enter the operator key; that clears the fake site. To also clear the run data (reservations, orders, work orders) in Cosmos DB:
+3. **Clean state** (only if the burst was run before and you want a fresh start): in the operator console press **Reset demo data** (bottom left). That clears the Waterstoring page, the work orders (so every technician is free again), orders and reservations, and restores the stock. It is refused while a run is going. (The yellow bar's **Clear alerts** on the residents' page clears only the public page.) The same from the command line, for Cosmos DB:
    ```powershell
    $env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"
    $rg = 'rg-evides-ai-demo'
@@ -94,11 +94,19 @@ flow 121 m3/h against 48 m3/h expected, no planned works, frost). For the false 
 4. Run the burst again: nothing is booked or ordered twice (every step is idempotent).
 
 **Pause before Communications (show that residents have not been told yet):**
-1. On the residents' page click **Meldingen wissen / Clear alerts** (operator key) so the page is empty. Keep that page open in a second tab.
+1. Press **Reset demo data** in the console so the residents' page is empty. Keep that page open in a second tab.
 2. In the console pick the burst, tick **Pause before step 3 Communications**, and run. Triage and Diagnostic run (about 50 s), then step 3 shows **Paused**.
 3. Go to the Waterstoring tab: there is no notice for the incident (the list says there are no known disruptions). Nothing has been written yet.
 4. Back in the console press **Resume the workflow**. Communications publishes; switch to the Waterstoring tab and the notice appears within 5 seconds, then the rest of the run finishes.
 5. **Cancel the run** ends it instead (outcome `cancelled`, nothing published or booked). Leave it alone for 15 minutes, or close the page, and it cancels itself.
+
+**Pause before Resource Matchmaker (show the technicians first, then who gets assigned):**
+1. Press **Reset demo data**, then open the **technicians page** (`/technicians` on the Waterstoring site; also linked in its footer) in a second tab: eight technicians with portraits, nobody assigned (4 available, 1 busy, 3 off shift at the alarm time).
+2. Tick **Pause before step 4 Resource Matchmaker** (you can tick the step 3 pause too) and run. After Communications the console shows step 4 **Paused**: residents know, but no technician is assigned.
+3. Show the technicians page again: still nobody is assigned. Point out Linda, Anouk and Fatima are off shift, Jeroen is busy, Pieter is not certified for cast iron.
+4. Press **Resume**. The Matchmaker picks Samira El Idrissi (T-02). Procurement and Scheduling follow.
+5. Back on the technicians page (it refreshes every 5 seconds) Samira's card turns to **Assigned** with the work order, when she leaves, arrives and expects to be done.
+(The portraits are AI-generated, fictional people; the page says so.)
 
 ## 4. Tracing (portal, Tracing, or Build > Agents > agent > Traces)
 Every agent call is traced to Application Insights: `invoke_agent <Agent>`, `chat gpt-5.4`, `execute_tool leakops_mcp.<tool>` and `execute_tool leakops_kb.knowledge_base_retrieve`, with

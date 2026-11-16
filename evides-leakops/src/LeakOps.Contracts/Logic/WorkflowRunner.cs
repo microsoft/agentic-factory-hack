@@ -73,20 +73,28 @@ public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
         if (report is null) return await Finish(WorkflowOutcomes.Failed, WorkflowSteps.Diagnostic, [steps[^1].Headline]);
         if (report.NeedsReview) return await Finish(WorkflowOutcomes.NeedsReview, WorkflowSteps.Diagnostic, report.ReviewReasons);
 
-        // The operator may ask to pause here, so the audience can see that residents have not been told yet. Nothing has been written.
-        if (pause is { Step: WorkflowSteps.Communications })
+        // The operator may ask to pause before a step, so the audience can look at the outside world first. Returns false when the run is cancelled.
+        async Task<bool> PauseBefore(string step, string headline)
         {
-            var go = await pause.Wait(runId, () => Emit(WorkflowEventTypes.RunPaused, WorkflowSteps.Communications,
-                headline: "Paused before Communications: residents have not been told yet"), cancellationToken);
-            if (!go)
-                return await Finish(WorkflowOutcomes.Cancelled, WorkflowSteps.Diagnostic, ["Paused before Communications and not resumed: nothing was published or booked."]);
-            await Emit(WorkflowEventTypes.RunResumed, WorkflowSteps.Communications, headline: "Resumed");
+            if (pause is null || !pause.Applies(step)) return true;
+            if (!await pause.Wait(runId, () => Emit(WorkflowEventTypes.RunPaused, step, headline: headline), cancellationToken)) return false;
+            await Emit(WorkflowEventTypes.RunResumed, step, headline: "Resumed");
+            return true;
         }
+
+        // Nothing has been written yet.
+        if (!await PauseBefore(WorkflowSteps.Communications, "Paused before Communications: residents have not been told yet"))
+            return await Finish(WorkflowOutcomes.Cancelled, WorkflowSteps.Diagnostic, ["Paused before Communications and not resumed: nothing was published or booked."]);
 
         var communications = await Step<CommunicationsResult>(WorkflowSteps.Communications, new CommunicationsRequest(report), c =>
             $"Published {c.IncidentId} on Waterstoring" + (c.UsedFallbackText ? " (safe template text)" : ""));
         if (communications is null) return await Finish(WorkflowOutcomes.Failed, WorkflowSteps.Communications, [steps[^1].Headline]);
         incidentId = communications.IncidentId;
+
+        // Residents know by now, but nobody is assigned, no stock is reserved and no work order exists.
+        if (!await PauseBefore(WorkflowSteps.Matchmaker, "Paused before Resource Matchmaker: no technician is assigned yet"))
+            return await Finish(WorkflowOutcomes.Cancelled, WorkflowSteps.Communications,
+                [$"Paused before Resource Matchmaker and not resumed: residents were already informed ({incidentId}), but no technician, stock or work order was booked."]);
 
         var match = await Step<ResourceMatch>(WorkflowSteps.Matchmaker, new MatchmakerRequest(report), m =>
             m.Primary is null

@@ -100,6 +100,13 @@ textarea:focus, button:focus-visible, .scenario:focus-visible, summary:focus-vis
 .check { display: block; font-size: 14px; font-weight: 600; margin: 0 0 12px; cursor: pointer; }
 .check input { margin-right: 6px; }
 .check span { display: block; font-weight: 400; color: var(--muted); font-size: 13px; margin: 2px 0 0 24px; }
+.pause-options { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 2px; margin: 0 0 14px; }
+.pause-options legend { font-size: 13px; font-weight: 700; color: var(--muted); padding: 0 6px; }
+.reset-box { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 14px; }
+.ghost-danger { border: 2px solid var(--bad); background: #fff; color: var(--bad); border-radius: 999px; padding: 8px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+.ghost-danger:disabled { opacity: .55; cursor: wait; }
+.reset-box .hint { margin-bottom: 0; }
+.reset-box .hint.bad { color: var(--bad); }
 .banner.cancelled { background: #f1f2f4; border-color: #ccd1d8; color: #3d4652; }
 @keyframes pulse { 50% { transform: scale(1.1); } }
 @media (prefers-reduced-motion: reduce) { .step.running .badge { animation: none; } }
