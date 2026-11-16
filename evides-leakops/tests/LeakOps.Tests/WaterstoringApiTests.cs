@@ -224,4 +224,37 @@ public class WaterstoringApiTests
     }
 
     private record SearchResult(string? Query, bool HasIncident, List<WaterstoringIncident> Incidents);
+
+    [Fact]
+    public async Task Reset_also_accepts_the_operator_key_but_no_other_key()
+    {
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.UseSetting("OPERATOR_KEY", "op-key"));
+        var writer = NewClient(factory);
+        await writer.PostAsJsonAsync("/api/incidents", Sample());
+
+        using var wrong = new HttpRequestMessage(HttpMethod.Post, "/api/admin/reset");
+        wrong.Headers.Add("X-Operator-Key", "not-the-key");
+        using var right = new HttpRequestMessage(HttpMethod.Post, "/api/admin/reset");
+        right.Headers.Add("X-Operator-Key", "op-key");
+        var anonymous = factory.CreateClient();
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.SendAsync(wrong)).StatusCode);
+        Assert.Single((await writer.GetFromJsonAsync<List<WaterstoringIncident>>("/api/incidents"))!);
+        Assert.Equal(HttpStatusCode.NoContent, (await anonymous.SendAsync(right)).StatusCode);
+        Assert.Empty((await writer.GetFromJsonAsync<List<WaterstoringIncident>>("/api/incidents"))!);
+    }
+
+    [Fact]
+    public async Task Operator_key_does_not_open_the_ingest_api_and_an_unset_key_never_matches()
+    {
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.UseSetting("OPERATOR_KEY", "op-key"));
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Operator-Key", "op-key");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsJsonAsync("/api/incidents", Sample())).StatusCode);
+
+        using var unset = new WebApplicationFactory<Program>();   // no OPERATOR_KEY: an empty header must not match
+        using var empty = new HttpRequestMessage(HttpMethod.Post, "/api/admin/reset");
+        empty.Headers.Add("X-Operator-Key", "");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await unset.CreateClient().SendAsync(empty)).StatusCode);
+    }
 }

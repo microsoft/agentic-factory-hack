@@ -11,7 +11,24 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="demo-bar" data-i18n="ribbon"></div>
+  <div class="demo-bar">
+    <span data-i18n="ribbon"></span>
+    <button id="clear-open" class="demo-clear" type="button" data-i18n="clearBtn"></button>
+  </div>
+
+  <dialog id="clear-dialog" class="clear-dialog" aria-labelledby="clear-title">
+    <form id="clear-form" method="dialog">
+      <h2 id="clear-title" data-i18n="clearTitle"></h2>
+      <p data-i18n="clearText"></p>
+      <label for="clear-key" data-i18n="clearKeyLabel"></label>
+      <input id="clear-key" type="password" autocomplete="off" required>
+      <p id="clear-msg" class="clear-msg" role="alert"></p>
+      <div class="clear-actions">
+        <button id="clear-cancel" type="button" class="clear-secondary" data-i18n="clearCancel"></button>
+        <button id="clear-go" type="submit" class="clear-danger" data-i18n="clearGo"></button>
+      </div>
+    </form>
+  </dialog>
 
   <header class="site-header">
     <div class="container header-inner">

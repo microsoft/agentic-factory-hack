@@ -130,7 +130,7 @@ tiles load from the internet (Leaflet and OpenStreetMap); the list works offline
 | `GET /api/search?q=3201 AB` | public | Active incidents by postcode, street or place (min. 3 characters) |
 | `POST /api/incidents` | `X-Api-Key` | Create an incident. Posting the same `incidentId` again replaces it (safe to retry) |
 | `PATCH /api/incidents/{id}` | `X-Api-Key` | Change `status`, `message`, `messageEn` and/or `expectedResolutionUtc`; adds a timeline entry |
-| `POST /api/admin/reset` | `X-Api-Key` | Clear all incidents (demo reset) |
+| `POST /api/admin/reset` | `X-Api-Key` or `X-Operator-Key` | Clear all incidents (demo reset). The "Meldingen wissen / Clear alerts" button in the yellow demo bar of the page calls it with the operator key you type in (the key is not stored; the app has the setting `OPERATOR_KEY`, the same value as the workflow host) |
 
 Statuses: `reported`, `repair_planned`, `repair_in_progress`, `resolved` (resolved incidents leave the search but stay in the list).
 Request and response shapes are the records in `src/LeakOps.Contracts/Waterstoring.cs`. Outside Development the app refuses to

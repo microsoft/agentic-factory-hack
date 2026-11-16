@@ -253,6 +253,7 @@ module waterstoring 'webapp.bicep' = {
     alwaysOn: webSku == 'B1'
     settings: [
       { name: 'WATERSTORING_API_KEY', value: waterstoringApiKey }
+      { name: 'OPERATOR_KEY', value: operatorKey }
       { name: 'WATERSTORING_STORE', value: 'cosmos' }
       { name: 'COSMOS_ENDPOINT', value: cosmos.properties.documentEndpoint }
       { name: 'COSMOS_DATABASE_NAME', value: 'LeakOpsDB' }

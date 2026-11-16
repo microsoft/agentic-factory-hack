@@ -31,7 +31,7 @@ The names above are for the current deployment; the suffix `88546e` is derived f
 1. **Web plan on:** `./evides-leakops/deploy/scale-web.ps1 -Sku B1` (the Free plan is slow and sleeps). Costs 0.0162 EUR an hour.
 2. **Warm up:** open the operator console and run the false-alarm scenario once. The first request after a quiet period is slow
    (function cold start, token acquisition). It also checks that the model answers.
-3. **Clean state** (only if the burst was run before and you want to show a fresh incident): clear the incident data and the fake site:
+3. **Clean state** (only if the burst was run before and you want to show a fresh incident): on the residents' page click **Meldingen wissen / Clear alerts** (yellow bar at the top) and enter the operator key; that clears the fake site. To also clear the run data (reservations, orders, work orders) in Cosmos DB:
    ```powershell
    $env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"
    $rg = 'rg-evides-ai-demo'

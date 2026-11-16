@@ -33,6 +33,20 @@ svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; 
 
 /* ---- Demo bar and header ---- */
 .demo-bar { background: #fff3cd; color: #664d03; text-align: center; font-size: 13px; padding: 6px 12px; border-bottom: 1px solid #ffe69c; }
+.demo-clear { margin-left: 12px; border: 1px solid #664d03; background: transparent; color: #664d03; border-radius: 999px; padding: 2px 12px; font: inherit; font-weight: 700; cursor: pointer; }
+.demo-clear:hover, .demo-clear:focus-visible { background: #664d03; color: #fff3cd; }
+.clear-dialog { border: 0; border-radius: 18px; padding: 24px 26px; max-width: 440px; width: calc(100% - 32px); box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
+.clear-dialog::backdrop { background: rgba(6, 79, 87, .45); }
+.clear-dialog h2 { margin: 0 0 8px; font-size: 20px; }
+.clear-dialog p { margin: 0 0 12px; font-size: 14px; }
+.clear-dialog label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.clear-dialog input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #b9c9cc; border-radius: 10px; font: inherit; }
+.clear-msg { min-height: 20px; color: #a32a1a; font-weight: 600; margin-top: 8px; }
+.clear-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.clear-actions button { border: 0; border-radius: 999px; padding: 9px 20px; font: inherit; font-weight: 700; cursor: pointer; }
+.clear-secondary { background: #e6eef0; color: #064f57; }
+.clear-danger { background: #c0392b; color: #fff; }
+.clear-danger:disabled { opacity: .6; cursor: wait; }
 
 .site-header { background: var(--light-blue); position: sticky; top: 0; z-index: 1000; }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 80px; }

@@ -5,6 +5,15 @@
 const TEXT = {
   nl: {
     ribbon: "DEMO - dit is een nagebootste website, niet de echte waterstoring.nl. Alle gegevens zijn gesimuleerd.",
+    clearBtn: "Meldingen wissen",
+    clearTitle: "Alle meldingen wissen?",
+    clearText: "Dit haalt alle storingen van deze demosite weg, zodat u opnieuw kunt beginnen. Het kan niet ongedaan worden gemaakt.",
+    clearKeyLabel: "Operatorsleutel (dezelfde als voor de operator console)",
+    clearCancel: "Annuleren",
+    clearGo: "Wissen",
+    clearBusy: "Bezig met wissen...",
+    clearWrongKey: "Deze sleutel klopt niet.",
+    clearFailed: "Wissen is niet gelukt. Probeer het opnieuw.",
     navCompany: "Uw waterbedrijf",
     navReport: "Meld een storing",
     eyebrow: "Live overzicht",
@@ -46,6 +55,15 @@ const TEXT = {
   },
   en: {
     ribbon: "DEMO - this is a mock-up site, not the real waterstoring.nl. All data is simulated.",
+    clearBtn: "Clear alerts",
+    clearTitle: "Clear all alerts?",
+    clearText: "This removes every disruption from this demo site so you can start again. It cannot be undone.",
+    clearKeyLabel: "Operator key (the same as for the operator console)",
+    clearCancel: "Cancel",
+    clearGo: "Clear",
+    clearBusy: "Clearing...",
+    clearWrongKey: "That key is not right.",
+    clearFailed: "Clearing failed. Please try again.",
     navCompany: "Your water company",
     navReport: "Report a disruption",
     eyebrow: "Live overview",
@@ -293,6 +311,39 @@ $("lang-en").addEventListener("click", () => applyLanguage("en"));
 $("search-form").addEventListener("submit", (event) => { event.preventDefault(); search($("search-input").value); });
 $("locate").addEventListener("click", locate);
 $("map-toggle").addEventListener("click", () => setMapOpen(!state.mapOpen));
+
+// ---- Clear alerts (demo reset) ----------------------------------------------------------------------------------
+// The operator key is typed in each time and only sent to this site's own API; it is never stored.
+
+const clearDialog = $("clear-dialog");
+$("clear-open").addEventListener("click", () => {
+  $("clear-key").value = "";
+  $("clear-msg").textContent = "";
+  clearDialog.showModal();
+  $("clear-key").focus();
+});
+$("clear-cancel").addEventListener("click", () => clearDialog.close());
+$("clear-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const go = $("clear-go");
+  go.disabled = true;
+  $("clear-msg").textContent = t().clearBusy;
+  try {
+    const response = await fetch("/api/admin/reset", { method: "POST", headers: { "X-Operator-Key": $("clear-key").value } });
+    if (response.status === 401) { $("clear-msg").textContent = t().clearWrongKey; return; }
+    if (!response.ok) { $("clear-msg").textContent = t().clearFailed; return; }
+    state.seen.clear();
+    $("search-result").replaceChildren();
+    state.lastSearch = null;
+    await refresh();
+    clearDialog.close();
+  } catch {
+    $("clear-msg").textContent = t().clearFailed;
+  } finally {
+    go.disabled = false;
+    $("clear-key").value = "";
+  }
+});
 
 initMap();
 applyLanguage("nl");

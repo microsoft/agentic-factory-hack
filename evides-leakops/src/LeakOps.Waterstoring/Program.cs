@@ -68,11 +68,14 @@ app.MapPatch("/api/incidents/{id}", async (string id, WaterstoringIncidentUpdate
     return Results.Ok(incident);
 }).AddEndpointFilter(RequireApiKey);
 
-app.MapPost("/api/admin/reset", async (IncidentStore store) =>
+// The "Clear alerts" button on the page calls this with the operator key (the same key as the operator console), so the demo
+// can be reset without knowing the ingest key. The ingest key keeps working for scripts.
+app.MapPost("/api/admin/reset", async (IncidentStore store, ILogger<Program> logger) =>
 {
     await store.ClearAsync();
+    logger.LogInformation("All incidents cleared");
     return Results.NoContent();
-}).AddEndpointFilter(RequireApiKey);
+}).AddEndpointFilter(RequireApiKeyOrOperatorKey);
 
 app.Run();
 
@@ -80,10 +83,19 @@ app.Run();
 async ValueTask<object?> RequireApiKey(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
 {
     var supplied = context.HttpContext.Request.Headers["X-Api-Key"].ToString();
-    // FixedTimeEquals compares without leaking, through timing, how many characters matched.
-    var valid = CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(supplied), Encoding.UTF8.GetBytes(apiKey!));
-    return valid ? await next(context) : Results.Json(new { error = "Missing or invalid X-Api-Key header." }, statusCode: StatusCodes.Status401Unauthorized);
+    return KeyMatches(supplied, apiKey) ? await next(context) : Results.Json(new { error = "Missing or invalid X-Api-Key header." }, statusCode: StatusCodes.Status401Unauthorized);
 }
+
+async ValueTask<object?> RequireApiKeyOrOperatorKey(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+{
+    var headers = context.HttpContext.Request.Headers;
+    var ok = KeyMatches(headers["X-Api-Key"].ToString(), apiKey) || KeyMatches(headers["X-Operator-Key"].ToString(), app.Configuration["OPERATOR_KEY"]);
+    return ok ? await next(context) : Results.Json(new { error = "Missing or invalid X-Operator-Key (or X-Api-Key) header." }, statusCode: StatusCodes.Status401Unauthorized);
+}
+
+// FixedTimeEquals compares without leaking, through timing, how many characters matched. An unset key never matches.
+static bool KeyMatches(string supplied, string? expected) =>
+    !string.IsNullOrEmpty(expected) && CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(supplied), Encoding.UTF8.GetBytes(expected));
 
 // Incidents live in memory on a laptop. In Azure the app setting WATERSTORING_STORE=cosmos keeps them in the LeakOps Cosmos database,
 // so a restart or a new deployment does not empty the page. In Azure the app's managed identity is used; locally a COSMOS_KEY works too.
