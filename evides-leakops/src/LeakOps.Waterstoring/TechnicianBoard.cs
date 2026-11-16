@@ -13,7 +13,8 @@ public record TechnicianCard(
     GeoPoint LastPosition, DateTimeOffset LastPositionAsOfUtc,
     DateTimeOffset? ShiftEndsUtc, DateTimeOffset? NextShiftStartsUtc,
     string? BusyWith, DateTimeOffset? BusyUntilUtc,
-    string Photo, TechnicianAssignment? Assignment);
+    string Photo, TechnicianAssignment? Assignment,
+    IReadOnlyList<Shift> Shifts, IReadOnlyList<BusyBlock> BusyBlocks);
 
 public record TechnicianSummary(int Total, int Available, int Assigned, int Busy, int OffShift);
 
@@ -46,7 +47,8 @@ public static class TechnicianBoard
                 t.Location, t.LocationAsOfUtc, status.ShiftEndsUtc, status.NextShiftStartsUtc, status.BusyWith, status.BusyUntilUtc,
                 $"/technicians/{t.Id}.jpg",
                 order is null ? null : new TechnicianAssignment(order.Id, order.IncidentId, SchedulingRules.StreetName(order.Street), order.Summary,
-                    order.ScheduledStartUtc, order.ExpectedArrivalUtc, order.ExpectedCompletionUtc));
+                    order.ScheduledStartUtc, order.ExpectedArrivalUtc, order.ExpectedCompletionUtc),
+                t.Shifts, t.BusyBlocks);
         }).ToList();
 
         var summary = new TechnicianSummary(cards.Count, cards.Count(c => c.State == Available), cards.Count(c => c.State == Assigned),

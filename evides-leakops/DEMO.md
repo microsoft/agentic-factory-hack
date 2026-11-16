@@ -105,7 +105,7 @@ flow 121 m3/h against 48 m3/h expected, no planned works, frost). For the false 
 2. Tick **Pause before step 4 Resource Matchmaker** (you can tick the step 3 pause too) and run. After Communications the console shows step 4 **Paused**: residents know, but no technician is assigned.
 3. Show the technicians page again: still nobody is assigned. Point out Linda, Anouk and Fatima are off shift, Jeroen is busy, Pieter is not certified for cast iron.
 4. Press **Resume**. The Matchmaker picks Samira El Idrissi (T-02). Procurement and Scheduling follow.
-5. Back on the technicians page (it refreshes every 5 seconds) Samira's card turns to **Assigned** with the work order, when she leaves, arrives and expects to be done.
+5. Back on the technicians page (it refreshes every 5 seconds) Samira is selected automatically: her state turns to **Assigned**, the reading pane shows the work order like a calendar event, and the planning timeline shows her blue work-order bar from leave to completion.
 (The portraits are AI-generated, fictional people; the page says so.)
 
 ## 4. Tracing (portal, Tracing, or Build > Agents > agent > Traces)

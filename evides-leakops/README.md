@@ -134,8 +134,11 @@ tiles load from the internet (Leaflet and OpenStreetMap); the list works offline
 | `GET /api/technicians[?at=<ISO time>]` | public | The simulated roster of all technicians with a state: `available`, `assigned` (a scheduled work order names them, with the job details), `busy` (a job from the roster) or `off_shift`. `at` defaults to the simulation clock, the time of the demo alarm (`DEMO_CLOCK_UTC` overrides it). Same logic as the Resource Matchmaker (`WorkforceAvailability`), so page and agent agree |
 | `POST /api/admin/reset-demo` | `X-Api-Key` or `X-Operator-Key` | Back to the start: clears the incidents, the work orders (so nobody is assigned), purchase orders and stock reservations of the workflow, and restores the stock from `data/inventory.json`. Behind the console's **Reset demo data** button |
 
-**Technicians page:** `/technicians` (NL/EN, refreshes every 5 seconds) shows a card per technician with portrait, state, certifications,
-vehicle, shift and, when assigned, the work order with leave, arrival and completion time. The roster and the seed stock ship with the app
+**Technicians page:** `/technicians` is styled as an internal Microsoft 365 / Outlook-like planning app (NL/EN, refreshes every 5 seconds): a mail-style
+list of all technicians with filter tabs (all, available, assigned, busy, off shift) and search, a reading pane for the selected technician
+(portrait with presence dot, state, certifications, vehicle, shift and, when assigned, the work order shown like a calendar event), and a
+scheduling-assistant timeline of everyone's shifts, busy jobs and work orders around the red "now" line (the simulation clock). A technician who
+becomes assigned during a run is selected automatically. The roster and the seed stock ship with the app
 (`data/*.json`, linked in `LeakOps.Waterstoring.csproj`); in Azure the roster and work orders are read from Cosmos DB with the web app's
 managed identity. The page is public and shows simulated data only. The portraits (`wwwroot/technicians/T-0x.jpg`) are **AI-generated
 fictional people**, made once with `deploy/generate-technician-photos.ps1` (a temporary `gpt-image-1.5` deployment, removed afterwards; the JPGs are committed, so a normal deploy needs no image model). A missing portrait falls back to initials.

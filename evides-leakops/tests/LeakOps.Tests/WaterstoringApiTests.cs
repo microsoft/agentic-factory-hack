@@ -329,7 +329,7 @@ public class WaterstoringApiTests
         var response = await factory.CreateClient().GetAsync("/technicians");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("tech-grid", await response.Content.ReadAsStringAsync());
+        Assert.Contains("id=\"planner\"", await response.Content.ReadAsStringAsync());
     }
 
     [Fact]
