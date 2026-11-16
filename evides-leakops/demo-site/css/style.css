@@ -179,6 +179,9 @@ h1,h2,h3,h4{color:var(--teal);margin:0;font-weight:700}
 /* finale */
 .finale{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:20px;align-items:start}
 .finale h2{font-size:clamp(22px,2.2vw,30px);margin-bottom:4px}
+.live-link{display:flex;flex-direction:column;gap:2px;margin:10px 0 2px;padding:10px 16px;border-radius:16px;background:var(--aqua-10);border:2px solid var(--aqua);color:var(--teal);text-decoration:none}
+.live-link b{font-size:15px}.live-link small{font-size:12.5px;color:#4f7a80}
+.live-link:hover,.live-link:focus-visible{background:var(--aqua-20);outline:none;box-shadow:0 0 0 3px var(--aqua-30)}
 .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
 .ctrl button{border:0;border-radius:999px;padding:9px 20px;font-weight:700;background:var(--yellow);color:var(--teal)}
 .ctrl button.sec{background:var(--aqua-20)}
