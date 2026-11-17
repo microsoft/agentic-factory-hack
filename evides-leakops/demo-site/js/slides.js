@@ -159,17 +159,17 @@
   const BEFORE_STEPS = [
     { p: 1, t: { en: 'The network fails', nl: 'Het net valt uit' }, who: { en: 'Nobody knows yet', nl: 'Nog niemand weet het' }, sys: [], pp: '0' },
     { p: 1, t: { en: 'SCADA raises an alarm', nl: 'SCADA geeft alarm' }, who: { en: 'Control room operator', nl: 'Operator in de meldkamer' }, sys: ['scada'], pp: '1' },
-    { p: 1, t: { en: 'First check: real or sensor fault?', nl: 'Eerste check: echt of sensorfout?' }, who: { en: 'Control room operator', nl: 'Operator in de meldkamer' }, sys: ['scada', 'hist', 'alarm'], pp: '1', agent: 'Triage' },
+    { p: 1, t: { en: 'First check: real or sensor fault?', nl: 'Eerste check: echt of sensorfout?' }, who: { en: 'Control room operator', nl: 'Operator in de meldkamer' }, sys: ['scada', 'hist', 'alarm'], pp: '1' },
     { p: 1, t: { en: 'Incident ticket and priority', nl: 'Incidentticket en prioriteit' }, who: { en: 'Operator and duty coordinator', nl: 'Operator en dienstco\u00F6rdinator' }, sys: ['eam', 'inc'], pp: '2' },
-    { p: 2, t: { en: 'GIS: which pipe, valves, customers?', nl: 'GIS: welke leiding, afsluiters, klanten?' }, who: { en: 'Network coordinator and duty engineer', nl: 'Netco\u00F6rdinator en dienstingenieur' }, sys: ['gis'], pp: '2-3', agent: 'Diagnostic' },
-    { p: 2, t: { en: 'Schedule and brief the crew', nl: 'Ploeg inplannen en briefen' }, who: { en: 'Dispatcher and 2-4 technicians', nl: 'Planner en 2-4 monteurs' }, sys: ['wfm', 'mob'], pp: '4-6', agent: 'Resource Matchmaker' },
+    { p: 2, t: { en: 'GIS: which pipe, valves, customers?', nl: 'GIS: welke leiding, afsluiters, klanten?' }, who: { en: 'Network coordinator and duty engineer', nl: 'Netco\u00F6rdinator en dienstingenieur' }, sys: ['gis'], pp: '2-3' },
+    { p: 2, t: { en: 'Schedule and brief the crew', nl: 'Ploeg inplannen en briefen' }, who: { en: 'Dispatcher and 2-4 technicians', nl: 'Planner en 2-4 monteurs' }, sys: ['wfm', 'mob'], pp: '4-6' },
     { p: 3, t: { en: 'Assess the impact on customers', nl: 'Impact op klanten beoordelen' }, who: { en: 'Coordinator and communications officer', nl: 'Co\u00F6rdinator en communicatiemedewerker' }, sys: ['inc', 'cis'], pp: '5-7' },
-    { p: 3, t: { en: 'Prepare and publish on Waterstoring.nl', nl: 'Opstellen en publiceren op Waterstoring.nl' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '6-8', agent: 'Communications' },
+    { p: 3, t: { en: 'Prepare and publish on Waterstoring.nl', nl: 'Opstellen en publiceren op Waterstoring.nl' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '6-8' },
     { p: 4, t: { en: 'Technician arrives and inspects', nl: 'Monteur arriveert en inspecteert' }, who: { en: '2-4 technicians', nl: '2-4 monteurs' }, sys: ['mob', 'gis'], pp: '2-4' },
     { p: 4, t: { en: 'Field status goes back to the office', nl: 'Status uit het veld terug naar kantoor' }, who: { en: 'Technician, dispatcher, control room', nl: 'Monteur, planner, meldkamer' }, sys: ['mob', 'eam', 'gis'], pp: '3+' },
     { p: 4, t: { en: 'Isolate: close valves, protect hospitals and industry', nl: 'Isoleren: afsluiters dicht, ziekenhuizen en industrie ontzien' }, who: { en: 'Network engineer, crew, control room', nl: 'Netwerkingenieur, ploeg, meldkamer' }, sys: ['scada', 'gis'], pp: '6-12' },
     { p: 4, t: { en: 'Repair: dig, replace, test pressure', nl: 'Repareren: graven, vervangen, drukproef' }, who: { en: '2-6 technicians, maybe a contractor', nl: '2-6 monteurs, evt. aannemer' }, sys: ['mob'], pp: '2-6' },
-    { p: 4, t: { en: 'Update the public status again', nl: 'Publieke status opnieuw bijwerken' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '1-2', agent: 'Scheduling' },
+    { p: 4, t: { en: 'Update the public status again', nl: 'Publieke status opnieuw bijwerken' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '1-2' },
     { p: 4, t: { en: 'Restore pressure, flush, check water quality', nl: 'Druk herstellen, spoelen, waterkwaliteit controleren' }, who: { en: 'Operators and laboratory', nl: 'Operators en laboratorium' }, sys: ['scada', 'hist'], pp: '2+' },
     { p: 4, t: { en: 'Close the incident: cause and costs', nl: 'Incident afsluiten: oorzaak en kosten' }, who: { en: 'Coordinator, asset management', nl: 'Co\u00F6rdinator, assetmanagement' }, sys: ['eam', 'gis', 'rep'], pp: '2' },
     { p: 4, t: { en: 'Mark resolved, later remove from the site', nl: 'Op opgelost zetten, later van de site halen' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['pub', 'ws'], pp: '1' }
@@ -190,7 +190,6 @@
           ${s.sys.length ? `<div class="bsys">${s.sys.map(k => `<i>${esc(SYS[k])}</i>`).join('')}</div>` : ''}
         </div>
         <div class="bp" title="${L2({ en: 'people involved', nl: 'betrokken mensen' })}">\uD83D\uDC65 ${s.pp}</div>
-        ${s.agent ? `<div class="bag">${L2({ en: 'AI demo', nl: 'AI-demo' })}: ${esc(s.agent)}</div>` : ''}
       </li>`;
     const ramp = RAMP.map(([n, v, label], i) => `<div class="rb" style="--d:${500 + i * 70}"><i style="height:${Math.max(4, v * 11)}px"></i><b>${label}</b><span>${n}</span></div>`).join('');
     const why = [
@@ -227,7 +226,6 @@
           <ol class="bsteps">${BEFORE_STEPS.map(card).join('')}</ol>
           <div class="blegend rv" style="--d:1300">
             ${[1, 2, 3, 4].map(p => `<span><i class="p${p}"></i>${L2(phaseName[p])}</span>`).join('')}
-            <span><i class="ag"></i>${L2({ en: 'step the demo hands to an AI agent', nl: 'stap die de demo aan een AI-agent geeft' })}</span>
           </div>
         </div>
         <aside>
