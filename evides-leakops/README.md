@@ -33,6 +33,15 @@ knowledge sources and knowledge bases, the eight knowledge documents, the three 
 called by Foundry directly with a key through a project connection), and four components instead of three because the workflow host and the agent
 functions sit in front of Foundry.*
 
+### One agent in detail: TriageAgent
+
+The same look for a single agent, the one in the Foundry Playground: how an alarm reaches it, its instructions, model, knowledge base and skill, the five
+C# MCP tools it may call with the Cosmos DB container each one reads, the code rules that check its answer, the typed answer, and numbers from two real runs.
+
+![TriageAgent in detail](docs/architecture-triage-agent.png)
+
+*Source: [docs/architecture-triage-agent.svg](docs/architecture-triage-agent.svg). The agent definition is in `src/LeakOps.Agents/TriageAgent.cs`, the rules in `src/LeakOps.Contracts/Logic/TriageRules.cs`.*
+
 ### Functional flow
 
 ![Functional flow of the burst scenario](docs/functional-flow.png)
