@@ -11,7 +11,7 @@ All data is simulated; the Waterstoring site is a fake. About 20 minutes with al
 The storyline as a picture: [docs/functional-flow.html](docs/functional-flow.html) ([PNG](docs/functional-flow.png)).
 
 **Interactive version for presenting:** https://white-field-03bd1f003.5.azurestaticapps.net (Azure Static Web App `leakops-demo-88546e` in the same resource group, no login, no keys).
-Every slide first shows the functional need, then reveals the technical solution (agent, tools, knowledge, skills, guardrails, where it runs); the slide
+Slide 1, "Before AI", shows how an incident runs today (16 steps, 6-8 people before residents are told, 12 system types, why it is complex). Then every slide first shows the functional need, then reveals the technical solution (agent, tools, knowledge, skills, guardrails, where it runs); the slide
 "Tools, knowledge, skills" shows what each agent is connected to, and the last slide
 replays the whole workflow. Space reveals / goes next, `L` switches English and Dutch. It shows data captured from a real run of this
 deployment, so it also works when the Azure demo is scaled down. Source and update steps: [demo-site/README.md](demo-site/README.md).

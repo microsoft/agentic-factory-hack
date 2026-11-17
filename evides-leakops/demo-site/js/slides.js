@@ -148,9 +148,118 @@
       </div></div>`;
   };
 
+  /* ---------- "Before AI": how an incident is handled today ---------- */
+  // The 16 steps come from the Evides team's description of a typical drinking-water incident (the exact implementation may vary).
+  // Systems are the usual utility system types; they are not a confirmed list of what Evides runs.
+  const SYS = {
+    scada: 'SCADA', hist: 'Historian', alarm: 'Alarm mgmt', eam: 'EAM (SAP PM / Maximo / Ultimo)', gis: 'GIS', wfm: 'Workforce mgmt',
+    mob: 'Mobile field app', cis: 'CIS', inc: 'Incident mgmt', pub: 'Publishing portal / API', ws: 'Waterstoring.nl', rep: 'Reporting'
+  };
+  // phase: 1 detect and verify, 2 analyse and mobilise, 3 inform residents, 4 repair and close. agent: the demo agent that takes this step over.
+  const BEFORE_STEPS = [
+    { p: 1, t: { en: 'The network fails', nl: 'Het net valt uit' }, who: { en: 'Nobody knows yet', nl: 'Nog niemand weet het' }, sys: [], pp: '0' },
+    { p: 1, t: { en: 'SCADA raises an alarm', nl: 'SCADA geeft alarm' }, who: { en: 'Control room operator', nl: 'Operator in de meldkamer' }, sys: ['scada'], pp: '1' },
+    { p: 1, t: { en: 'First check: real or sensor fault?', nl: 'Eerste check: echt of sensorfout?' }, who: { en: 'Control room operator', nl: 'Operator in de meldkamer' }, sys: ['scada', 'hist', 'alarm'], pp: '1', agent: 'Triage' },
+    { p: 1, t: { en: 'Incident ticket and priority', nl: 'Incidentticket en prioriteit' }, who: { en: 'Operator and duty coordinator', nl: 'Operator en dienstco\u00F6rdinator' }, sys: ['eam', 'inc'], pp: '2' },
+    { p: 2, t: { en: 'GIS: which pipe, valves, customers?', nl: 'GIS: welke leiding, afsluiters, klanten?' }, who: { en: 'Network coordinator and duty engineer', nl: 'Netco\u00F6rdinator en dienstingenieur' }, sys: ['gis'], pp: '2-3', agent: 'Diagnostic' },
+    { p: 2, t: { en: 'Schedule and brief the crew', nl: 'Ploeg inplannen en briefen' }, who: { en: 'Dispatcher and 2-4 technicians', nl: 'Planner en 2-4 monteurs' }, sys: ['wfm', 'mob'], pp: '4-6', agent: 'Resource Matchmaker' },
+    { p: 3, t: { en: 'Assess the impact on customers', nl: 'Impact op klanten beoordelen' }, who: { en: 'Coordinator and communications officer', nl: 'Co\u00F6rdinator en communicatiemedewerker' }, sys: ['inc', 'cis'], pp: '5-7' },
+    { p: 3, t: { en: 'Prepare and publish on Waterstoring.nl', nl: 'Opstellen en publiceren op Waterstoring.nl' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '6-8', agent: 'Communications' },
+    { p: 4, t: { en: 'Technician arrives and inspects', nl: 'Monteur arriveert en inspecteert' }, who: { en: '2-4 technicians', nl: '2-4 monteurs' }, sys: ['mob', 'gis'], pp: '2-4' },
+    { p: 4, t: { en: 'Field status goes back to the office', nl: 'Status uit het veld terug naar kantoor' }, who: { en: 'Technician, dispatcher, control room', nl: 'Monteur, planner, meldkamer' }, sys: ['mob', 'eam', 'gis'], pp: '3+' },
+    { p: 4, t: { en: 'Isolate: close valves, protect hospitals and industry', nl: 'Isoleren: afsluiters dicht, ziekenhuizen en industrie ontzien' }, who: { en: 'Network engineer, crew, control room', nl: 'Netwerkingenieur, ploeg, meldkamer' }, sys: ['scada', 'gis'], pp: '6-12' },
+    { p: 4, t: { en: 'Repair: dig, replace, test pressure', nl: 'Repareren: graven, vervangen, drukproef' }, who: { en: '2-6 technicians, maybe a contractor', nl: '2-6 monteurs, evt. aannemer' }, sys: ['mob'], pp: '2-6' },
+    { p: 4, t: { en: 'Update the public status again', nl: 'Publieke status opnieuw bijwerken' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['inc', 'pub', 'ws'], pp: '1-2', agent: 'Scheduling' },
+    { p: 4, t: { en: 'Restore pressure, flush, check water quality', nl: 'Druk herstellen, spoelen, waterkwaliteit controleren' }, who: { en: 'Operators and laboratory', nl: 'Operators en laboratorium' }, sys: ['scada', 'hist'], pp: '2+' },
+    { p: 4, t: { en: 'Close the incident: cause and costs', nl: 'Incident afsluiten: oorzaak en kosten' }, who: { en: 'Coordinator, asset management', nl: 'Co\u00F6rdinator, assetmanagement' }, sys: ['eam', 'gis', 'rep'], pp: '2' },
+    { p: 4, t: { en: 'Mark resolved, later remove from the site', nl: 'Op opgelost zetten, later van de site halen' }, who: { en: 'Communications officer', nl: 'Communicatiemedewerker' }, sys: ['pub', 'ws'], pp: '1' }
+  ];
+  // People involved while the incident unfolds (typical, mid-points of the ranges above), steps 1-8 and the isolation step.
+  const RAMP = [[1, 0, '0'], [2, 1, '1'], [3, 1, '1'], [4, 2, '2'], [5, 2.5, '2-3'], [6, 5, '4-6'], [7, 6, '5-7'], [8, 7, '6-8'], [11, 9, '6-12']];
+
+  function beforeSlide(lang) {
+    const L2 = o => T(o, lang);
+    const systems = new Set(BEFORE_STEPS.flatMap(s => s.sys));
+    const phaseName = [null,
+      { en: 'Detect and verify', nl: 'Detecteren en verifi\u00EBren' }, { en: 'Analyse and mobilise', nl: 'Analyseren en mobiliseren' },
+      { en: 'Inform residents', nl: 'Bewoners informeren' }, { en: 'Repair and close', nl: 'Repareren en afsluiten' }];
+    const kpi = (v, l, d) => `<div class="bk rv" style="--d:${d}"><b>${v}</b><span>${L2(l)}</span></div>`;
+    const card = (s, i) => `<li class="bs p${s.p} rv" style="--d:${300 + i * 60}">
+        <div class="bn">${i + 1}</div>
+        <div class="bt"><b>${L2(s.t)}</b><span>${L2(s.who)}</span>
+          ${s.sys.length ? `<div class="bsys">${s.sys.map(k => `<i>${esc(SYS[k])}</i>`).join('')}</div>` : ''}
+        </div>
+        <div class="bp" title="${L2({ en: 'people involved', nl: 'betrokken mensen' })}">\uD83D\uDC65 ${s.pp}</div>
+        ${s.agent ? `<div class="bag">${L2({ en: 'AI demo', nl: 'AI-demo' })}: ${esc(s.agent)}</div>` : ''}
+      </li>`;
+    const ramp = RAMP.map(([n, v, label], i) => `<div class="rb" style="--d:${500 + i * 70}"><i style="height:${Math.max(4, v * 11)}px"></i><b>${label}</b><span>${n}</span></div>`).join('');
+    const why = [
+      { en: '<b>Many systems, built apart.</b> Alarm, ticket, map, planning, customer data and website are different systems; people carry the information from one to the next.', nl: '<b>Veel systemen, los gebouwd.</b> Alarm, ticket, kaart, planning, klantdata en website zijn verschillende systemen; mensen dragen de informatie van het ene naar het andere over.' },
+      { en: '<b>Many roles, one step each.</b> Six to eight people touch the incident before a resident is told anything. Every hand-over costs minutes and can lose detail.', nl: '<b>Veel rollen, elk \u00E9\u00E9n stap.</b> Zes tot acht mensen raken het incident aan voordat een bewoner iets hoort. Elke overdracht kost minuten en kan details kwijtraken.' },
+      { en: '<b>A wide service area.</b> Evides supplies the south-west of Zuid-Holland, the Brabantse Wal and Zeeland. The network, the districts and the crews are spread out, so every alarm needs local knowledge.', nl: '<b>Een groot verzorgingsgebied.</b> Evides voorziet het zuidwesten van Zuid-Holland, de Brabantse Wal en Zeeland. Net, gebieden en ploegen liggen verspreid, dus elk alarm vraagt lokale kennis.' },
+      { en: '<b>Publishing is a manual, checked step.</b> Waterstoring.nl shows information \u201Cdirectly from the source\u201D, supplied and verified by the water company. If the site has nothing yet, residents are told to phone 0900 0787, so the phone line and the website are two channels to keep in step. Boil-water advice still goes out as orange or red cards in the letterbox.', nl: '<b>Publiceren is een handmatige, gecontroleerde stap.</b> Waterstoring.nl toont informatie \u201Crechtstreeks vanuit de bron\u201D, aangeleverd en geverifieerd door het waterbedrijf. Staat er nog niets, dan moeten bewoners bellen naar 0900 0787: telefoon en website zijn twee kanalen die gelijk moeten lopen. Een kookadvies gaat nog als oranje of rode kaart in de brievenbus.' },
+      { en: '<b>High stakes, little time.</b> At night, in frost, valves must be closed without cutting off hospitals or industry, and every check has to be done by someone who knows the network.', nl: '<b>Hoge inzet, weinig tijd.</b> \u2019s Nachts, bij vorst, moeten afsluiters dicht zonder ziekenhuizen of industrie af te sluiten, en elke controle moet door iemand die het net kent.' }
+    ];
+    const pains = [
+      { en: 'Time to the first public notice depends on a chain of people being free and awake.', nl: 'De tijd tot het eerste publieke bericht hangt af van een keten van mensen die beschikbaar en wakker zijn.' },
+      { en: 'The same facts (street, pipe, customers, ETA) are typed again in several systems.', nl: 'Dezelfde feiten (straat, leiding, klanten, verwachte tijd) worden in meerdere systemen opnieuw ingetypt.' },
+      { en: 'A medium outage ties up 7-12 people; a trunk main 15-30+, often at night.', nl: 'Een middelgrote storing houdt 7-12 mensen bezig; een hoofdleiding 15-30+, vaak \u2019s nachts.' },
+      { en: 'On waterstoring.nl a large disruption can run for many hours (one example there: 21 hours, boil-water advice active).', nl: 'Op waterstoring.nl kan een grote storing vele uren duren (daar bijvoorbeeld: 21 uur, kookadvies actief).' }
+    ];
+    const total = Math.round(scen('burst').summary.totalMs / 1000);
+    const agentChips = ['Triage', 'Diagnostic', 'Communications', 'Resource Matchmaker', 'Procurement', 'Scheduling'].map(a => `<span class="tag agent">${a}</span>`).join('');
+    const link = (href, text) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    return `<div class="before">
+      <div class="bhead rv" style="--d:0"><span class="tag bad">${L2({ en: 'Before AI \u00B7 today', nl: 'V\u00F3\u00F3r AI \u00B7 vandaag' })}</span></div>
+      <h2 class="rv" style="--d:60">${L2({ en: 'One burst pipe sets off a chain of 16 steps', nl: 'E\u00E9n leidingbreuk zet een keten van 16 stappen in gang' })}</h2>
+      <p class="bl rv" style="--d:120">${L2({
+        en: 'This is how a drinking-water incident typically runs from the first pressure drop until Waterstoring.nl says \u201Cresolved\u201D. People do the thinking, the typing and the hand-overs.',
+        nl: 'Zo loopt een drinkwaterstoring doorgaans, van de eerste drukval tot Waterstoring.nl \u201Copgelost\u201D meldt. Mensen doen het denkwerk, het typewerk en de overdrachten.' })}</p>
+      <div class="bkpis">
+        ${kpi('16', { en: 'steps from pipe break to closed ticket', nl: 'stappen van leidingbreuk tot gesloten ticket' }, 160)}
+        ${kpi('6-8', { en: 'people involved before residents are told', nl: 'mensen betrokken voordat bewoners het horen' }, 220)}
+        ${kpi('7-12', { en: 'people for a medium outage (15-30+ for a trunk main)', nl: 'mensen bij een middelgrote storing (15-30+ bij een hoofdleiding)' }, 280)}
+        ${kpi(String(systems.size), { en: 'system types in the chain', nl: 'systeemtypen in de keten' }, 340)}
+        ${kpi('2-24+ h', { en: 'repair: 2-4 h small leak, 6-24+ h trunk main', nl: 'reparatie: 2-4 u klein lek, 6-24+ u hoofdleiding' }, 400)}
+      </div>
+      <div class="bgrid">
+        <div>
+          <ol class="bsteps">${BEFORE_STEPS.map(card).join('')}</ol>
+          <div class="blegend rv" style="--d:1300">
+            ${[1, 2, 3, 4].map(p => `<span><i class="p${p}"></i>${L2(phaseName[p])}</span>`).join('')}
+            <span><i class="ag"></i>${L2({ en: 'step the demo hands to an AI agent', nl: 'stap die de demo aan een AI-agent geeft' })}</span>
+          </div>
+        </div>
+        <aside>
+          <div class="sec-label rv" style="--d:500">${L2({ en: 'People involved as the incident unfolds (typical)', nl: 'Betrokken mensen terwijl het incident zich ontvouwt (typisch)' })}</div>
+          <div class="ramp rv" style="--d:540">${ramp}</div>
+          <div class="ramp-x rv" style="--d:560">${L2({ en: 'step number in the chain', nl: 'stapnummer in de keten' })}</div>
+          <div class="sec-label rv" style="--d:700">${L2({ en: 'Why it is so complex', nl: 'Waarom het zo complex is' })}</div>
+          <ul class="why">${why.map((w, i) => `<li class="rv" style="--d:${760 + i * 90}">${L2(w)}</li>`).join('')}</ul>
+        </aside>
+      </div>
+      <div class="sec-label rv" style="--d:1000">${L2({ en: 'Where it hurts', nl: 'Waar het pijn doet' })}</div>
+      <ul class="pain">${pains.map((p, i) => `<li class="rv" style="--d:${1040 + i * 80}">${L2(p)}</li>`).join('')}</ul>
+      <div class="value rv" style="--d:1400"><div class="star">\u2605</div><div><b>${L2({ en: 'The question for this demo', nl: 'De vraag voor deze demo' })}</b>
+        <span>${L2({
+          en: `What if six AI agents took the checking, the map work, the matching, the notice, the parts and the planning, in about ${total} seconds in the real run, and people only approved the decisions that matter?`,
+          nl: `Wat als zes AI-agents het controleren, het kaartwerk, het koppelen, het bericht, de onderdelen en de planning overnemen, in ongeveer ${total} seconden in de echte run, en mensen alleen de beslissingen goedkeuren die ertoe doen?` })}</span>
+        <div class="bagents">${agentChips}</div></div></div>
+      <p class="bsrc rv" style="--d:1500">${L2({
+        en: 'The 16 steps, roles and system types are a typical drinking-water incident process described by the Evides team; the exact implementation at Evides may vary, and the system names are typical for utilities, not a confirmed list. Public facts: ',
+        nl: 'De 16 stappen, rollen en systeemtypen zijn een typisch drinkwaterstoringsproces zoals beschreven door het Evides-team; de exacte invulling bij Evides kan afwijken en de systeemnamen zijn gebruikelijk voor nutsbedrijven, geen bevestigde lijst. Openbare feiten: ' })}
+        ${link('https://www.evides.nl/storing-onderhoud', 'evides.nl/storing-onderhoud')} \u00B7 ${link('https://waterstoring.nl/over-ons', 'waterstoring.nl/over-ons')} \u00B7 ${link('https://waterstoring.nl/zoek-uw-waterbedrijf', 'waterstoring.nl/zoek-uw-waterbedrijf')} \u00B7 ${link('https://nl.wikipedia.org/wiki/Evides', 'Wikipedia: Evides')}</p>
+    </div>`;
+  }
+
   /* ---------- slides ---------- */
   const SLIDES = [
     { id: 'intro', type: 'intro', short: { en: 'Start', nl: 'Start' } },
+
+    {
+      id: 'before', type: 'before', short: { en: 'Before AI', nl: 'V\u00F3\u00F3r AI' },
+      render: ctx => beforeSlide(ctx.lang)
+    },
 
     {
       id: 'alarm', type: 'step', no: 1, short: { en: 'Alarm', nl: 'Alarm' }, art: 'alarm',

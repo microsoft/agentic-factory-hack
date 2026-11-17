@@ -20,6 +20,7 @@
     next: { en: 'Next', nl: 'Volgende' },
     reveal: { en: 'Reveal the solution', nl: 'Toon de oplossing' },
     start: { en: 'Start the demo', nl: 'Start de demo' },
+    seeAi: { en: 'See it with AI', nl: 'Zie het met AI' },
     play: { en: 'Play the workflow', nl: 'Speel de workflow af' },
     pause: { en: 'Pause', nl: 'Pauzeer' },
     replay: { en: 'Replay', nl: 'Opnieuw' },
@@ -44,6 +45,7 @@
     state.seen[slide.id] = true;
     let html;
     if (slide.type === 'intro') html = introHtml();
+    else if (slide.type === 'before') html = slide.render(ctx());
     else if (slide.type === 'finale') html = finaleHtml();
     else html = stepHtml(slide);
     stage.innerHTML = `<div class="slide" ${opts.anim === false ? 'style="animation:none"' : ''} data-id="${slide.id}">${html}</div>`;
@@ -133,6 +135,7 @@
     const nb = $('#btn-next');
     nb.disabled = false;
     if (slide.type === 'intro') nb.textContent = t(UI.start) + ' \u2192';
+    else if (slide.type === 'before') nb.textContent = t(UI.seeAi) + ' \u2192';
     else if (slide.type === 'finale') nb.textContent = playerLabel();
     else if (!state.revealed[slide.id]) nb.textContent = t(UI.reveal) + ' \u25B8';
     else nb.textContent = t(UI.next) + ' \u2192';
@@ -144,7 +147,7 @@
   function go(i) { state.i = Math.max(0, Math.min(SLIDES.length - 1, i)); state.tab = 0; render(); }
   function reveal() {
     const slide = SLIDES[state.i];
-    if (slide.type === 'intro' || slide.type === 'finale' || state.revealed[slide.id]) return;
+    if (slide.type === 'intro' || slide.type === 'before' || slide.type === 'finale' || state.revealed[slide.id]) return;
     state.revealed[slide.id] = true;
     state.tab = 0;
     $('#sol').innerHTML = solHtml(slide);
@@ -167,7 +170,7 @@
   function advance() {
     const slide = SLIDES[state.i];
     if (slide.type === 'finale') return togglePlay();
-    if (slide.type === 'intro' || state.revealed[slide.id]) return go(state.i + 1);
+    if (slide.type === 'intro' || slide.type === 'before' || state.revealed[slide.id]) return go(state.i + 1);
     reveal();
   }
   function back() { go(state.i - 1); }

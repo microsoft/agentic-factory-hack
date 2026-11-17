@@ -18,7 +18,7 @@ Live: https://white-field-03bd1f003.5.azurestaticapps.net (Azure Static Web App 
 | `R` | Replay the workflow (last slide) |
 | `1`–`6` | Technical tabs in the solution card (see below) |
 
-Slide 2 has a switch between the burst and the false alarm. The workflow replay has 1x, 3x and 10x speed. `#/3` in the URL opens slide 3.
+Slide 1, "Before AI", shows today's drinking-water incident process on one page: the 16 steps from pipe break to closed ticket with roles, system types and people involved, why it is so complex (with public facts from evides.nl, waterstoring.nl and Wikipedia) and where it hurts. The steps are the Evides team's description of a typical process and may differ in detail at Evides; the system names are typical for utilities, not a confirmed list. The steps the demo hands to an AI agent are marked. Slide 3 has a switch between the burst and the false alarm. The workflow replay has 1x, 3x and 10x speed. `#/4` in the URL opens slide 4.
 
 ## Technical tabs
 After "Reveal the solution", the card has six tabs: **Overview** (the story) | **Instructions** | **Tools & MCP** | **Data & knowledge** | **Code rules** | **Source**.
