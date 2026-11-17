@@ -21,6 +21,18 @@ facts and the rules. **For the demo script, the portal tour and troubleshooting 
 
 *Source: [docs/architecture.svg](docs/architecture.svg) (editable).*
 
+### Architecture in detail (names as deployed)
+
+The same solution in the layout of the "Foundry agent with C# MCP tools" reference picture: the four components, the 19 C# MCP functions per
+agent, and the data behind them with the real names and sources (Cosmos DB containers, storage account and blob containers, AI Search
+knowledge sources and knowledge bases, the eight knowledge documents, the three skills, observability and hosting plans).
+
+![Detailed architecture of the Evides LeakOps demo](docs/architecture-detailed.png)
+
+*Source: [docs/architecture-detailed.svg](docs/architecture-detailed.svg). Differences from the reference picture: no API Management and no VNet (this is a demo; the MCP server is
+called by Foundry directly with a key through a project connection), and four components instead of three because the workflow host and the agent
+functions sit in front of Foundry.*
+
 ### Functional flow
 
 ![Functional flow of the burst scenario](docs/functional-flow.png)
@@ -43,7 +55,7 @@ facts the rules compare the answer with. Nothing the model says is published, bo
 | `evals/` | Foundry evaluation dataset (`leakops-evals.json`, 5 evaluations) and runner (`run-evals.ps1`, `-Only knowledge`) |
 | `deploy/` | Bicep and scripts: deploy, add or remove the knowledge layer (`deploy-knowledge.ps1`, `knowledge.bicep`), scale the web plan, tear down |
 | `DEMO.md` | Demo runbook: storyline, portal tour, troubleshooting |
-| `docs/` | Architecture diagram (`architecture.svg`/`.png`) and functional flow (`functional-flow.html`/`.png`) |
+| `docs/` | Architecture diagrams (`architecture.svg`/`.png` overview, `architecture-detailed.svg`/`.png` with names, MCP functions and data sources) and functional flow (`functional-flow.html`/`.png`) |
 | `demo-site/` | Interactive demo website (static): each slide shows the functional need, then reveals the technical solution; the finale replays the whole workflow. See [demo-site/README.md](demo-site/README.md) |
 | `src/LeakOps.Waterstoring` | Fake Waterstoring.nl (ingest API + public map) |
 | `src/LeakOps.Workflow` | ASP.NET workflow host: runs the six agents in order, streams progress (SSE), operator console |
