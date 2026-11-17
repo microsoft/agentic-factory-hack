@@ -42,6 +42,30 @@ C# MCP tools it may call with the Cosmos DB container each one reads, the code r
 
 *Source: [docs/architecture-triage-agent.svg](docs/architecture-triage-agent.svg). The agent definition is in `src/LeakOps.Agents/TriageAgent.cs`, the rules in `src/LeakOps.Contracts/Logic/TriageRules.cs`.*
 
+### Every agent in detail
+
+The same picture for the other five agents. Each one shows how its input arrives, its instructions, model, knowledge base and skills (or that it has none), the C# MCP
+tools it may call with the Cosmos DB containers each one reads or writes, what the code does around the model, the typed answer, and numbers from the captured run.
+The tool-call counts and token numbers are read from `demo-site/js/captured.js`, the real run of the deployed demo.
+
+| Agent | Picture (source SVG next to it) | Code |
+|---|---|---|
+| 2. Diagnostic | [PNG](docs/architecture-diagnostic-agent.png) · [SVG](docs/architecture-diagnostic-agent.svg) | `src/LeakOps.Agents/DiagnosticAgent.cs` |
+| 3. Communications | [PNG](docs/architecture-communications-agent.png) · [SVG](docs/architecture-communications-agent.svg) | `src/LeakOps.Agents/CommunicationsAgent.cs` |
+| 4. Resource Matchmaker | [PNG](docs/architecture-matchmaker-agent.png) · [SVG](docs/architecture-matchmaker-agent.svg) | `src/LeakOps.Agents/ResourceMatchmakerAgent.cs` |
+| 5. Procurement | [PNG](docs/architecture-procurement-agent.png) · [SVG](docs/architecture-procurement-agent.svg) | `src/LeakOps.Agents/ProcurementAgent.cs` |
+| 6. Scheduling | [PNG](docs/architecture-scheduling-agent.png) · [SVG](docs/architecture-scheduling-agent.svg) | `src/LeakOps.Agents/SchedulingAgent.cs` |
+
+![DiagnosticAgent in detail](docs/architecture-diagnostic-agent.png)
+
+![CommunicationsAgent in detail](docs/architecture-communications-agent.png)
+
+![ResourceMatchmakerAgent in detail](docs/architecture-matchmaker-agent.png)
+
+![ProcurementAgent in detail](docs/architecture-procurement-agent.png)
+
+![SchedulingAgent in detail](docs/architecture-scheduling-agent.png)
+
 ### Functional flow
 
 ![Functional flow of the burst scenario](docs/functional-flow.png)

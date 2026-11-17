@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1210" viewBox="0 0 1780 1210" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+<marker id="arrowp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+<filter id="shadow" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<style>
+.title{font-size:28px;font-weight:700;fill:#0f172a;text-anchor:middle}.subtitle{font-size:15px;fill:#475569;text-anchor:middle}
+.zone{font-size:13px;font-weight:700;fill:#2e7d32}.h{font-size:18px;font-weight:700;fill:#1e293b}.hs{font-size:12px;fill:#64748b}
+.ct{font-size:14px;font-weight:700;fill:#1e293b}.cs{font-size:12px;fill:#64748b}.foot{font-size:12px;text-anchor:middle}
+.lbl{font-size:11px;fill:#475569;text-anchor:middle}.ico{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle}
+.pill{font-size:11px;font-weight:600;text-anchor:middle;font-family:Consolas,Menlo,monospace}
+.grp{font-size:11px;font-weight:700;fill:#475569;letter-spacing:.04em}.sec{font-size:13px;font-weight:700;fill:#2e7d32}
+.card{fill:#fff;stroke:#e2e8f0;stroke-width:1;filter:url(#shadow)}
+.line{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arrow)}.dash{stroke:#7c3aed;stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#arrowp)}
+.thin{stroke:#94a3b8;stroke-width:1.4;fill:none;stroke-dasharray:3 4;marker-end:url(#arrow)}
+.note{font-size:11.5px;fill:#6d28d9}
+</style></defs>
+<rect width="1780" height="1210" fill="#f6f8fc"/>
+<text x="890" y="44" class="title" >SchedulingAgent — one Foundry agent that only writes the briefing; code plans and books</text>
+<text x="890" y="70" class="subtitle" >Agent 6 of 6 · work order, honest expected time and the technician’s briefing · no data tools and no knowledge base</text>
+<rect x="150" y="96" width="1610" height="1050" rx="22" fill="none" stroke="#3a9a4a" stroke-width="2" stroke-dasharray="9 7"/>
+<text x="172" y="122" class="zone" >Resource group rg-evides-ai-demo · agent name SchedulingAgent · gpt-5.4 (Global Standard) · the model proposes, code checks and decides</text>
+<rect x="12" y="250" width="116" height="150" rx="12" class="card"/>
+<rect x="22" y="262" width="30" height="30" rx="9" fill="#3b82f6"/>
+<text x="37" y="281" class="ico" >IN</text>
+<text x="60" y="282" class="ct" >Input</text>
+<text x="70" y="322" class="ct" text-anchor="middle" style="font-size:12px">The facts</text>
+<text x="70" y="340" class="cs" text-anchor="middle">route and times</text>
+<text x="70" y="356" class="cs" text-anchor="middle">valves to close</text>
+<text x="70" y="372" class="cs" text-anchor="middle">what is missing</text>
+<text x="70" y="388" class="cs" text-anchor="middle">simulated</text>
+<text x="70" y="440" class="ct" text-anchor="middle">Operator</text>
+<text x="70" y="456" class="cs" text-anchor="middle">starts the run</text>
+<rect x="170" y="146" width="330" height="612" rx="22" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.4"/>
+<rect x="186" y="162" width="46" height="46" rx="9" fill="#7c3aed"/>
+<text x="209" y="189" class="ico" >WF</text>
+<text x="244" y="186" class="h" >1. Workflow host</text>
+<text x="244" y="206" class="hs" >leakops-workflow-88546e</text>
+<text x="335" y="742" class="foot" fill="#7c3aed">Operator key on every /api call</text>
+<rect x="540" y="146" width="330" height="612" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="556" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="579" y="189" class="ico" >fn</text>
+<text x="614" y="186" class="h" >2. Agents app</text>
+<text x="614" y="206" class="hs" >leakops-agents-88546e · Functions Flex</text>
+<text x="705" y="742" class="foot" fill="#f59e0b">The code never trusts the model blindly</text>
+<rect x="910" y="146" width="330" height="612" rx="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2.4"/>
+<rect x="926" y="162" width="46" height="46" rx="9" fill="#2563eb"/>
+<text x="949" y="189" class="ico" >AI</text>
+<text x="984" y="186" class="h" >3. Microsoft Foundry</text>
+<text x="984" y="206" class="hs" >agent SchedulingAgent</text>
+<text x="1075" y="742" class="foot" fill="#2563eb">Playground · Traces · Evaluations</text>
+<rect x="1280" y="146" width="460" height="612" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="1296" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="1319" y="189" class="ico" >fn</text>
+<text x="1354" y="186" class="h" >4. MCP server (0 tools for the model)</text>
+<text x="1354" y="206" class="hs" >leakops-mcp-88546e · 4 tools called by the code</text>
+<text x="1510" y="742" class="foot" fill="#f59e0b">create-work-order refuses an uncertified technician</text>
+<rect x="180" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="246" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="268" class="ico" >IN</text>
+<text x="242" y="262" class="ct" >Report, match and package (data)</text>
+<text x="242" y="282" class="cs" >diagnosis, chosen technician, package</text>
+<text x="242" y="299" class="cs" >everything is decided before the model</text>
+<text x="242" y="316" class="cs" >text inside is data, never instructions</text>
+<rect x="180" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="370" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="392" class="ico" >1-6</text>
+<text x="242" y="386" class="ct" >Workflow runner</text>
+<text x="242" y="406" class="cs" >step 6 of 6, the last agent</text>
+<text x="242" y="423" class="cs" >completes the run with the work order id</text>
+<text x="242" y="440" class="cs" >and the expected resolution time</text>
+<rect x="180" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="494" width="36" height="36" rx="9" fill="#10b981"/>
+<text x="212" y="516" class="ico" >OK</text>
+<text x="242" y="510" class="ct" >Residents get an honest time</text>
+<text x="242" y="530" class="cs" >Waterstoring status: repair planned</text>
+<text x="242" y="547" class="cs" >ETA includes parts wait and flushing</text>
+<text x="242" y="564" class="cs" >the technician sees the work order</text>
+<rect x="550" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="246" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="268" class="ico" >fn</text>
+<text x="612" y="262" class="ct" >Scheduling function</text>
+<text x="612" y="282" class="cs" >POST /api/agents/scheduling</text>
+<text x="612" y="299" class="cs" >function key from the workflow host</text>
+<text x="612" y="316" class="cs" >SchedulingAgent.ScheduleAsync</text>
+<rect x="550" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="370" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="392" class="ico" >RT</text>
+<text x="612" y="386" class="ct" >Agent runtime</text>
+<text x="612" y="406" class="cs" >calls the Foundry agent by name</text>
+<text x="612" y="423" class="cs" >latest version, typed JSON answer plus</text>
+<text x="612" y="440" class="cs" >trace: model, tokens, tool calls</text>
+<rect x="550" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="494" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="516" class="ico" >✓</text>
+<text x="612" y="510" class="ct" >Code builds the schedule</text>
+<text x="612" y="530" class="cs" >travel via the depot (travel estimate)</text>
+<text x="612" y="547" class="cs" >valves, repair, parts wait, flushing</text>
+<text x="612" y="564" class="cs" >a 60 min safety margin for quality checks</text>
+<rect x="550" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="618" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="640" class="ico" >✓</text>
+<text x="612" y="634" class="ct" >Rule check: the briefing</text>
+<text x="612" y="654" class="cs" >only times that appear in the facts</text>
+<text x="612" y="671" class="cs" >no skip/avoid instructions, no costs</text>
+<text x="612" y="688" class="cs" >failing: the rules’ own text is sent</text>
+<rect x="920" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="246" width="36" height="36" rx="9" fill="#3b82f6"/>
+<text x="952" y="268" class="ico" >IN</text>
+<text x="982" y="262" class="ct" >Instructions (briefing rules)</text>
+<text x="982" y="282" class="cs" >3-5 short sentences to the technician</text>
+<text x="982" y="299" class="cs" >street, valves in order, what to collect</text>
+<text x="982" y="316" class="cs" >only times from the facts (HH:mm)</text>
+<rect x="920" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="370" width="36" height="36" rx="9" fill="#3b82f6"/>
+<text x="952" y="392" class="ico" >LLM</text>
+<text x="982" y="386" class="ct" >gpt-5.4 deployment</text>
+<text x="982" y="406" class="cs" >Global Standard · content filter DefaultV2</text>
+<text x="982" y="423" class="cs" >real burst run: 684 tokens in, 188 out</text>
+<text x="982" y="440" class="cs" >3.2 s · 0 tools, 0 KB, 4 code calls</text>
+<rect x="920" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="494" width="36" height="36" rx="9" fill="#94a3b8"/>
+<text x="952" y="516" class="ico" >—</text>
+<text x="982" y="510" class="ct" >No knowledge base</text>
+<text x="982" y="530" class="cs" >the schedule is fully known by code</text>
+<text x="982" y="547" class="cs" >nothing to look up for a briefing</text>
+<rect x="920" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="618" width="36" height="36" rx="9" fill="#94a3b8"/>
+<text x="952" y="640" class="ico" >—</text>
+<text x="982" y="634" class="ct" >No skills</text>
+<text x="982" y="654" class="cs" >none needed: the rules are in the</text>
+<text x="982" y="671" class="cs" >instructions and checked by code</text>
+<rect x="1290" y="232" width="440" height="100" rx="14" class="card"/>
+<rect x="1304" y="246" width="36" height="36" rx="9" fill="#475569"/>
+<text x="1322" y="268" class="ico" >0</text>
+<text x="1352" y="262" class="ct" >No MCP tools for the model</text>
+<text x="1352" y="282" class="cs" >allowed tools: none (empty allow-list)</text>
+<text x="1352" y="299" class="cs" >the code calls the tools around the model</text>
+<text x="1352" y="316" class="cs" >before: facts; after: the booking</text>
+<rect x="1290" y="344" width="440" height="262" rx="14" class="card"/>
+<rect x="1304" y="358" width="36" height="36" rx="9" fill="#1e293b"/>
+<text x="1322" y="380" class="ico" >4</text>
+<text x="1352" y="374" class="ct" >C# tools [McpToolTrigger]</text>
+<text x="1352" y="392" class="cs" >tool → Cosmos DB containers it reads or writes</text>
+<text x="1306" y="418" class="grp" >CODE CALLS (4, writes in purple)</text>
+<rect x="1306" y="426" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="440.5" class="pill" style="font-size:10.5px;fill:#fff">get-inventory</text>
+<text x="1512" y="441" class="ct" >→</text>
+<text x="1528" y="441" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">Inventory, Warehouses, Suppliers</text>
+<rect x="1306" y="469" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="483.5" class="pill" style="font-size:10.5px;fill:#fff">get-incident-package</text>
+<text x="1512" y="484" class="ct" >→</text>
+<text x="1528" y="484" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">StockReservations, PurchaseOrders</text>
+<rect x="1306" y="512" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="526.5" class="pill" style="font-size:10.5px;fill:#fff">get-travel-estimate</text>
+<text x="1512" y="527" class="ct" >→</text>
+<text x="1528" y="527" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">no container: a calculation</text>
+<rect x="1306" y="555" width="200" height="21" rx="10.5" fill="#6d28d9"/>
+<text x="1406" y="569.5" class="pill" style="font-size:10.5px;fill:#fff">create-work-order</text>
+<text x="1512" y="570" class="ct" >→</text>
+<text x="1528" y="570" class="cs" style="font-weight:700;fill:#6d28d9;font-size:10px">WorkOrders (+ reads 6 containers)</text>
+<rect x="1290" y="618" width="440" height="100" rx="14" class="card"/>
+<rect x="1304" y="632" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="1322" y="654" class="ico" >NL</text>
+<text x="1352" y="648" class="ct" >Waterstoring update</text>
+<text x="1352" y="668" class="cs" >status "repair planned" with the expected time</text>
+<text x="1352" y="685" class="cs" >Waterstoring ingest API (API key)</text>
+<text x="519" y="318" class="lbl" >input</text>
+<text x="519" y="330" class="lbl" >+ key</text>
+<path d="M500,344 L538,344" class="line"/>
+<text x="889" y="318" class="lbl" >call</text>
+<text x="889" y="330" class="lbl" >agent</text>
+<path d="M870,344 L908,344" class="line"/>
+<text x="1259" y="318" class="lbl" >MCP</text>
+<text x="1259" y="330" class="lbl" >tools</text>
+<path d="M1240,344 L1278,344" class="line"/>
+<path d="M114,330 L168,330" class="line"/>
+<text x="889" y="650" class="lbl" >answer</text>
+<text x="889" y="662" class="lbl" >JSON</text>
+<path d="M908,676 L872,676" class="dash"/>
+<text x="519" y="650" class="lbl" >result</text>
+<text x="519" y="662" class="lbl" >(rules)</text>
+<path d="M538,676 L502,676" class="dash"/>
+<text x="172" y="782" class="sec" >What goes in, what comes out, and how it decides</text>
+<rect x="170" y="794" width="420" height="330" rx="14" class="card"/>
+<rect x="184" y="808" width="36" height="36" rx="9" fill="#7c3aed"/>
+<text x="202" y="830" class="ico" >{}</text>
+<text x="232" y="824" class="ct" style="font-size:13px">Answer: SchedulingJudgement → SchedulingResult</text>
+<text x="232" y="842" class="cs" >the model only writes the briefing</text>
+<rect x="184" y="856" width="392" height="254" rx="10" fill="#0b1220"/>
+<text x="196" y="878" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#7dd3fc" xml:space="preserve">// SchedulingJudgement (the model)</text>
+<text x="196" y="897" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">{ "briefing": "Go to Dorpsweg (Kerkstraat to</text>
+<text x="196" y="916" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    Havenlaan) in Spijkenisse, arriving on site at</text>
+<text x="196" y="935" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    04:57 … close V-0412-A, then V-0412-B …" }</text>
+<text x="196" y="954" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve"></text>
+<text x="196" y="973" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#7dd3fc" xml:space="preserve">// SchedulingResult (code)</text>
+<text x="196" y="992" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">{ "workOrder": { "id": "WO-INC-2026-1114-0001",</text>
+<text x="196" y="1011" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    "technician": "T-02 Samira El Idrissi",</text>
+<text x="196" y="1030" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    "arrives": "04:57", "repairDone": "17:10" },</text>
+<text x="196" y="1049" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "residentsToldAt": "18:15",</text>
+<text x="196" y="1068" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "usedFallbackBriefing": false,</text>
+<text x="196" y="1087" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "timeBreakdown": [ 6 lines ] }</text>
+<rect x="610" y="794" width="560" height="330" rx="14" class="card"/>
+<rect x="624" y="808" width="36" height="36" rx="9" fill="#be185d"/>
+<text x="642" y="830" class="ico" >?</text>
+<text x="672" y="824" class="ct" >How the time is built</text>
+<text x="672" y="842" class="cs" >every number comes from tools and rules, not from the model</text>
+<rect x="624" y="856" width="532" height="81" rx="10" fill="#eff6ff"/>
+<text x="638" y="876" class="ct" fill="#1e40af">Getting there and starting</text>
+<text x="638" y="894" class="cs" >alarm 04:10, the technician leaves 04:20</text>
+<text x="638" y="911" class="cs" >travel 7 min + 30 min at the depot: 04:57</text>
+<text x="638" y="928" class="cs" >closing 2 valves takes 46 min</text>
+<rect x="624" y="945" width="532" height="81" rx="10" fill="#fef2f2"/>
+<text x="638" y="965" class="ct" fill="#991b1b">The honest promise</text>
+<text x="638" y="983" class="cs" >repair 6 h: normally done at 11:43</text>
+<text x="638" y="1000" class="cs" >waiting for CPL-FLEX-300 (16:10) + 60 min</text>
+<text x="638" y="1017" class="cs" >flushing 60 min: residents are told 18:15</text>
+<rect x="624" y="1034" width="532" height="81" rx="10" fill="#fffbeb"/>
+<text x="638" y="1054" class="ct" fill="#92400e">Guardrails</text>
+<text x="638" y="1072" class="cs" >one work order per incident, safe to repeat</text>
+<text x="638" y="1089" class="cs" >an uncertified technician is refused</text>
+<text x="638" y="1106" class="cs" >briefing times must match the schedule</text>
+<rect x="1190" y="794" width="550" height="330" rx="14" class="card"/>
+<rect x="1204" y="808" width="36" height="36" rx="9" fill="#0e7490"/>
+<text x="1222" y="830" class="ico" >RUN</text>
+<text x="1252" y="824" class="ct" >The real run of the deployed demo</text>
+<text x="1252" y="842" class="cs" >captured 2026-11-16 (simulated data)</text>
+<rect x="1204" y="856" width="522" height="85" rx="10" fill="#eff6ff"/>
+<text x="1218" y="877" class="ct" >Burst on a cast-iron main</text>
+<text x="1218" y="896" class="cs" >3.2 s · 684 + 188 tokens</text>
+<text x="1218" y="913" class="cs" >0 MCP tool calls by the model</text>
+<text x="1218" y="930" class="cs" >4 calls made by the code (rules)</text>
+<rect x="1204" y="951" width="522" height="85" rx="10" fill="#f0fdf4"/>
+<text x="1218" y="972" class="ct" >Result</text>
+<text x="1218" y="991" class="cs" >work order WO-INC-2026-1114-0001 created</text>
+<text x="1218" y="1008" class="cs" >residents told 18:15, not the optimistic 11:43</text>
+<text x="1218" y="1025" class="cs" >briefing accepted, no fallback text used</text>
+<rect x="1204" y="1046" width="522" height="68" rx="10" fill="#f8fafc"/>
+<text x="1218" y="1067" class="ct" >Guardrails shown</text>
+<text x="1218" y="1086" class="cs" >the model never calculates or invents a time</text>
+<text x="1218" y="1103" class="cs" >a rejected briefing is replaced by the rules’ text</text>
+<text x="890" y="1186" class="lbl" >All data is simulated · SchedulingAgent is registered by LeakOps.AgentRegistry (instructions, tools, knowledge, skills, answer schema) and visible in the Foundry portal · code: src/LeakOps.Agents/SchedulingAgent.cs</text>
+</svg>
