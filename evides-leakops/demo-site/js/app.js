@@ -86,6 +86,7 @@
         </div>
         <button class="cta" data-act="next">${t(UI.start)} \u2192</button>
         <div class="how">
+          <div><b>0 \u00B7 ${t({ en: 'Before AI', nl: 'V\u00F3\u00F3r AI' })}</b>${t({ en: 'First, how an incident runs today.', nl: 'Eerst: hoe een storing nu verloopt.' })}</div>
           <div><b>1 \u00B7 ${t(UI.need)}</b>${t({ en: 'Every slide starts with the functional need.', nl: 'Elke slide begint met de functionele behoefte.' })}</div>
           <div><b>2 \u00B7 ${t({ en: 'The solution', nl: 'De oplossing' })}</b>${t({ en: 'Reveal the technical solution: agent, tools, guardrails.', nl: 'Toon de technische oplossing: agent, tools, vangrails.' })}</div>
           <div><b>3 \u00B7 ${t({ en: 'The whole workflow', nl: 'De hele workflow' })}</b>${t({ en: 'The finale plays it all, end to end.', nl: 'De finale speelt alles af, van begin tot eind.' })}</div>

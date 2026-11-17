@@ -281,7 +281,7 @@
           tag: 'Workflow host', title: { en: 'One alarm in, one automated workflow out', nl: 'Eén alarm erin, één geautomatiseerde workflow eruit' },
           chips: ['ASP.NET (.NET 10)', 'App Service', 'Server-sent events', 'X-Operator-Key'].map((c, i) => `<span class="tool" style="--d:${250 + i * 70}">${c}</span>`).join(''),
           rules: [
-            { en: 'The workflow API only starts with the operator key (Entra sign-in and RBAC around it).', nl: 'De workflow-API start alleen met de operator-sleutel (Entra-aanmelding en RBAC eromheen).' },
+            { en: 'The workflow API only starts with the operator key (compared in fixed time, required outside Development).', nl: 'De workflow-API start alleen met de operator-sleutel (in vaste tijd vergeleken, buiten Development verplicht).' },
             { en: 'Every run is idempotent: the same alarm twice books or orders nothing twice.', nl: 'Elke run is idempotent: hetzelfde alarm twee keer boekt of bestelt niets dubbel.' }
           ],
           zones: ['operator', 'entra', 'host'], answerTitle: { en: 'The alarm payload (real, from the demo)', nl: 'De alarm-payload (echt, uit de demo)' },
@@ -289,8 +289,9 @@
           side: `<div class="sec-label">${T({ en: 'What the workflow runner does', nl: 'Wat de workflow-runner doet' }, ctx.lang)}</div>
             <ul class="tl"><li>${T({ en: 'Takes the alarm and starts the six agents <b>in order</b>', nl: 'Neemt het alarm en start de zes agents <b>in volgorde</b>' }, ctx.lang)}</li>
             <li>${T({ en: 'Streams live progress of every step to the operator console', nl: 'Streamt live de voortgang van elke stap naar de operatorconsole' }, ctx.lang)}</li>
-            <li class="last">${T({ en: 'A false alarm <b>stops the flow</b> after the first agent', nl: 'Een vals alarm <b>stopt de flow</b> na de eerste agent' }, ctx.lang)}</li></ul>`,
-          value: { en: 'The alarm is no longer an e-mail someone has to read: it starts the whole response by itself, and a person only gets involved where it matters.', nl: 'Het alarm is geen e-mail meer die iemand moet lezen: het start zelf de hele afhandeling en een mens komt alleen in beeld waar het ertoe doet.' }
+            <li class="last">${T({ en: 'A false alarm <b>stops the flow</b> after the first agent', nl: 'Een vals alarm <b>stopt de flow</b> na de eerste agent' }, ctx.lang)}</li></ul>
+            <p class="small">${T({ en: 'In this demo an operator picks the alarm and presses Run, and the alarm is simulated. In production an event from the alarm system would call the same API.', nl: 'In deze demo kiest een operator het alarm en drukt op Run, en het alarm is gesimuleerd. In productie zou een gebeurtenis uit het alarmsysteem dezelfde API aanroepen.' }, ctx.lang)}</p>`,
+          value: { en: 'Once an alarm is handed to the workflow, six agents take it from first check to work order without anyone re-typing or phoning around. A person only steps in where it matters: doubtful cases and large orders.', nl: 'Zodra een alarm aan de workflow wordt overgedragen, nemen zes agents het over van eerste check tot werkbon, zonder dat iemand hoeft over te typen of rond te bellen. Een mens grijpt alleen in waar het ertoe doet: twijfelgevallen en grote orders.' }
         });
       }
     },
@@ -519,7 +520,10 @@
           zones: ['hostNL', 'agents', 'foundry', 'mcp', 'cosmos'],
           json: { workOrderId: wo.id, technician: `${wo.technicianId} ${wo.technicianName}`, arrivesAt: hm(wo.expectedArrivalUtc), repairDoneAt: hm(wo.expectedCompletionUtc), residentsToldAt: hm(r.expectedResolutionUtc), travelMinutes: wo.travelMinutes, isolationMinutes: wo.isolationMinutes, partsWaitMinutes: wo.partsWaitMinutes, repairHours: wo.repairHours, purchaseOrderIds: wo.purchaseOrderIds.length + ' linked' },
           side: `<div class="sec-label">${T({ en: 'How the time was built (from the agent)', nl: 'Hoe de tijd is opgebouwd (door de agent)' }, lang)}</div><ul class="tl">${bd.map((x, i) => `<li class="${i === bd.length - 1 ? 'last' : ''}">${esc(x)}</li>`).join('')}</ul>`,
-          value: { en: `Residents are told <b>${hm(r.expectedResolutionUtc)}</b>, not the optimistic 11:43: the plan already counts the missing coupling and a possibly seized valve.`, nl: `Bewoners horen <b>${hm(r.expectedResolutionUtc)}</b>, niet de optimistische 11:43: de planning telt de ontbrekende koppeling en een mogelijk vastzittende afsluiter al mee.` }
+          value: (() => {
+            const normal = ((bd.find(x => /normally done at \d{2}:\d{2}/.test(x)) || '').match(/normally done at (\d{2}:\d{2})/) || [])[1];
+            return { en: `Residents are told <b>${hm(r.expectedResolutionUtc)}</b>${normal ? `, not the optimistic ${normal}` : ''}: the plan already counts the missing coupling and a possibly seized valve.`, nl: `Bewoners horen <b>${hm(r.expectedResolutionUtc)}</b>${normal ? `, niet de optimistische ${normal}` : ''}: de planning telt de ontbrekende koppeling en een mogelijk vastzittende afsluiter al mee.` };
+          })()
         });
       }
     },
