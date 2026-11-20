@@ -23,6 +23,9 @@ Live: https://white-field-03bd1f003.5.azurestaticapps.net (Azure Static Web App 
 
 Slide 1, "Before AI", shows today's drinking-water incident process on one page: the 16 steps from pipe break to closed ticket with roles, system types and people involved, why it is so complex (with public facts from evides.nl, waterstoring.nl and Wikipedia) and where it hurts. The steps, roles and system types are the Evides team's description of a typical process and may differ in detail at Evides; the system names are typical for utilities, not a confirmed list. Slide 12, "Before vs after AI", shows the same 16 steps side by side with what happens now: 7 done by an agent, 3 AI-assisted (an agent prepares, a person acts or approves) and 6 still done by people or unchanged (field work stays with people), with before/after KPIs on top. Its values with AI (44 s to the public notice, 66 s to the work order, technician, times, tool calls and tokens) come from `js/captured.js`. Slide 3 has a switch between the burst and the false alarm. The workflow replay has 1x, 3x and 10x speed. `#/4` in the URL opens slide 4.
 
+Four step slides link to the live fake pages of the Waterstoring app (simulated data): slide 4 "Diagnostic" to the network map (`/gis`, a simulated
+demo GIS, not the Evides GIS), slide 5 "Residents" to the residents' page, slide 6 "Technician" to `/technicians` and slide 7 "Parts" to `/warehouse`.
+
 Slide 13, "Questions", opens with a water wave that rises from the bottom and ripples on its surface. The ten question cards (English and Dutch) flip
 in 3D to show the answer; flipped cards stay flipped when you switch the language, and the footer button "Hide the answers" turns them all back.
 With reduced motion the water stands still and the answer fades in instead of flipping. The QR code is a static file, `img/qr-demo.svg`, because the

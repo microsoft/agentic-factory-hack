@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using LeakOps.Contracts;
 using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
@@ -20,13 +21,30 @@ public interface IDemoData
     Task<IReadOnlyList<StockReservation>> ReservationsAsync();
     Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync();
 
-    /// <summary>Deletes incidents, work orders, purchase orders and stock reservations of the workflow, and restores the stock levels.</summary>
+    // The simulated water network and the diagnoses for the GIS page.
+    Task<IReadOnlyList<PipeSegment>> PipeSegmentsAsync();
+    Task<IReadOnlyList<Valve>> ValvesAsync();
+    Task<IReadOnlyList<Sensor>> SensorsAsync();
+    Task<IReadOnlyList<GisDiagnosis>> DiagnosesAsync();
+
+    /// <summary>Keeps the Diagnostic agent's report for the GIS page. The same alarm again replaces its earlier diagnosis.</summary>
+    Task SaveDiagnosisAsync(GisDiagnosis diagnosis);
+
+    /// <summary>Deletes incidents, diagnoses, work orders, purchase orders and stock reservations of the workflow, and restores the stock levels.</summary>
     Task ResetAsync();
 }
 
-/// <summary>Reads the shipped data/*.json files. Used on a laptop and in tests: the roster and stock are the seed data and nothing is reserved, ordered or assigned.</summary>
+/// <summary>A diagnosis as the GIS page received it from the workflow host.</summary>
+public record GisDiagnosis(DateTimeOffset ReceivedUtc, DiagnosticReport Report);
+
+/// <summary>
+/// Reads the shipped data/*.json files. Used on a laptop and in tests: the roster and stock are the seed data and nothing is reserved,
+/// ordered or assigned. Diagnoses for the GIS page are kept in memory until the demo is reset.
+/// </summary>
 public class FileDemoData(string dataDirectory) : IDemoData
 {
+    private readonly ConcurrentDictionary<string, GisDiagnosis> diagnoses = new();
+
     private Task<IReadOnlyList<T>> Seed<T>(string file) => Task.FromResult<IReadOnlyList<T>>(DemoJson.ReadList<T>(dataDirectory, file));
 
     public Task<IReadOnlyList<Technician>> TechniciansAsync() => Seed<Technician>("technicians.json");
@@ -36,7 +54,22 @@ public class FileDemoData(string dataDirectory) : IDemoData
     public Task<IReadOnlyList<Supplier>> SuppliersAsync() => Seed<Supplier>("suppliers.json");
     public Task<IReadOnlyList<StockReservation>> ReservationsAsync() => Task.FromResult<IReadOnlyList<StockReservation>>([]);
     public Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => Task.FromResult<IReadOnlyList<PurchaseOrder>>([]);
-    public Task ResetAsync() => Task.CompletedTask;
+    public Task<IReadOnlyList<PipeSegment>> PipeSegmentsAsync() => Seed<PipeSegment>("pipe-segments.json");
+    public Task<IReadOnlyList<Valve>> ValvesAsync() => Seed<Valve>("valves.json");
+    public Task<IReadOnlyList<Sensor>> SensorsAsync() => Seed<Sensor>("sensors.json");
+    public Task<IReadOnlyList<GisDiagnosis>> DiagnosesAsync() => Task.FromResult<IReadOnlyList<GisDiagnosis>>([.. diagnoses.Values]);
+
+    public Task SaveDiagnosisAsync(GisDiagnosis diagnosis)
+    {
+        diagnoses[diagnosis.Report.AlarmId] = diagnosis;
+        return Task.CompletedTask;
+    }
+
+    public Task ResetAsync()
+    {
+        diagnoses.Clear();
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>
@@ -54,6 +87,26 @@ public class CosmosDemoData(CosmosClient client, string database, string dataDir
     public async Task<IReadOnlyList<Supplier>> SuppliersAsync() => await QueryAsync<Supplier>(LeakOpsContainers.Suppliers);
     public async Task<IReadOnlyList<StockReservation>> ReservationsAsync() => await QueryAsync<StockReservation>(LeakOpsContainers.StockReservations);
     public async Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => await QueryAsync<PurchaseOrder>(LeakOpsContainers.PurchaseOrders);
+    public async Task<IReadOnlyList<PipeSegment>> PipeSegmentsAsync() => await QueryAsync<PipeSegment>(LeakOpsContainers.PipeSegments);
+    public async Task<IReadOnlyList<Valve>> ValvesAsync() => await QueryAsync<Valve>(LeakOpsContainers.Valves);
+    public async Task<IReadOnlyList<Sensor>> SensorsAsync() => await QueryAsync<Sensor>(LeakOpsContainers.Sensors);
+
+    // Diagnoses live in the Incidents container (the reset clears it), marked with a kind so other incident documents are left alone.
+    public async Task<IReadOnlyList<GisDiagnosis>> DiagnosesAsync() =>
+        (await QueryAsync<DiagnosisDocument>(LeakOpsContainers.Incidents, $"SELECT * FROM c WHERE c.kind = '{DiagnosisDocument.GisKind}'"))
+            .Select(d => new GisDiagnosis(d.ReceivedUtc, d.Report)).ToList();
+
+    public async Task SaveDiagnosisAsync(GisDiagnosis diagnosis)
+    {
+        var report = diagnosis.Report;
+        var document = new DiagnosisDocument($"gis-{report.AlarmId}", report.DistrictId, DiagnosisDocument.GisKind, diagnosis.ReceivedUtc, report);
+        await Db.GetContainer(LeakOpsContainers.Incidents).UpsertItemAsync(document, new PartitionKey(report.DistrictId));
+    }
+
+    private record DiagnosisDocument(string Id, string DistrictId, string Kind, DateTimeOffset ReceivedUtc, DiagnosticReport Report)
+    {
+        public const string GisKind = "gis-diagnosis";
+    }
 
     public async Task ResetAsync()
     {
@@ -66,10 +119,10 @@ public class CosmosDemoData(CosmosClient client, string database, string dataDir
             await inventory.UpsertItemAsync(item, new PartitionKey(item.Category));
     }
 
-    private async Task<List<T>> QueryAsync<T>(string container)
+    private async Task<List<T>> QueryAsync<T>(string container, string query = "SELECT * FROM c")
     {
         var found = new List<T>();
-        using var feed = Db.GetContainer(container).GetItemQueryIterator<T>("SELECT * FROM c");
+        using var feed = Db.GetContainer(container).GetItemQueryIterator<T>(query);
         while (feed.HasMoreResults) found.AddRange(await feed.ReadNextAsync());
         return found;
     }

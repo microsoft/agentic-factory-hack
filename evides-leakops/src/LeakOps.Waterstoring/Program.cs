@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using LeakOps.Contracts;
+using LeakOps.Contracts.Logic;
 using LeakOps.Waterstoring;
 using Microsoft.Azure.Cosmos;
 
@@ -34,6 +35,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "Healthy", service = "wate
 app.MapGet("/evides", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "index.html"), "text/html"));
 app.MapGet("/technicians", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "technicians.html"), "text/html"));
 app.MapGet("/warehouse", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "warehouse.html"), "text/html"));
+app.MapGet("/gis", (IWebHostEnvironment env) => Results.File(Path.Combine(env.WebRootPath, "gis.html"), "text/html"));
 
 // ---- Public, read-only ------------------------------------------------------------------------------------------
 
@@ -57,6 +59,11 @@ app.MapGet("/api/technicians", async (IDemoData data, IConfiguration config, Dat
 app.MapGet("/api/warehouse", async (IDemoData data, IConfiguration config, DateTimeOffset? at) =>
     Results.Ok(WarehouseBoard.Build(await data.InventoryAsync(), await data.WarehousesAsync(), await data.SuppliersAsync(),
         await data.ReservationsAsync(), await data.PurchaseOrdersAsync(), SimulationClock(config, at))));
+
+// The simulated water network on a street map, plus the latest diagnosis of the Diagnostic agent (demo data, not the Evides GIS).
+app.MapGet("/api/gis", async (IDemoData data, IConfiguration config, DateTimeOffset? at) =>
+    Results.Ok(GisBoard.Build(await data.PipeSegmentsAsync(), await data.ValvesAsync(), await data.SensorsAsync(),
+        await data.DiagnosesAsync(), SimulationClock(config, at))));
 
 static DateTimeOffset SimulationClock(IConfiguration config, DateTimeOffset? at) =>
     at ?? (DateTimeOffset.TryParse(config["DEMO_CLOCK_UTC"], out var configured) ? configured : DateTimeOffset.Parse("2026-11-14T03:10:00Z"));
@@ -101,6 +108,20 @@ app.MapPost("/api/admin/reset-demo", async (IncidentStore store, IDemoData data,
     await store.ClearAsync();
     await data.ResetAsync();
     logger.LogInformation("Demo data reset");
+    return Results.NoContent();
+}).AddEndpointFilter(RequireApiKeyOrOperatorKey);
+
+// The workflow host sends the Diagnostic agent's report here right after the Diagnostic step, for the GIS page.
+app.MapPost("/api/gis/diagnosis", async (DiagnosticReport report, IDemoData data, TimeProvider time, ILogger<Program> logger) =>
+{
+    var errors = new Dictionary<string, string[]>();
+    if (!IncidentIds.IsValidAlarmId(report.AlarmId)) errors["alarmId"] = ["Required: ALM- followed by letters, digits, '.', '_' or '-'"];
+    if (string.IsNullOrWhiteSpace(report.SegmentId)) errors["segmentId"] = ["Required"];
+    if (string.IsNullOrWhiteSpace(report.DistrictId)) errors["districtId"] = ["Required"];
+    if (errors.Count > 0) return Results.ValidationProblem(errors);
+
+    await data.SaveDiagnosisAsync(new GisDiagnosis(time.GetUtcNow(), report));
+    logger.LogInformation("Diagnosis for {AlarmId} on {SegmentId} received for the GIS page", report.AlarmId, report.SegmentId);
     return Results.NoContent();
 }).AddEndpointFilter(RequireApiKeyOrOperatorKey);
 

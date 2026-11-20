@@ -7,9 +7,9 @@ namespace LeakOps.Contracts.Logic;
 /// answers of the earlier ones. The runner decides when to stop: a false alarm closes the run, and any agent that says a person has to
 /// decide ends it there (with the reasons), so nothing further is booked on a doubtful basis. It never throws for an agent problem:
 /// the run ends as "failed" and says which step failed. Every step is safe to run again (the agents are idempotent), so an operator
-/// can simply run the same alarm once more.
+/// can simply run the same alarm once more. After the Diagnostic step it hands the report to the GIS feed (if any), best effort.
 /// </summary>
-public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
+public class WorkflowRunner(IAgentGateway gateway, TimeProvider time, IGisFeed? gis = null)
 {
     public async Task<WorkflowSummary> RunAsync(AnomalyAlarm alarm, Func<WorkflowEvent, ValueTask> emit, CancellationToken cancellationToken, PauseGate? pause = null)
     {
@@ -71,6 +71,14 @@ public class WorkflowRunner(IAgentGateway gateway, TimeProvider time)
             $"{r.SegmentId} {SchedulingRules.StreetName(r.Street)}: DN{r.DiameterMm} {r.Material.Replace('_', ' ')}, {r.BreachType}, severity {r.Severity}, {r.CustomersAffected} customers"
             + (r.NeedsReview ? " - needs review" : ""));
         if (report is null) return await Finish(WorkflowOutcomes.Failed, WorkflowSteps.Diagnostic, [steps[^1].Headline]);
+
+        // Show the diagnosis on the simulated GIS map, also when it needs review (the map flags that). Never let the map stop the run.
+        if (gis is not null)
+        {
+            try { await gis.PublishAsync(report, cancellationToken); }
+            catch (Exception) when (!cancellationToken.IsCancellationRequested) { }
+        }
+
         if (report.NeedsReview) return await Finish(WorkflowOutcomes.NeedsReview, WorkflowSteps.Diagnostic, report.ReviewReasons);
 
         // The operator may ask to pause before a step, so the audience can look at the outside world first. Returns false when the run is cancelled.

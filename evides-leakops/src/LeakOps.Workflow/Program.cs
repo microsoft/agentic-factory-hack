@@ -18,6 +18,7 @@ builder.Services.AddSingleton<RunControl>();
 // The agents take a while (a model call each), so the HTTP timeout is generous.
 builder.Services.AddHttpClient<IAgentGateway, AgentGateway>(client => client.Timeout = TimeSpan.FromMinutes(5));
 builder.Services.AddHttpClient<IDemoReset, WaterstoringDemoReset>(client => client.Timeout = TimeSpan.FromSeconds(60));
+builder.Services.AddHttpClient<IGisFeed, WaterstoringGisFeed>(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddTransient<WorkflowRunner>();
 
 // Telemetry goes to Application Insights when the app runs in Azure (the connection string is an app setting there).

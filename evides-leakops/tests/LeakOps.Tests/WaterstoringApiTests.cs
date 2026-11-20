@@ -284,6 +284,11 @@ public class WaterstoringApiTests
         public Task<IReadOnlyList<Supplier>> SuppliersAsync() => _seed.SuppliersAsync();
         public Task<IReadOnlyList<StockReservation>> ReservationsAsync() => Task.FromResult<IReadOnlyList<StockReservation>>(Reservations);
         public Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => Task.FromResult<IReadOnlyList<PurchaseOrder>>(Orders);
+        public Task<IReadOnlyList<PipeSegment>> PipeSegmentsAsync() => _seed.PipeSegmentsAsync();
+        public Task<IReadOnlyList<Valve>> ValvesAsync() => _seed.ValvesAsync();
+        public Task<IReadOnlyList<Sensor>> SensorsAsync() => _seed.SensorsAsync();
+        public Task<IReadOnlyList<GisDiagnosis>> DiagnosesAsync() => _seed.DiagnosesAsync();
+        public Task SaveDiagnosisAsync(GisDiagnosis diagnosis) => _seed.SaveDiagnosisAsync(diagnosis);
         public Task ResetAsync() { Resets++; return Task.CompletedTask; }
     }
 

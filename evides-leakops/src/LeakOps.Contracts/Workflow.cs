@@ -81,6 +81,15 @@ public interface IAgentGateway
     Task<AgentResult<T>> CallAsync<T>(string step, object body, CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Hands the Diagnostic agent's report to the (simulated) GIS page, so the map can show the leak, the valves to close and who is affected.
+/// Best effort: the runner ignores a failure, because a map that lags behind must never stop the response to a leak.
+/// </summary>
+public interface IGisFeed
+{
+    Task PublishAsync(DiagnosticReport report, CancellationToken cancellationToken);
+}
+
 /// <summary>An agent answered with an error or could not be reached.</summary>
 public class AgentCallException(string step, int statusCode, string reason, string message) : Exception(message)
 {
