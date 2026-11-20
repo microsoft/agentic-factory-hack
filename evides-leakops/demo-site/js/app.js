@@ -12,7 +12,8 @@
     lang: (() => { try { return localStorage.getItem('evides-demo-lang') || 'en'; } catch { return 'en'; } })(),
     scen: 'burst',
     revealed: {},
-    seen: {}
+    seen: {},
+    qa: {}
   };
 
   const UI = {
@@ -25,6 +26,8 @@
     pause: { en: 'Pause', nl: 'Pauzeer' },
     replay: { en: 'Replay', nl: 'Opnieuw' },
     compare: { en: 'Before vs after AI', nl: 'V\u00F3\u00F3r en na AI' },
+    questions: { en: 'Questions', nl: 'Vragen' },
+    hideAnswers: { en: 'Hide the answers', nl: 'Verberg de antwoorden' },
     need: { en: 'The need', nl: 'De behoefte' },
     today: { en: 'Today, by hand', nl: 'Vandaag, met de hand' },
     lockedTitle: { en: 'How does AI solve this?', nl: 'Hoe lost AI dit op?' },
@@ -32,6 +35,10 @@
     hint: {
       en: '<kbd>Space</kbd> reveal / next &nbsp; <kbd>\u2190</kbd> back &nbsp; <kbd>1</kbd>\u2013<kbd>6</kbd> technical tabs &nbsp; <kbd>L</kbd> language &nbsp; <kbd>F</kbd> fullscreen',
       nl: '<kbd>Spatie</kbd> tonen / volgende &nbsp; <kbd>\u2190</kbd> terug &nbsp; <kbd>1</kbd>\u2013<kbd>6</kbd> technische tabs &nbsp; <kbd>L</kbd> taal &nbsp; <kbd>F</kbd> volledig scherm'
+    },
+    hintQa: {
+      en: '<kbd>1</kbd>\u2013<kbd>9</kbd>, <kbd>0</kbd> show / hide an answer &nbsp; <kbd>\u2190</kbd> back &nbsp; <kbd>L</kbd> language &nbsp; <kbd>F</kbd> fullscreen',
+      nl: '<kbd>1</kbd>\u2013<kbd>9</kbd>, <kbd>0</kbd> antwoord tonen / verbergen &nbsp; <kbd>\u2190</kbd> terug &nbsp; <kbd>L</kbd> taal &nbsp; <kbd>F</kbd> volledig scherm'
     },
     scenA: { en: 'A \u00B7 Burst on a cast-iron main', nl: 'A \u00B7 Breuk in gietijzeren hoofdleiding' },
     scenB: { en: 'B \u00B7 Planned valve work (false alarm)', nl: 'B \u00B7 Gepland afsluiterwerk (vals alarm)' },
@@ -46,10 +53,12 @@
     state.seen[slide.id] = true;
     let html;
     if (slide.type === 'intro') html = introHtml();
-    else if (slide.type === 'before' || slide.type === 'compare') html = slide.render(ctx());
+    else if (slide.type === 'before' || slide.type === 'compare' || slide.type === 'qa') html = slide.render(ctx());
     else if (slide.type === 'finale') html = finaleHtml();
     else html = stepHtml(slide);
-    stage.innerHTML = `<div class="slide" ${opts.anim === false ? 'style="animation:none"' : ''} data-id="${slide.id}">${html}</div>`;
+    // On a language switch the closing slide keeps its water at rest instead of rising again.
+    const still = slide.type === 'qa' && opts.anim === false ? ' still' : '';
+    stage.innerHTML = `<div class="slide${still}" ${opts.anim === false ? 'style="animation:none"' : ''} data-id="${slide.id}">${html}</div>`;
     if (opts.keepScroll !== true) stage.scrollTop = 0;
     if (slide.type === 'finale') initFinale();
     updateChrome();
@@ -58,7 +67,7 @@
     document.title = 'Evides LeakOps - ' + t(slide.short);
   }
 
-  function ctx() { return { lang: state.lang, scen: state.scen }; }
+  function ctx() { return { lang: state.lang, scen: state.scen, qa: state.qa }; }
 
   // The solution card: tab bar plus the open tab. The overview is the story; the other tabs are the technical detail from the source.
   function solHtml(slide) { return window.TechUI.wrap(slide, ctx(), state.tab, () => slide.solution(ctx())); }
@@ -139,10 +148,11 @@
     if (slide.type === 'intro') nb.textContent = t(UI.start) + ' \u2192';
     else if (slide.type === 'before') nb.textContent = t(UI.seeAi) + ' \u2192';
     else if (slide.type === 'finale') nb.textContent = fin.done && !isLast() ? t(UI.compare) + ' \u2192' : playerLabel();
-    else if (slide.type === 'compare') { nb.textContent = t(UI.next) + ' \u2192'; nb.disabled = isLast(); }
+    else if (slide.type === 'compare') { nb.textContent = (SLIDES[state.i + 1]?.type === 'qa' ? t(UI.questions) : t(UI.next)) + ' \u2192'; nb.disabled = isLast(); }
+    else if (slide.type === 'qa') { nb.textContent = '\u21BA ' + t(UI.hideAnswers); nb.disabled = !Object.values(state.qa).some(Boolean); }
     else if (!state.revealed[slide.id]) nb.textContent = t(UI.reveal) + ' \u25B8';
     else nb.textContent = t(UI.next) + ' \u2192';
-    $('#hint').innerHTML = t(UI.hint);
+    $('#hint').innerHTML = t(slide.type === 'qa' ? UI.hintQa : UI.hint);
     $('#btn-lang').textContent = state.lang === 'en' ? 'EN | nl' : 'en | NL';
   }
 
@@ -151,7 +161,7 @@
   function go(i) { state.i = Math.max(0, Math.min(SLIDES.length - 1, i)); state.tab = 0; render(); }
   function reveal() {
     const slide = SLIDES[state.i];
-    if (slide.type === 'intro' || slide.type === 'before' || slide.type === 'compare' || slide.type === 'finale' || state.revealed[slide.id]) return;
+    if (slide.type === 'intro' || slide.type === 'before' || slide.type === 'compare' || slide.type === 'qa' || slide.type === 'finale' || state.revealed[slide.id]) return;
     state.revealed[slide.id] = true;
     state.tab = 0;
     $('#sol').innerHTML = solHtml(slide);
@@ -176,8 +186,38 @@
     // After the replay has finished, Next goes on to the before/after slide; the play button in the finale still replays.
     if (slide.type === 'finale') return fin.done && !isLast() ? go(state.i + 1) : togglePlay();
     if (slide.type === 'compare') return isLast() ? undefined : go(state.i + 1);
+    if (slide.type === 'qa') return;
     if (slide.type === 'intro' || slide.type === 'before' || state.revealed[slide.id]) return go(state.i + 1);
     reveal();
+  }
+  // Closing slide: a question card flips to its answer; the flipped set lives in state so it survives a language switch.
+  function flipQa(i, ev) {
+    const slide = SLIDES[state.i];
+    if (slide.type !== 'qa' || i < 0 || i >= slide.count) return;
+    state.qa[i] = !state.qa[i];
+    const btn = stage.querySelector(`[data-act="qa"][data-v="${i}"]`);
+    if (btn) { setQaCard(btn, state.qa[i]); splash(btn.parentElement, ev); }
+    updateChrome();
+  }
+  function setQaCard(btn, on) {
+    btn.parentElement.classList.toggle('flipped', on);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.querySelector('.qa-front').setAttribute('aria-hidden', String(on));
+    btn.querySelector('.qa-back').setAttribute('aria-hidden', String(!on));
+  }
+  // A ripple where the card was clicked, or from its centre for a key press.
+  function splash(card, ev) {
+    const r = card.getBoundingClientRect(), d = document.createElement('i'), byMouse = ev && ev.detail > 0;
+    d.className = 'qa-splash';
+    d.style.left = (byMouse ? ev.clientX - r.left : r.width / 2) + 'px';
+    d.style.top = (byMouse ? ev.clientY - r.top : r.height / 2) + 'px';
+    d.addEventListener('animationend', () => d.remove());
+    card.appendChild(d);
+  }
+  function resetQa() {
+    state.qa = {};
+    stage.querySelectorAll('.qa-card.flipped .qa-inner').forEach(b => setQaCard(b, false));
+    updateChrome();
   }
   function back() { go(state.i - 1); }
   function setLang(l) { state.lang = l; try { localStorage.setItem('evides-demo-lang', l); } catch { } const keep = fin.t; render({ anim: false, keepScroll: true }); if (SLIDES[state.i].type === 'finale') restoreFinale(keep); }
@@ -198,15 +238,19 @@
       case 'scen': state.scen = el.dataset.v; return render({ anim: false, keepScroll: true });
       case 'play': return togglePlay();
       case 'reset': return resetFinale();
+      case 'qa': return flipQa(+el.dataset.v, e);
     }
   });
   $('#btn-prev').addEventListener('click', back);
-  $('#btn-next').addEventListener('click', advance);
+  // On the closing slide the main button hides the answers again; Space and the arrow keys do nothing there.
+  $('#btn-next').addEventListener('click', () => (SLIDES[state.i].type === 'qa' ? resetQa() : advance()));
   $('#btn-lang').addEventListener('click', () => setLang(state.lang === 'en' ? 'nl' : 'en'));
   $('#btn-full').addEventListener('click', fullscreen);
   document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+    // Keys 1-9 and 0 flip question 1-10 on the closing slide.
+    if (SLIDES[state.i].type === 'qa' && /^[0-9]$/.test(e.key)) return flipQa((+e.key + 9) % 10);
     switch (e.key) {
       case 'ArrowRight': case 'PageDown': case ' ': case 'Enter': e.preventDefault(); advance(); break;
       case 'ArrowLeft': case 'PageUp': e.preventDefault(); back(); break;

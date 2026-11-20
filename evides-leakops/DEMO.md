@@ -12,8 +12,8 @@ The storyline as a picture: [docs/functional-flow.html](docs/functional-flow.htm
 
 **Interactive version for presenting:** https://white-field-03bd1f003.5.azurestaticapps.net (Azure Static Web App `leakops-demo-88546e` in the same resource group, no login, no keys).
 Slide 1, "Before AI", shows how an incident runs today (16 steps, 6-8 people before residents are told, 12 system types, why it is complex). Then every slide first shows the functional need, then reveals the technical solution (agent, tools, knowledge, skills, guardrails, where it runs); the slide
-"Tools, knowledge, skills" shows what each agent is connected to, slide 11 replays the whole workflow, and the last slide, "Before vs after AI",
-shows the same 16 steps marked as done by an agent (7), AI-assisted (3) or still done by people (6), with before/after KPIs from the captured run. Space reveals / goes next, `L` switches English and Dutch. It shows data captured from a real run of this
+"Tools, knowledge, skills" shows what each agent is connected to, slide 11 replays the whole workflow, and slide 12, "Before vs after AI",
+shows the same 16 steps marked as done by an agent (7), AI-assisted (3) or still done by people (6), with before/after KPIs from the captured run. The last slide, "Questions", says thank you, shows a QR code to the site and ten common questions: click a card (or press `1`-`9`, `0`) to show its answer. Space reveals / goes next, `L` switches English and Dutch. It shows data captured from a real run of this
 deployment, so it also works when the Azure demo is scaled down. Source and update steps: [demo-site/README.md](demo-site/README.md).
 
 | What | Where |

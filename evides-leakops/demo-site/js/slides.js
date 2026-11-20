@@ -340,6 +340,72 @@
     </div>`;
   }
 
+  /* ---------- closing slide: thank you and questions ---------- */
+  const DEMO_URL = 'https://white-field-03bd1f003.5.azurestaticapps.net';
+  const QA = [
+    { q: { en: 'Is this real data?', nl: 'Is dit echte data?' },
+      a: { en: 'No, everything is simulated and the documents are synthetic. The technology is real and runs in Azure.', nl: 'Nee, alles is gesimuleerd en de documenten zijn synthetisch. De techniek is echt en draait in Azure.' } },
+    { q: { en: 'What if the AI is wrong?', nl: 'Wat als de AI fout zit?' },
+      a: { en: 'Code checks every result. A false alarm is only accepted with documented planned work; when in doubt it goes to a person.', nl: 'Code controleert elke uitkomst. Een vals alarm wordt alleen geaccepteerd met gedocumenteerd gepland werk; bij twijfel gaat het naar een mens.' } },
+    { q: { en: 'Does this replace people?', nl: 'Vervangt dit mensen?' },
+      a: { en: 'No. 6 of the 16 steps stay with people, and money above 2,500 EUR and unclear data stay with a person. It mainly relieves the on-call shift.', nl: 'Nee. 6 van de 16 stappen blijven mensenwerk, en geld boven 2.500 EUR en onduidelijke data liggen bij een mens. Het ontlast vooral de piketdienst.' } },
+    { q: { en: 'What does it cost?', nl: 'Wat kost het?' },
+      a: { en: 'A run costs cents (about 35k tokens in, 3.6k out). The demo costs about 100 EUR a month, about 70 EUR of it for AI Search.', nl: 'Een run kost centen (ongeveer 35k tokens in, 3,6k uit). De demo kost ongeveer 100 EUR per maand, waarvan ongeveer 70 EUR voor AI Search.' } },
+    { q: { en: 'Security and privacy?', nl: 'Veiligheid en privacy?' },
+      a: { en: 'Entra ID and managed identities only, least privilege per agent, the Foundry content filter, hosted in Sweden Central.', nl: 'Alleen Entra ID en managed identities, minste rechten per agent, het contentfilter van Foundry, gehost in Sweden Central.' } },
+    { q: { en: 'Why 6 agents and not 1?', nl: 'Waarom 6 agents en niet 1?' },
+      a: { en: 'A narrow job per agent means fewer rights, and each agent can be tested and improved separately.', nl: 'Een smalle taak per agent geeft minder rechten, en elke agent is apart te testen en te verbeteren.' } },
+    { q: { en: 'Why Foundry and not build it ourselves?', nl: 'Waarom Foundry en niet zelf bouwen?' },
+      a: { en: 'Foundry gives versions, tracing, evaluations and guardrails that you would otherwise build yourself.', nl: 'Foundry geeft versies, tracing, evaluaties en vangrails, die je anders zelf moet bouwen.' } },
+    { q: { en: 'Difference from the hackathon?', nl: 'Verschil met de hackathon?' },
+      a: { en: 'The same pattern and base (Foundry and Microsoft Agent Framework), but there a tire factory with 5 agents and memory. Here: 6 agents on a real Evides process, MCP tools on Functions, Foundry IQ and skills, no memory on purpose, and guardrails in code.', nl: 'Hetzelfde patroon en dezelfde basis (Foundry en Microsoft Agent Framework), maar daar een bandenfabriek met 5 agents en geheugen. Hier: 6 agents op een echt Evides-proces, MCP-tools op Functions, Foundry IQ en skills, bewust geen geheugen, en vangrails in code.' } },
+    { q: { en: 'Prompt injection?', nl: 'Prompt-injectie?' },
+      a: { en: 'The content filter blocks a hard attack. Text in the data is never an instruction, and an evaluation tests that.', nl: 'Het contentfilter blokkeert een harde aanval. Tekst in de data is nooit een instructie, en een evaluatie test dat.' } },
+    { q: { en: 'How to get to production?', nl: 'Hoe naar productie?' },
+      a: { en: 'One process, real data read-only behind the same tools, and a person approves everything. Only then automate.', nl: '\u00C9\u00E9n proces, echte data alleen-lezen achter dezelfde tools, en een mens keurt alles goed. Pas daarna automatiseren.' } }
+  ];
+  // A sine wave as one SVG path; the layer is twice as wide and slides by half its width, so the loop has no seam.
+  const wavePath = (amp, base) => {
+    let d = `M0 ${base}`;
+    for (let x = 0; x < 2880; x += 360) d += ` q90 ${-amp} 180 0 t180 0`;
+    return d + ' V320 H0 Z';
+  };
+  function qaSlide(lang, flipped = {}) {
+    const L2 = o => T(o, lang);
+    const key = i => (i + 1) % 10;
+    const card = (x, i) => `<li class="qa-card rv${flipped[i] ? ' flipped' : ''}" style="--d:${900 + i * 70}">
+        <button class="qa-inner" data-act="qa" data-v="${i}" aria-pressed="${flipped[i] ? 'true' : 'false'}" aria-label="${esc(L2(x.q))}">
+          <span class="qa-face qa-front" aria-hidden="${flipped[i] ? 'true' : 'false'}"><span class="qa-no">${i + 1}</span><b>${L2(x.q)}</b>
+            <small><svg width="11" height="14" aria-hidden="true"><use href="#drop"/></svg>${L2({ en: 'Click or press', nl: 'Klik of druk op' })} <kbd>${key(i)}</kbd></small></span>
+          <span class="qa-face qa-back" aria-hidden="${flipped[i] ? 'false' : 'true'}"><span class="qa-no">${i + 1}</span><em>${L2(x.q)}</em><span>${L2(x.a)}</span></span>
+        </button>
+      </li>`;
+    const ring = (x, y, d) => `<i class="qa-ring" style="left:${x}%;top:${y}%;--d:${d}"></i>`;
+    return `<div class="qa">
+      <div class="qa-water" aria-hidden="true">
+        <svg class="qa-wave w3" viewBox="0 0 2880 320" preserveAspectRatio="none"><path d="${wavePath(26, 70)}"/></svg>
+        <svg class="qa-wave w2" viewBox="0 0 2880 320" preserveAspectRatio="none"><path d="${wavePath(34, 96)}"/></svg>
+        <svg class="qa-wave w1" viewBox="0 0 2880 320" preserveAspectRatio="none"><path d="${wavePath(22, 120)}"/></svg>
+        <div class="qa-rings">${ring(18, 34, 1700)}${ring(50, 28, 2100)}${ring(80, 38, 2500)}${ring(34, 52, 3600)}${ring(66, 50, 4200)}</div>
+        ${[12, 27, 41, 58, 73, 88].map((x, i) => `<i class="qa-bubble" style="left:${x}%;--d:${2200 + i * 650};--s:${6 + (i % 3) * 3}px"></i>`).join('')}
+      </div>
+      <div class="qa-head">
+        <div>
+          <span class="tag sol rv" style="--d:300">${L2({ en: 'Questions?', nl: 'Vragen?' })}</span>
+          <h2 class="qa-title rv" style="--d:450">${L2({ en: 'Thank you', nl: 'Bedankt' })}</h2>
+          <p class="rv" style="--d:600">${L2({
+            en: 'Ten questions we often hear. Click a question to show the answer. All data in this demo is simulated.',
+            nl: 'Tien vragen die we vaak horen. Klik op een vraag om het antwoord te tonen. Alle data in deze demo is gesimuleerd.' })}</p>
+        </div>
+        <a class="qa-qr rv" style="--d:750" href="${DEMO_URL}" target="_blank" rel="noopener noreferrer">
+          <img src="img/qr-demo.svg" width="132" height="132" alt="${esc(L2({ en: 'QR code to the demo site', nl: 'QR-code naar de demosite' }))}">
+          <span><b>${L2({ en: 'Try the demo yourself', nl: 'Bekijk de demo zelf' })}</b><small>${DEMO_URL.replace('https://', '')}</small></span>
+        </a>
+      </div>
+      <ol class="qa-grid">${QA.map(card).join('')}</ol>
+    </div>`;
+  }
+
   /* ---------- slides ---------- */
   const SLIDES = [
     { id: 'intro', type: 'intro', short: { en: 'Start', nl: 'Start' } },
@@ -719,6 +785,11 @@
     {
       id: 'after', type: 'compare', short: { en: 'Before vs after AI', nl: 'V\u00F3\u00F3r en na AI' },
       render: ctx => afterSlide(ctx.lang)
+    },
+
+    {
+      id: 'qa', type: 'qa', short: { en: 'Questions', nl: 'Vragen' }, count: QA.length,
+      render: ctx => qaSlide(ctx.lang, ctx.qa)
     }
   ];
 

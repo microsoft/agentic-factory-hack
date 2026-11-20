@@ -299,6 +299,78 @@ h1,h2,h3,h4{color:var(--teal);margin:0;font-weight:700}
   *,*:before,*:after{animation-duration:.001ms!important;animation-delay:0ms!important;transition:none!important}
 }
 
+/* ---------- closing slide: thank you and questions (water theme) ---------- */
+/* The slide only fades in (no slide-in transform), so the fixed water layer stays anchored to the window. */
+.slide[data-id="qa"]{animation:qafade .5s ease both}
+@keyframes qafade{from{opacity:0}to{opacity:1}}
+.qa{position:relative;padding:2px 0 8px}
+.qa-head,.qa-grid{position:relative;z-index:1}
+.qa-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px 28px;margin-bottom:18px}
+.qa-head p{font-size:17px;max-width:760px;margin:0}
+.qa-title{font-size:clamp(48px,5.6vw,88px);line-height:1.02;letter-spacing:-1.5px;margin:10px 0 8px;padding-bottom:4px;
+  background:linear-gradient(100deg,var(--teal) 35%,var(--aqua) 50%,var(--teal) 65%);background-size:300% 100%;background-position:100% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.qa-title.rv{animation:rise .6s ease forwards,shimmer 6s ease-in-out 2.4s infinite;animation-delay:calc(var(--d,0) * 1ms),2.4s}
+@keyframes shimmer{0%{background-position:100% 0}45%,100%{background-position:0 0}}
+.qa-qr{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:10px 20px 10px 10px;box-shadow:var(--shadow);text-decoration:none;color:var(--teal);transition:.2s}
+.qa-qr:hover{border-color:var(--aqua-30);transform:translateY(-2px)}
+.qa-qr img{display:block;border-radius:12px}
+.qa-qr b{display:block;font-size:18px;margin-bottom:4px}
+.qa-qr small{display:block;font-size:13.5px;color:#5f7f84;white-space:nowrap}
+.qa-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.qa-card{position:relative;perspective:1400px}
+.qa-inner{display:grid;width:100%;height:100%;border:0;padding:0;background:none;color:inherit;text-align:left;border-radius:22px;
+  transform-style:preserve-3d;transition:transform .8s cubic-bezier(.34,1.36,.5,1)}
+.qa-inner:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.qa-card.flipped .qa-inner{transform:rotateY(180deg)}
+/* Two rows of cards fill the height left under the heading on a 1080p screen. */
+.qa-face{grid-area:1/1;display:flex;flex-direction:column;gap:8px;min-height:clamp(205px,calc((100vh - 480px) / 2),340px);padding:16px 18px;border-radius:22px;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden}
+.qa-front{background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s}
+.qa-inner:hover .qa-front{border-color:var(--aqua-30);box-shadow:0 8px 26px rgba(6,79,87,.18)}
+.qa-front b{flex:1;font-size:clamp(18px,1.3vw,24px);line-height:1.25;color:var(--teal)}
+.qa-front small{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6b8a8f}
+.qa-front kbd{background:var(--aqua-10);border:1px solid var(--aqua-30);border-radius:6px;padding:0 6px;font-family:inherit;font-weight:700;color:var(--teal)}
+.qa-back{transform:rotateY(180deg);background:linear-gradient(160deg,var(--teal-2),var(--teal) 70%);color:#fff;box-shadow:0 10px 30px rgba(6,79,87,.35)}
+.qa-back em{font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--aqua-30);line-height:1.3}
+.qa-back > span:last-child{font-size:clamp(14.5px,.86vw,17px);line-height:1.42}
+.qa-no{width:30px;height:30px;flex:none;border-radius:50%;background:var(--aqua-20);color:var(--teal);font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.qa-back .qa-no{background:var(--yellow)}
+.qa-splash{position:absolute;z-index:3;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:3px solid var(--aqua);pointer-events:none;animation:splash .9s ease-out forwards}
+@keyframes splash{from{transform:scale(.2);opacity:.9}to{transform:scale(11);opacity:0}}
+/* The water: rises from the bottom with a small overshoot, then keeps drifting; rings spread on its surface and bubbles rise. */
+.qa-water{position:fixed;left:0;right:0;bottom:var(--foot-h);height:36vh;z-index:0;overflow:hidden;pointer-events:none;animation:flood 2.6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes flood{0%{transform:translateY(100%)}55%{transform:translateY(-20%)}80%{transform:translateY(4%)}100%{transform:none}}
+.qa-wave{position:absolute;left:0;bottom:0;width:200%;height:100%;animation:drift 14s linear infinite}
+.qa-wave.w3{animation-duration:22s;animation-direction:reverse}.qa-wave.w3 path{fill:var(--aqua-30);opacity:.45}
+.qa-wave.w2{animation-duration:11s}.qa-wave.w2 path{fill:var(--aqua);opacity:.32}
+.qa-wave.w1{animation-duration:16s;animation-direction:reverse}.qa-wave.w1 path{fill:var(--aqua-dark);opacity:.3}
+@keyframes drift{to{transform:translateX(-50%)}}
+.qa-rings{position:absolute;inset:0}
+.qa-ring,.qa-ring:after{position:absolute;border:2px solid rgba(255,255,255,.9);border-radius:50%}
+.qa-ring{width:170px;height:46px;margin:-23px 0 0 -85px;opacity:0;animation:ring 3.4s ease-out infinite;animation-delay:calc(var(--d,0) * 1ms)}
+.qa-ring:after{content:"";inset:12px 34px;border-color:rgba(255,255,255,.7)}
+@keyframes ring{0%{transform:scale(.1);opacity:0}12%{opacity:.95}100%{transform:scale(2.6);opacity:0}}
+.qa-bubble{position:absolute;bottom:-14px;width:var(--s);height:var(--s);border-radius:50%;background:rgba(255,255,255,.75);opacity:0;animation:bubble 5.6s ease-in infinite;animation-delay:calc(var(--d,0) * 1ms)}
+@keyframes bubble{0%{transform:none;opacity:0}15%{opacity:.85}100%{transform:translate(12px,-24vh);opacity:0}}
+/* After a language switch the slide is drawn again without the entrance. */
+.still .qa-water{animation:none}
+.still .rv{animation:none;opacity:1}
+.still .qa-title.rv{animation:shimmer 6s ease-in-out 1s infinite}
+@media (max-width:1400px){.qa-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:1100px){.qa-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Reduced motion: still water, no rings or bubbles, and the answer fades in instead of flipping. */
+@media (prefers-reduced-motion:reduce){
+  .qa-water,.qa-wave{animation:none!important}
+  .qa-ring,.qa-bubble,.qa-splash{display:none}
+  .qa-title.rv{animation:none!important;opacity:1;background-position:100% 0}
+  .qa-card .qa-inner,.qa-card.flipped .qa-inner{transform:none;transition:none!important}
+  .qa-card .qa-face{-webkit-backface-visibility:visible;backface-visibility:visible;transition:opacity .35s ease!important}
+  .qa-card .qa-back{transform:none;opacity:0}
+  .qa-card.flipped .qa-back{opacity:1}
+  .qa-card.flipped .qa-front{opacity:0}
+}
+
 /* ---------- technical tabs ---------- */
 .tabs{position:sticky;top:0;z-index:6;display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:-24px -28px 14px;padding:12px 20px 10px;background:#fff;border-radius:28px 28px 0 0;border-bottom:1px solid var(--line)}
 .tab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:0;background:var(--aqua-10);color:var(--teal);font-weight:700;font-size:13px;border-radius:999px;padding:6px 11px;transition:.15s}

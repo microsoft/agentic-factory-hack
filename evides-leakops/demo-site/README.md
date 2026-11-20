@@ -4,22 +4,29 @@ A static presentation site (plain HTML, CSS and JavaScript, no build step, no ba
 Every step slide first shows the **functional need** (what a duty manager faces today) and, on reveal, the **technical solution**: the Foundry
 agent, the MCP tools it called, the guardrails in code, where it runs in the [architecture](../docs/architecture.svg), and the **AI value**.
 The workflow slide (11) replays the complete workflow over the architecture diagram (including the knowledge and skills lanes, which light up when an agent
-calls its knowledge base) and ends with the result, the token usage of the run, the residents' notice and a short before/after. The last slide (12),
+calls its knowledge base) and ends with the result, the token usage of the run, the residents' notice and a short before/after. Slide 12,
 "Before vs after AI", is the detailed version: the same 16 steps as slide 1, each marked as done by an agent, AI-assisted or still done by people.
+The last slide (13), "Questions", closes the demo: "Thank you", a QR code to this site and ten common questions; a click on a question card flips it to the answer.
 
 Live: https://white-field-03bd1f003.5.azurestaticapps.net (Azure Static Web App `leakops-demo-88546e`, Free tier, resource group `rg-evides-ai-demo`).
 
 ## Use it
 | Key | Action |
 |---|---|
-| `Space`, `Enter`, `→` | Reveal the solution, then go to the next slide (on the workflow slide: play / pause, and after the replay on to slide 12) |
+| `Space`, `Enter`, `→` | Reveal the solution, then go to the next slide (on the workflow slide: play / pause, and after the replay on to slide 12; nothing on the last slide) |
 | `←` | Previous slide |
 | `L` | English / Dutch |
 | `F` | Fullscreen |
 | `R` | Replay the workflow (workflow slide, 11) |
 | `1`–`6` | Technical tabs in the solution card (see below) |
+| `1`–`9`, `0` | Show or hide the answer to question 1-10 (questions slide, 13) |
 
 Slide 1, "Before AI", shows today's drinking-water incident process on one page: the 16 steps from pipe break to closed ticket with roles, system types and people involved, why it is so complex (with public facts from evides.nl, waterstoring.nl and Wikipedia) and where it hurts. The steps, roles and system types are the Evides team's description of a typical process and may differ in detail at Evides; the system names are typical for utilities, not a confirmed list. Slide 12, "Before vs after AI", shows the same 16 steps side by side with what happens now: 7 done by an agent, 3 AI-assisted (an agent prepares, a person acts or approves) and 6 still done by people or unchanged (field work stays with people), with before/after KPIs on top. Its values with AI (44 s to the public notice, 66 s to the work order, technician, times, tool calls and tokens) come from `js/captured.js`. Slide 3 has a switch between the burst and the false alarm. The workflow replay has 1x, 3x and 10x speed. `#/4` in the URL opens slide 4.
+
+Slide 13, "Questions", opens with a water wave that rises from the bottom and ripples on its surface. The ten question cards (English and Dutch) flip
+in 3D to show the answer; flipped cards stay flipped when you switch the language, and the footer button "Hide the answers" turns them all back.
+With reduced motion the water stands still and the answer fades in instead of flipping. The QR code is a static file, `img/qr-demo.svg`, because the
+CSP allows no runtime libraries; it encodes the live URL. To regenerate it (any static SVG QR code works), for example: `npx qrcode -t svg -d 064f57 -o evides-leakops/demo-site/img/qr-demo.svg <url>`.
 
 ## Technical tabs
 After "Reveal the solution", the card has six tabs: **Overview** (the story) | **Instructions** | **Tools & MCP** | **Data & knowledge** | **Code rules** | **Source**.
