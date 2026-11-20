@@ -118,6 +118,15 @@ app.MapPost("/api/gis/diagnosis", async (DiagnosticReport report, IDemoData data
     if (!IncidentIds.IsValidAlarmId(report.AlarmId)) errors["alarmId"] = ["Required: ALM- followed by letters, digits, '.', '_' or '-'"];
     if (string.IsNullOrWhiteSpace(report.SegmentId)) errors["segmentId"] = ["Required"];
     if (string.IsNullOrWhiteSpace(report.DistrictId)) errors["districtId"] = ["Required"];
+    // A stored report is drawn on every page view, so a missing list or location would break the map until the next reset.
+    if (report.Location is null) errors["location"] = ["Required"];
+    foreach (var (name, list) in new (string, object?)[]
+    {
+        ("segmentPath", report.SegmentPath), ("servedStreets", report.ServedStreets), ("severityReasons", report.SeverityReasons),
+        ("criticalCustomers", report.CriticalCustomers), ("postalCodes", report.PostalCodes), ("isolationPlan", report.IsolationPlan),
+        ("evidence", report.Evidence), ("warnings", report.Warnings), ("reviewReasons", report.ReviewReasons),
+    })
+        if (list is null) errors[name] = ["Required (may be empty)"];
     if (errors.Count > 0) return Results.ValidationProblem(errors);
 
     await data.SaveDiagnosisAsync(new GisDiagnosis(time.GetUtcNow(), report));

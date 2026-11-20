@@ -173,6 +173,22 @@ public class WaterstoringApiTests
         Assert.Contains("affected", body);
     }
 
+    [Fact]
+    public async Task A_diagnosis_without_its_lists_is_rejected_so_the_map_keeps_working()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+        var client = NewClient(factory);
+
+        var response = await client.PostAsJsonAsync("/api/gis/diagnosis",
+            new { alarmId = "ALM-1", segmentId = "SEG-0412", districtId = "DMA-SPK-01" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("isolationPlan", body);
+        Assert.Contains("location", body);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/gis")).StatusCode);
+    }
+
     [Theory]
     [InlineData("3201 AB", true)]
     [InlineData("3201ab", true)]

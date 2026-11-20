@@ -134,7 +134,7 @@ function drawNetwork(data) {
     L.polyline([ll(p.start), ll(p.end)], {
       color: hit ? LEAK : MATERIAL_COLOR[p.material] ?? "#3d5a73", weight: Math.max(3, Math.round(p.diameterMm / 50)), opacity: hit ? 0.95 : 0.85,
     })
-      .bindTooltip(`${p.id} \u00B7 ${streetName(p.street)}`, { sticky: true })
+      .bindTooltip(el("span", {}, `${p.id} \u00B7 ${streetName(p.street)}`), { sticky: true })   // a node, not a string: Leaflet inserts strings as HTML
       .bindPopup(card(`${p.id} \u00B7 ${streetName(p.street)}`, [
         [x.district, `${p.place} (${p.districtId})`],
         [x.material, label(x.materials, p.material)],
