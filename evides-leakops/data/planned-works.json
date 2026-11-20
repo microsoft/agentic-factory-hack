@@ -1,0 +1,18 @@
+[
+  { "id": "PW-7781", "districtId": "D-02", "title": "Replace isolation valve V-0507-B, Industrieweg", "workType": "valve_replacement", "status": "in_progress",
+    "startUtc": "2026-11-13T09:00:00Z", "endUtc": "2026-11-13T12:30:00Z", "segmentIds": [ "SEG-0507", "SEG-0508" ],
+    "expectedPressureImpactBar": -1.5, "expectedFlowImpact": "Reduced inflow while the valve is closed; pressure drops on Industrieweg and Handelsstraat until the new valve is open.",
+    "contractor": "Waterbouw Zuid (simulated)", "customersNotified": true },
+  { "id": "PW-7780", "districtId": "D-02", "title": "Hydrant flushing campaign, Randweg Zuid", "workType": "hydrant_flushing", "status": "completed",
+    "startUtc": "2026-11-12T07:00:00Z", "endUtc": "2026-11-12T10:00:00Z", "segmentIds": [ "SEG-0510" ],
+    "expectedPressureImpactBar": -0.4, "expectedFlowImpact": "Short flow increase while hydrants are open.",
+    "contractor": "Evides Operations (simulated)", "customersNotified": true },
+  { "id": "PW-7702", "districtId": "D-01", "title": "Service connection renewal, Kerkstraat", "workType": "connection_renewal", "status": "scheduled",
+    "startUtc": "2026-11-16T07:00:00Z", "endUtc": "2026-11-16T15:00:00Z", "segmentIds": [ "SEG-0399" ],
+    "expectedPressureImpactBar": -0.3, "expectedFlowImpact": "Local, short interruptions for a few houses.",
+    "contractor": "Waterbouw Zuid (simulated)", "customersNotified": true },
+  { "id": "PW-7690", "districtId": "D-01", "title": "Flow meter calibration, Randweg Noord", "workType": "meter_calibration", "status": "completed",
+    "startUtc": "2026-11-10T08:00:00Z", "endUtc": "2026-11-10T12:00:00Z", "segmentIds": [ "SEG-0420" ],
+    "expectedPressureImpactBar": 0.0, "expectedFlowImpact": "None expected.",
+    "contractor": "Evides Operations (simulated)", "customersNotified": false }
+]

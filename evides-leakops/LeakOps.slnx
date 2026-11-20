@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LeakOps.AppHost/LeakOps.AppHost.csproj" />
+    <Project Path="src/LeakOps.AgentRegistry/LeakOps.AgentRegistry.csproj" />
+    <Project Path="src/LeakOps.Agents/LeakOps.Agents.csproj" />
+    <Project Path="src/LeakOps.Contracts/LeakOps.Contracts.csproj" />
+    <Project Path="src/LeakOps.Mcp/LeakOps.Mcp.csproj" />
+    <Project Path="src/LeakOps.Seeder/LeakOps.Seeder.csproj" />
+    <Project Path="src/LeakOps.Waterstoring/LeakOps.Waterstoring.csproj" />
+    <Project Path="src/LeakOps.Workflow/LeakOps.Workflow.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LeakOps.Tests/LeakOps.Tests.csproj" />
+  </Folder>
+</Solution>

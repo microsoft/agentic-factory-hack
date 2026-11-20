@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Fake Waterstoring.nl: ingest API + public map page. Incidents are kept in memory, or in Cosmos DB when deployed. -->
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.63.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <!-- The roster (technicians page) and the seed stock (Reset demo data) ship with the app, in a data folder next to it. -->
+  <ItemGroup>
+    <Content Include="..\..\data\technicians.json;..\..\data\inventory.json;..\..\data\warehouses.json;..\..\data\suppliers.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LeakOps.Contracts\LeakOps.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

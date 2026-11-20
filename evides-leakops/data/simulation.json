@@ -1,0 +1,49 @@
+{
+  "districts": [
+    {
+      "districtId": "D-01", "name": "Spijkenisse-Noord (simulated)",
+      "startUtc": "2026-11-12T15:10:00Z", "endUtc": "2026-11-14T03:10:00Z",
+      "startTempC": 3.5, "endTempC": -3.0, "avgWindKmh": 9,
+      "rain": []
+    },
+    {
+      "districtId": "D-02", "name": "Hoogvliet-Industrie (simulated)",
+      "startUtc": "2026-11-11T21:40:00Z", "endUtc": "2026-11-13T09:40:00Z",
+      "startTempC": 8.5, "endTempC": 7.0, "avgWindKmh": 14,
+      "rain": [ { "fromUtc": "2026-11-12T10:00:00Z", "toUtc": "2026-11-12T16:00:00Z", "mmPerHour": 1.2 } ]
+    }
+  ],
+  "sensors": [
+    { "sensorId": "PS-101", "baseValue": 4.95, "demandSensitivity": -0.30, "noiseSd": 0.03,
+      "anomaly": [
+        { "timeUtc": "2026-11-14T02:40:00Z", "value": 4.86 }, { "timeUtc": "2026-11-14T02:50:00Z", "value": 4.31 },
+        { "timeUtc": "2026-11-14T03:00:00Z", "value": 3.52 }, { "timeUtc": "2026-11-14T03:10:00Z", "value": 2.85 } ] },
+    { "sensorId": "PS-103", "baseValue": 4.90, "demandSensitivity": -0.30, "noiseSd": 0.03,
+      "anomaly": [
+        { "timeUtc": "2026-11-14T02:40:00Z", "value": 4.81 }, { "timeUtc": "2026-11-14T02:50:00Z", "value": 4.50 },
+        { "timeUtc": "2026-11-14T03:00:00Z", "value": 4.02 }, { "timeUtc": "2026-11-14T03:10:00Z", "value": 3.62 } ] },
+    { "sensorId": "PS-102", "baseValue": 4.85, "demandSensitivity": -0.28, "noiseSd": 0.03,
+      "anomaly": [
+        { "timeUtc": "2026-11-14T02:40:00Z", "value": 4.77 }, { "timeUtc": "2026-11-14T02:50:00Z", "value": 4.70 },
+        { "timeUtc": "2026-11-14T03:00:00Z", "value": 4.58 }, { "timeUtc": "2026-11-14T03:10:00Z", "value": 4.45 } ] },
+    { "sensorId": "FS-101", "baseValue": 8, "demandSensitivity": 110, "noiseSd": 1.5,
+      "anomaly": [
+        { "timeUtc": "2026-11-14T02:40:00Z", "value": 40 }, { "timeUtc": "2026-11-14T02:50:00Z", "value": 66 },
+        { "timeUtc": "2026-11-14T03:00:00Z", "value": 97 }, { "timeUtc": "2026-11-14T03:10:00Z", "value": 121 } ] },
+    { "sensorId": "PS-201", "baseValue": 5.30, "demandSensitivity": -0.45, "noiseSd": 0.03,
+      "anomaly": [
+        { "timeUtc": "2026-11-13T09:00:00Z", "value": 4.99 }, { "timeUtc": "2026-11-13T09:10:00Z", "value": 4.82 },
+        { "timeUtc": "2026-11-13T09:20:00Z", "value": 4.41 }, { "timeUtc": "2026-11-13T09:30:00Z", "value": 4.12 },
+        { "timeUtc": "2026-11-13T09:40:00Z", "value": 3.72 } ] },
+    { "sensorId": "PS-202", "baseValue": 5.15, "demandSensitivity": -0.42, "noiseSd": 0.03,
+      "anomaly": [
+        { "timeUtc": "2026-11-13T09:00:00Z", "value": 4.86 }, { "timeUtc": "2026-11-13T09:10:00Z", "value": 4.78 },
+        { "timeUtc": "2026-11-13T09:20:00Z", "value": 4.47 }, { "timeUtc": "2026-11-13T09:30:00Z", "value": 4.13 },
+        { "timeUtc": "2026-11-13T09:40:00Z", "value": 3.92 } ] },
+    { "sensorId": "FS-201", "baseValue": 20, "demandSensitivity": 200, "noiseSd": 3,
+      "anomaly": [
+        { "timeUtc": "2026-11-13T09:00:00Z", "value": 160 }, { "timeUtc": "2026-11-13T09:10:00Z", "value": 154 },
+        { "timeUtc": "2026-11-13T09:20:00Z", "value": 138 }, { "timeUtc": "2026-11-13T09:30:00Z", "value": 122 },
+        { "timeUtc": "2026-11-13T09:40:00Z", "value": 112 } ] }
+  ]
+}

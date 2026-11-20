@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Agentic Factory demo - OPTIONAL API Management (BasicV2 = $0.27/hour, delete after use). NOT needed to run the solution: the MCP tools run on Azure Functions (see azuredeploy.demo-core.json). Deploy only with scripts/demo-up.sh --with-apim to show the 'API Management as AI gateway / MCP server' story of Challenge 1. Same deterministic name as before."
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "swedencentral",
+      "allowedValues": [ "swedencentral", "francecentral", "eastus2", "germanywestcentral" ],
+      "metadata": { "description": "Azure location" }
+    },
+    "apimSku": {
+      "type": "string",
+      "defaultValue": "BasicV2",
+      "allowedValues": [ "BasicV2", "StandardV2" ],
+      "metadata": { "description": "API Management tier (v2 tiers support MCP servers)" }
+    },
+    "publisherEmail": {
+      "type": "string",
+      "defaultValue": "alon.havivi@macaw.nl",
+      "metadata": { "description": "APIM publisher email" }
+    },
+    "publisherName": {
+      "type": "string",
+      "defaultValue": "Macaw Demo",
+      "metadata": { "description": "APIM publisher name" }
+    }
+  },
+  "variables": {
+    "prefix": "msagthack",
+    "suffix": "[uniqueString(resourceGroup().id)]",
+    "apimName": "[format('{0}-apim-{1}', variables('prefix'), variables('suffix'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ApiManagement/service",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[variables('apimName')]",
+      "location": "[parameters('location')]",
+      "identity": { "type": "SystemAssigned" },
+      "sku": { "name": "[parameters('apimSku')]", "capacity": 1 },
+      "properties": {
+        "publisherEmail": "[parameters('publisherEmail')]",
+        "publisherName": "[parameters('publisherName')]"
+      }
+    }
+  ],
+  "outputs": {
+    "apiManagementName": { "type": "string", "value": "[variables('apimName')]" },
+    "apimPrincipalId": { "type": "string", "value": "[reference(resourceId('Microsoft.ApiManagement/service', variables('apimName')), '2023-03-01-preview', 'full').identity.principalId]" }
+  }
+}

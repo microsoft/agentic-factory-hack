@@ -1,0 +1,30 @@
+[
+  {
+    "id": "scn-burst-cast-iron",
+    "name": "Burst on a cast-iron main during frost",
+    "description": "Night-time pressure collapse on Dorpsweg (D-01) while the district inlet flow jumps to daytime-peak levels. It is -4 C and there are no planned works.",
+    "alarm": {
+      "alarmId": "ALM-2026-1114-0001", "sensorId": "PS-101", "districtId": "D-01", "triggeredAtUtc": "2026-11-14T03:10:00Z",
+      "metric": "pressure", "observedValue": 2.85, "unit": "bar", "thresholdLow": 3.0, "thresholdHigh": null,
+      "message": "Pressure at PS-101 below low alarm limit (2.85 bar, limit 3.00 bar)."
+    },
+    "groundTruth": {
+      "outcome": "genuine_leak", "segmentId": "SEG-0412", "chainageM": 160, "breachType": "burst",
+      "explanation": "1962 cast-iron DN300 main burst in frost. Pressure fell on both sensors of the segment (more at the western one), night flow tripled, no planned works nearby."
+    }
+  },
+  {
+    "id": "scn-false-alarm-planned-works",
+    "name": "Pressure dip caused by planned valve replacement",
+    "description": "Pressure drops on Industrieweg (D-02) on a weekday morning while the district inlet flow goes down, not up. A valve replacement was planned for the same time.",
+    "alarm": {
+      "alarmId": "ALM-2026-1113-0002", "sensorId": "PS-201", "districtId": "D-02", "triggeredAtUtc": "2026-11-13T09:40:00Z",
+      "metric": "pressure", "observedValue": 3.72, "unit": "bar", "thresholdLow": 4.0, "thresholdHigh": null,
+      "message": "Pressure at PS-201 below low alarm limit (3.72 bar, limit 4.00 bar)."
+    },
+    "groundTruth": {
+      "outcome": "false_alarm", "segmentId": null, "chainageM": null, "breachType": null,
+      "explanation": "Planned work PW-7781 (valve V-0507-B replacement) closed part of the network. Flow went down, pressure drop matches the expected impact."
+    }
+  }
+]

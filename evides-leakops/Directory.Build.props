@@ -1,0 +1,10 @@
+<Project>
+  <!-- Shared by every project under evides-leakops/. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <NoWarn>$(NoWarn);CA2252</NoWarn>
+  </PropertyGroup>
+</Project>

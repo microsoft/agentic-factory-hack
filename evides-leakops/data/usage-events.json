@@ -1,0 +1,7 @@
+[
+  { "id": "UE-001", "districtId": "D-01", "startUtc": "2025-07-19T12:00:00Z", "endUtc": "2025-07-19T18:00:00Z", "description": "Heatwave afternoon: lawn sprinklers and paddling pools", "flowChangePercent": 28, "pressureChangeBar": -0.25 },
+  { "id": "UE-002", "districtId": "D-01", "startUtc": "2026-04-27T09:00:00Z", "endUtc": "2026-04-27T15:00:00Z", "description": "King's Day street market in the town centre", "flowChangePercent": 15, "pressureChangeBar": -0.10 },
+  { "id": "UE-003", "districtId": "D-01", "startUtc": "2026-01-09T20:00:00Z", "endUtc": "2026-01-09T23:00:00Z", "description": "Frost advisory: customers let taps drip overnight to protect pipes", "flowChangePercent": 18, "pressureChangeBar": -0.15 },
+  { "id": "UE-004", "districtId": "D-02", "startUtc": "2026-03-14T08:00:00Z", "endUtc": "2026-03-14T11:00:00Z", "description": "Scheduled hydrant flushing campaign", "flowChangePercent": 22, "pressureChangeBar": -1.20 },
+  { "id": "UE-005", "districtId": "D-02", "startUtc": "2025-12-12T06:00:00Z", "endUtc": "2025-12-12T10:00:00Z", "description": "Industrial customer batch cleaning cycle", "flowChangePercent": 35, "pressureChangeBar": -0.60 }
+]

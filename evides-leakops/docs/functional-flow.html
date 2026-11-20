@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional flow - Evides LeakOps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#064f57; --aqua:#3cbecf; --aqua-dark:#31a8b7; --aqua-10:#ebf9fa; --aqua-20:#d8f2f6; --aqua-30:#9ddee7;
+    --yellow:#fcbc2c; --grey:#444; --line:#eee; --red:#cc5b49; --green:#2daa66;
+    --shadow:0 0 10px rgba(6,79,87,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Ubuntu,system-ui,Segoe UI,Arial,sans-serif;color:var(--grey);background:#fff;line-height:1.5}
+  h1,h2,h3{color:var(--teal);margin:0;font-weight:700}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  header.top{border-bottom:1px solid var(--line);background:#fff}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+  .logo{display:flex;align-items:center;gap:8px;font-size:34px;font-weight:700;color:var(--teal);letter-spacing:-.5px}
+  .logo svg{width:26px;height:34px}
+  .tag{font-size:14px;font-weight:500;color:var(--teal);background:var(--aqua-20);border-radius:999px;padding:6px 16px}
+  .hero{background:var(--aqua-10);padding:56px 0 64px}
+  .hero .wrap{display:grid;grid-template-columns:1.15fr 1fr;gap:40px;align-items:center}
+  .eyebrow{color:var(--aqua-dark);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:13px}
+  .hero h1{font-size:46px;line-height:1.12;margin:10px 0 16px}
+  .hero p{font-size:18px;max-width:560px;margin:0 0 22px}
+  .pills{display:flex;flex-wrap:wrap;gap:10px}
+  .pill{background:#fff;border-radius:999px;padding:8px 18px;box-shadow:var(--shadow);font-size:15px;color:var(--teal);font-weight:500}
+  .btn{display:inline-block;background:var(--yellow);color:var(--teal);font-weight:700;border-radius:999px;padding:10px 26px}
+  section{padding:56px 0}
+  .sec-title{font-size:30px;margin-bottom:6px}
+  .sec-sub{margin:0 0 34px;font-size:17px}
+
+  /* Flow */
+  .flow{position:relative}
+  .flow:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--aqua-30);border-radius:4px}
+  .node{position:relative;display:grid;grid-template-columns:1fr 84px 1fr;align-items:center;margin-bottom:34px}
+  .node .num{justify-self:center;width:64px;height:64px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;border:6px solid #fff;box-shadow:var(--shadow);z-index:2}
+  .node.start .num,.node.end .num{background:var(--yellow);color:var(--teal)}
+  .card{background:#fff;border-radius:32px;box-shadow:var(--shadow);padding:26px 28px;border:1px solid var(--line)}
+  .card.aqua{background:var(--aqua-20);border-color:var(--aqua-20)}
+  .card h3{font-size:23px;margin-bottom:4px}
+  .agent{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--aqua-dark);margin-bottom:6px}
+  .card p{margin:6px 0 10px}
+  .card ul{margin:8px 0 0;padding-left:20px}
+  .card li{margin:3px 0}
+  .art{display:flex;justify-content:center}
+  .art svg{width:100%;max-width:430px;height:auto}
+  .node.l .card{grid-column:1}.node.l .art{grid-column:3}
+  .node.r .card{grid-column:3}.node.r .art{grid-column:1;grid-row:1}
+  .node .num{grid-column:2;grid-row:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{background:var(--aqua-10);color:var(--teal);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:500}
+  .chip.y{background:#fff3d2}.chip.r{background:#f8e0dc;color:#8a2f20}.chip.g{background:#dcf3e6;color:#17683d}
+  .tool{font-family:Consolas,monospace;font-size:12.5px;background:var(--teal);color:#fff;border-radius:999px;padding:3px 11px;display:inline-block;margin:2px 4px 2px 0}
+
+  /* Decision */
+  .branch{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:-6px 0 40px}
+  .branch .card{border-left:10px solid var(--green)}
+  .branch .card.stop{border-left-color:var(--yellow)}
+  .branch h3{font-size:19px}
+
+  /* Guardrails */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .tile{background:#fff;border-radius:32px;box-shadow:var(--shadow);padding:26px;border:1px solid var(--line)}
+  .tile .ic{width:60px;height:60px;border-radius:20px;background:var(--aqua-20);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .tile .ic svg{width:32px;height:32px}
+  .tile h3{font-size:19px;margin-bottom:6px}
+  .tile p{margin:0;font-size:15px}
+  .band{background:var(--aqua-10)}
+
+  /* Chat bubble outcome */
+  .phone{background:#fff;border-radius:32px;box-shadow:var(--shadow);padding:22px;border:1px solid var(--line)}
+  .bubble{background:#fff;border-radius:22px;padding:12px 18px;box-shadow:var(--shadow);margin:10px 0;font-size:15px;color:var(--teal)}
+  .panel{background:var(--aqua-20);border-radius:32px;padding:22px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+  .bar{position:relative;height:16px;border-radius:999px;background:var(--aqua-20);margin:50px 0 70px}
+  .bar .seg{position:absolute;top:0;bottom:0;border-radius:999px}
+  .bar .mk{position:absolute;top:-8px;width:3px;height:32px;background:var(--teal)}
+  .bar .mk span{position:absolute;white-space:nowrap;font-size:13px;color:var(--teal);font-weight:700;transform:translateX(-50%)}
+  .bar .mk .u{top:-26px}.bar .mk .d{top:40px}
+  footer{background:var(--teal);color:#fff;padding:28px 0;font-size:15px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px}
+  footer b{color:var(--yellow)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="drop" viewBox="0 0 26 34"><path d="M13 1C13 1 2 15.5 2 22a11 11 0 0022 0C24 15.5 13 1 13 1z" fill="#3cbecf"/><path d="M8 22a5 5 0 005 5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <div class="logo"><svg><use href="#drop"/></svg>evides</div>
+    <span class="tag">Demo &middot; Evides &times; Microsoft Foundry</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Functional flow &middot; use case</div>
+      <h1>From pressure alarm to <span style="color:var(--aqua-dark)">water back on the tap</span></h1>
+      <p>Six AI agents in Microsoft Foundry work together after a burst-main alarm: they judge the alarm, locate the damage, inform residents, find the right technician, secure the parts and plan the repair. People stay in control of every decision that matters.</p>
+      <div class="pills">
+        <span class="pill">&#9201; about 50 seconds end to end</span>
+        <span class="pill">6 agents</span>
+        <span class="pill">1,840 households informed</span>
+        <span class="pill">Waterstoring.nl notice</span>
+      </div>
+    </div>
+    <div class="art">
+      <svg viewBox="0 0 520 330" role="img" aria-label="Water main burst in a street">
+        <rect width="520" height="330" rx="32" fill="#d8f2f6"/>
+        <circle cx="430" cy="62" r="30" fill="#fcbc2c"/>
+        <path d="M0 238h520v92H0z" fill="#9ddee7" opacity=".55"/>
+        <path d="M0 238h520" stroke="#31a8b7" stroke-width="4"/>
+        <rect x="0" y="262" width="520" height="22" fill="#064f57"/>
+        <rect x="0" y="262" width="150" height="22" fill="#064f57"/>
+        <path d="M150 262c20-4 40 0 60 4" stroke="#fff" stroke-width="3" fill="none" stroke-dasharray="6 8"/>
+        <rect x="248" y="258" width="24" height="30" fill="#fff" opacity=".0"/>
+        <path d="M232 262l12-10 8 12 10-14 10 12 8-10 12 10z" fill="#cc5b49"/>
+        <path d="M262 250c0-60-30-92-50-120M262 250c0-70 8-110 4-150M262 250c4-60 34-92 60-110" stroke="#3cbecf" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <circle cx="208" cy="124" r="9" fill="#3cbecf"/><circle cx="266" cy="94" r="9" fill="#3cbecf"/><circle cx="326" cy="134" r="9" fill="#3cbecf"/>
+        <rect x="40" y="130" width="70" height="108" rx="6" fill="#fff"/><rect x="54" y="146" width="16" height="16" fill="#9ddee7"/><rect x="80" y="146" width="16" height="16" fill="#9ddee7"/><rect x="54" y="176" width="16" height="16" fill="#9ddee7"/><rect x="80" y="176" width="16" height="16" fill="#fcbc2c"/>
+        <path d="M30 130l45-34 45 34z" fill="#064f57"/>
+        <rect x="380" y="150" width="90" height="88" rx="6" fill="#fff"/><path d="M370 150l55-40 55 40z" fill="#064f57"/><rect x="410" y="190" width="24" height="48" fill="#3cbecf"/>
+        <g transform="translate(18 18)"><rect width="196" height="46" rx="23" fill="#fff"/><circle cx="26" cy="23" r="9" fill="#cc5b49"/><text x="46" y="28" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">PS-101 &#8722;2.4 bar</text></g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2 class="sec-title">The flow, step by step</h2>
+    <p class="sec-sub">Scenario "Burst cast-iron main, Dorpsweg" &mdash; real output of the deployed demo (run INC-2026-1114-0001).</p>
+
+    <div class="flow">
+
+      <!-- START -->
+      <div class="node start l">
+        <div class="card aqua">
+          <span class="agent">Trigger</span>
+          <h3>Alarm from the network</h3>
+          <p>Pressure station <b>PS-101</b> in district <b>D-01</b> reports a sudden pressure drop. The alarm arrives as a JSON payload (ALM-2026-1114-0001) together with flow and pressure readings.</p>
+          <div class="chips"><span class="chip">SCADA / telemetry</span><span class="chip">Pressure &minus;2.4 bar</span><span class="chip">Flow spike</span></div>
+        </div>
+        <div class="num">&#9889;</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#ebf9fa"/>
+            <rect x="40" y="40" width="230" height="170" rx="22" fill="#fff" stroke="#d8f2f6" stroke-width="3"/>
+            <polyline points="62,150 100,148 130,152 160,146 185,92 205,168 235,160 252,166" fill="none" stroke="#3cbecf" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+            <line x1="62" y1="190" x2="252" y2="190" stroke="#eee" stroke-width="3"/>
+            <circle cx="185" cy="92" r="8" fill="#cc5b49"/>
+            <text x="62" y="72" font-size="16" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">PS-101 pressure</text>
+            <rect x="290" y="60" width="104" height="52" rx="26" fill="#cc5b49"/><text x="342" y="92" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="Ubuntu,Arial">ALARM</text>
+            <path d="M342 118v36" stroke="#064f57" stroke-width="4" stroke-dasharray="5 6"/>
+            <path d="M330 150l12 16 12-16z" fill="#064f57"/>
+            <rect x="290" y="176" width="104" height="40" rx="20" fill="#fcbc2c"/><text x="342" y="202" text-anchor="middle" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">to Triage</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 1 TRIAGE -->
+      <div class="node r">
+        <div class="card">
+          <span class="agent">Agent 1 &middot; Triage</span>
+          <h3>Is this a real leak?</h3>
+          <p>The agent checks the readings, the history and the planned-works calendar. It answers with a verdict, a confidence score and a suspected pipe segment.</p>
+          <p><b>Result:</b> <i>genuine leak</i>, confidence 0.95, suspected segment <b>SEG-0412</b>.</p>
+          <div><span class="tool">get-sensor-readings</span><span class="tool">get-planned-works</span><span class="tool">get-weather</span><span class="tool">get-usage-history</span></div>
+        </div>
+        <div class="num">1</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#d8f2f6"/>
+            <g transform="translate(70 40)"><path d="M70 0l70 36v62c0 44-30 70-70 86C30 168 0 142 0 98V36z" fill="#fff"/><path d="M70 22l50 26v50c0 30-20 50-50 62-30-12-50-32-50-62V48z" fill="#3cbecf" opacity=".25"/><path d="M42 98l20 22 40-48" stroke="#2daa66" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <g transform="translate(250 60)"><rect width="140" height="52" rx="26" fill="#fff"/><text x="70" y="32" text-anchor="middle" font-size="16" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">genuine_leak</text></g>
+            <g transform="translate(250 130)"><rect width="140" height="52" rx="26" fill="#fff"/><text x="70" y="32" text-anchor="middle" font-size="16" font-weight="700" fill="#31a8b7" font-family="Ubuntu,Arial">0.95 confident</text></g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="branch">
+        <div class="card">
+          <h3>&#10003; Genuine leak &rarr; continue</h3>
+          <p>The flow carries on with the Diagnostic agent.</p>
+        </div>
+        <div class="card stop">
+          <h3>&#9208; False alarm / planned works &rarr; stop</h3>
+          <p>Example: Industrieweg, planned work PW-7781 (valve V-0507-B). The case is closed after about 20 s, nobody is woken up and no residents are notified.</p>
+        </div>
+      </div>
+
+      <!-- 2 DIAGNOSTIC -->
+      <div class="node l">
+        <div class="card">
+          <span class="agent">Agent 2 &middot; Diagnostic</span>
+          <h3>Where, what and how bad?</h3>
+          <p>The agent looks at the pipe network and asset register and works out the damage, the severity and who is affected.</p>
+          <ul>
+            <li><b>SEG-0412 Dorpsweg</b>, DN300 cast iron</li>
+            <li>Fault: <b>burst</b>, severity <b>S1</b></li>
+            <li><b>1,840</b> customers without water</li>
+            <li>Isolation valves identified</li>
+          </ul>
+          <div><span class="tool">get-pipe-segment</span><span class="tool">estimate-leak-position</span><span class="tool">classify-severity</span><span class="tool">get-repair-procedure</span></div>
+        </div>
+        <div class="num">2</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#ebf9fa"/>
+            <path d="M20 190C90 190 120 120 200 120S320 70 410 70" stroke="#9ddee7" stroke-width="22" fill="none" stroke-linecap="round"/>
+            <path d="M20 190C90 190 120 120 200 120" stroke="#3cbecf" stroke-width="22" fill="none" stroke-linecap="round"/>
+            <path d="M140 150l56-30" stroke="#cc5b49" stroke-width="22" stroke-linecap="round"/>
+            <circle cx="126" cy="156" r="14" fill="#fcbc2c" stroke="#fff" stroke-width="4"/><circle cx="262" cy="104" r="14" fill="#fcbc2c" stroke="#fff" stroke-width="4"/>
+            <g transform="translate(150 28)"><path d="M26 0a26 26 0 0126 26c0 20-26 44-26 44S0 46 0 26A26 26 0 0126 0z" fill="#064f57"/><circle cx="26" cy="26" r="9" fill="#fff"/></g>
+            <rect x="250" y="150" width="150" height="62" rx="22" fill="#fff"/><text x="325" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">SEG-0412</text><text x="325" y="198" text-anchor="middle" font-size="14" fill="#444" font-family="Ubuntu,Arial">DN300 &middot; S1 &middot; 1,840</text>
+            <text x="126" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="#8a6200" font-family="Ubuntu,Arial">valve</text>
+            <text x="262" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#8a6200" font-family="Ubuntu,Arial">valve</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 3 COMMS -->
+      <div class="node r">
+        <div class="card">
+          <span class="agent">Agent 3 &middot; Communications</span>
+          <h3>Residents are informed</h3>
+          <p>The agent writes a clear notice in Dutch and English and publishes it on the (simulated) <b>Waterstoring.nl</b> page for the affected area. Wording is checked against a rule set: no cause speculation, no promises it cannot keep.</p>
+          <div><span class="tool">Waterstoring API</span></div>
+          <div class="chips"><span class="chip g">Published in about 3.5 s</span><span class="chip">NL + EN</span></div>
+        </div>
+        <div class="num">3</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#d8f2f6"/>
+            <rect x="150" y="14" width="130" height="222" rx="24" fill="#064f57"/><rect x="158" y="30" width="114" height="190" rx="14" fill="#fff"/>
+            <rect x="158" y="30" width="114" height="34" rx="14" fill="#ebf9fa"/><use href="#drop" x="166" y="36" width="14" height="20"/><text x="186" y="52" font-size="11" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">WATERSTORING</text>
+            <rect x="166" y="76" width="98" height="12" rx="6" fill="#cc5b49"/><rect x="166" y="98" width="98" height="8" rx="4" fill="#d8f2f6"/><rect x="166" y="114" width="84" height="8" rx="4" fill="#d8f2f6"/><rect x="166" y="130" width="92" height="8" rx="4" fill="#d8f2f6"/><rect x="166" y="154" width="72" height="22" rx="11" fill="#fcbc2c"/>
+            <g transform="translate(14 60)"><rect width="120" height="48" rx="24" fill="#fff"/><text x="60" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">Waterstoring</text></g>
+            <g transform="translate(298 120)"><rect width="118" height="48" rx="24" fill="#fff"/><text x="59" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#31a8b7" font-family="Ubuntu,Arial">NL &middot; EN</text></g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 4 MATCHMAKER -->
+      <div class="node l">
+        <div class="card">
+          <span class="agent">Agent 4 &middot; Resource Matchmaker</span>
+          <h3>The right technician, fast</h3>
+          <p>The agent matches the job to the technicians on duty, based on certification, shift and travel time. Code re-checks the choice against the rules.</p>
+          <div class="chips">
+            <span class="chip g">T-02 Samira El Idrissi &middot; 6 min away</span>
+            <span class="chip r">T-01 not certified</span>
+            <span class="chip y">T-03 busy</span>
+            <span class="chip r">T-04 off shift</span>
+            <span class="chip">Backup: T-05</span>
+          </div>
+          <div style="margin-top:10px"><span class="tool">get-technicians</span><span class="tool">get-travel-estimate</span></div>
+        </div>
+        <div class="num">4</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#ebf9fa"/>
+            <rect x="0" y="176" width="430" height="24" fill="#064f57" opacity=".85"/>
+            <rect x="60" y="100" width="170" height="82" rx="14" fill="#fff"/><rect x="230" y="122" width="76" height="60" rx="12" fill="#3cbecf"/><rect x="246" y="130" width="44" height="26" rx="6" fill="#ebf9fa"/>
+            <circle cx="110" cy="190" r="20" fill="#064f57"/><circle cx="110" cy="190" r="8" fill="#9ddee7"/><circle cx="262" cy="190" r="20" fill="#064f57"/><circle cx="262" cy="190" r="8" fill="#9ddee7"/>
+            <use href="#drop" x="88" y="116" width="22" height="30"/><text x="120" y="140" font-size="18" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">evides</text>
+            <circle cx="360" cy="116" r="26" fill="#fcbc2c"/><path d="M330 178c0-26 14-38 30-38s30 12 30 38z" fill="#064f57"/><path d="M338 106a22 14 0 0144 0z" fill="#3cbecf"/>
+            <rect x="290" y="30" width="116" height="40" rx="20" fill="#fff"/><text x="348" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">6 min away</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 5 PROCUREMENT -->
+      <div class="node r">
+        <div class="card">
+          <span class="agent">Agent 5 &middot; Procurement</span>
+          <h3>Parts in the van, not on a waiting list</h3>
+          <p>The agent builds the parts list for a DN300 cast-iron repair, reserves what is in stock and orders what is missing.</p>
+          <ul>
+            <li><b>9 items</b> reserved from stock</li>
+            <li><b>1 item short</b> (coupling) &rarr; ordered express</li>
+            <li>Orders above <b>&euro;2,500</b> need human approval</li>
+          </ul>
+          <div><span class="tool">get-inventory</span><span class="tool">reserve-stock</span><span class="tool">create-purchase-order</span></div>
+        </div>
+        <div class="num">5</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#d8f2f6"/>
+            <g transform="translate(50 60)"><rect width="150" height="120" rx="18" fill="#fff"/><rect x="0" y="0" width="150" height="34" rx="18" fill="#3cbecf"/><rect x="16" y="52" width="54" height="14" rx="7" fill="#9ddee7"/><rect x="16" y="76" width="82" height="14" rx="7" fill="#9ddee7"/><rect x="16" y="100" width="40" height="8" rx="4" fill="#d8f2f6"/>
+              <path d="M110 60l10 10 20-24" stroke="#2daa66" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <g transform="translate(236 70)"><rect width="140" height="100" rx="12" fill="#fcbc2c"/><path d="M0 34h140" stroke="#064f57" stroke-width="3"/><rect x="50" y="0" width="40" height="34" fill="#fde29a"/><text x="70" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">EXPRESS</text></g>
+            <rect x="236" y="190" width="150" height="34" rx="17" fill="#fff"/><text x="311" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">9 reserved &middot; 1 ordered</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 6 SCHEDULING -->
+      <div class="node l">
+        <div class="card">
+          <span class="agent">Agent 6 &middot; Scheduling</span>
+          <h3>Work order and honest planning</h3>
+          <p>The agent creates the work order, plans arrival and completion, and states a realistic time for residents. Code checks that the promised time includes a safety margin.</p>
+          <ul>
+            <li>Work order <b>WO-INC-2026-1114-0001</b></li>
+            <li>Technician arrives <b>04:57</b>, repair done <b>17:10</b></li>
+            <li>Residents are told: water back by <b>18:15</b></li>
+          </ul>
+          <div><span class="tool">create-work-order</span><span class="tool">get-travel-estimate</span></div>
+        </div>
+        <div class="num">6</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#ebf9fa"/>
+            <rect x="46" y="40" width="190" height="170" rx="22" fill="#fff"/><rect x="46" y="40" width="190" height="42" rx="22" fill="#064f57"/><rect x="46" y="62" width="190" height="20" fill="#064f57"/>
+            <circle cx="86" cy="26" r="0"/>
+            <g fill="#d8f2f6"><rect x="64" y="98" width="28" height="22" rx="6"/><rect x="104" y="98" width="28" height="22" rx="6"/><rect x="144" y="98" width="28" height="22" rx="6"/><rect x="184" y="98" width="28" height="22" rx="6"/><rect x="64" y="132" width="28" height="22" rx="6"/><rect x="104" y="132" width="28" height="22" rx="6"/><rect x="184" y="132" width="28" height="22" rx="6"/><rect x="64" y="166" width="28" height="22" rx="6"/></g>
+            <rect x="144" y="132" width="28" height="22" rx="6" fill="#fcbc2c"/>
+            <text x="141" y="68" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" font-family="Ubuntu,Arial">14 NOV</text>
+            <circle cx="330" cy="100" r="54" fill="#fff"/><circle cx="330" cy="100" r="46" fill="none" stroke="#3cbecf" stroke-width="8"/><path d="M330 68v34l22 14" stroke="#064f57" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <rect x="262" y="172" width="136" height="38" rx="19" fill="#fcbc2c"/><text x="330" y="197" text-anchor="middle" font-size="15" font-weight="700" fill="#064f57" font-family="Ubuntu,Arial">water back 18:15</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- END -->
+      <div class="node end r">
+        <div class="card aqua">
+          <span class="agent">Result</span>
+          <h3>Incident handled, humans informed</h3>
+          <p>An operator sees the complete trace: every agent step, every tool call and every rule check. The residents see an honest notice and a realistic end time.</p>
+        </div>
+        <div class="num">&#10003;</div>
+        <div class="art">
+          <svg viewBox="0 0 430 250">
+            <rect width="430" height="250" rx="32" fill="#d8f2f6"/>
+            <use href="#drop" x="150" y="30" width="130" height="170"/>
+            <path d="M178 120l28 30 52-62" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 class="sec-title">What the residents see</h2>
+    <p class="sec-sub">The notice that agent 3 publishes and agent 6 updates with the planned resolution time.</p>
+    <div class="two">
+      <div class="phone">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--teal);font-size:20px"><svg width="20" height="26"><use href="#drop"/></svg> WATERSTORING.nl <span style="background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:2px 10px">DEMO</span></div>
+        <div class="panel" style="margin-top:16px">
+          <div class="bubble" style="border-left:8px solid var(--red)"><b>Waterstoring Dorpsweg</b><br>Door een leidingbreuk is er geen water in een deel van Dorpsweg en omgeving. Een monteur is onderweg.</div>
+          <div class="bubble"><b>Verwacht hersteld:</b> 18:15 &middot; 1.840 huishoudens</div>
+          <div class="bubble"><b>English:</b> A burst water main has cut supply in part of Dorpsweg and surroundings. A technician is on the way.</div>
+        </div>
+      </div>
+      <div class="phone">
+        <h3 style="font-size:20px;margin-bottom:6px">Timeline of the day</h3>
+        <div class="bar">
+          <div class="seg" style="left:0;width:5%;background:var(--red)"></div>
+          <div class="seg" style="left:5%;width:68%;background:var(--aqua)"></div>
+          <div class="seg" style="left:73%;width:26%;background:var(--yellow)"></div>
+          <div class="mk" style="left:0"><span class="u" style="transform:none">Alarm</span></div>
+          <div class="mk" style="left:5%"><span class="d">04:57 arrival</span></div>
+          <div class="mk" style="left:73%"><span class="u">17:10 repair done</span></div>
+          <div class="mk" style="left:99%"><span class="d">18:15 told to residents</span></div>
+        </div>
+        <p style="margin:0;font-size:15px">Between "repair done" and the promised time sits the safety margin for flushing and quality checks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="sec-title">Safe by design</h2>
+    <p class="sec-sub">The model judges and writes. Code owns the facts and the rules.</p>
+    <div class="grid4">
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Rule checks in code</h3><p>Every answer is re-checked: certification, approval limits, wording, safety margin. A broken rule means <i>needs review</i>, never silent approval.</p></div>
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Short-circuit on false alarms</h3><p>Planned works or a low-confidence alarm closes the flow early. Fewer call-outs and no unnecessary resident notices.</p></div>
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg></div><h3>Content filter on input</h3><p>Prompt-injection attempts such as "ignore all previous instructions" are blocked by the Foundry content filter before the model sees them.</p></div>
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 11l2 2 4-4"/></svg></div><h3>Human approval</h3><p>Orders above &euro;2,500 and any <i>needs review</i> result wait for an operator. People stay accountable.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 class="sec-title">What Microsoft Foundry adds</h2>
+    <p class="sec-sub">The agents are not hidden in code: they live in the Foundry portal.</p>
+    <div class="grid3">
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="3"/><path d="M8 21h8M12 18v3"/></svg></div><h3>Agents &amp; versions</h3><p>Six named agents (Triage to Scheduling) with instructions, model and tools in one place, versioned and reusable.</p></div>
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div><h3>Tracing</h3><p>Each run shows agent, model call and tool call as spans in Application Insights. Ideal for audits and root cause.</p></div>
+      <div class="tile"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#064f57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-9"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/></svg></div><h3>Evaluations</h3><p>Test questions with expected answers plus task-adherence and tool-success judges: Triage 4/4, Diagnostic 1/1.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b>Evides LeakOps demo</b> &middot; Alarm &rarr; Triage &rarr; Diagnostic &rarr; Communications &rarr; Matchmaker &rarr; Procurement &rarr; Scheduling</div>
+    <div>All data is simulated &middot; Not an official Evides publication</div>
+  </div>
+</footer>
+
+</body>
+</html>
