@@ -35,6 +35,16 @@ booked or dispatched. When the model and the data disagree, the safer reading wi
 | `deploy/`, `demo-site/`, `docs/` | Bicep and scripts, static presentation site, architecture diagrams |
 
 `README.md` is the technical reference, `DEMO.md` the runbook, `demo-site/README.md` the site. Read the relevant section before changing behaviour.
+Source repository: https://github.com/havivialon/agentic-factory-hack (based on the Microsoft agentic-factory-hack).
+
+## Deployment target
+- **Always** deploy to the Macaw tenant `05baed4d-e049-45c7-b47d-c99c66fdb589`, subscription `a39be7cd-9ae9-42cf-b42f-dc6e45a82464`,
+  resource group `rg-evides-ai-demo`. These are the defaults of every script in `deploy/`; do not pass other values.
+- Never deploy to another tenant, subscription or resource group (not the tire-factory group either). Every script that changes
+  Azure calls `Assert-LeakOpsTenant` from `deploy/tenant-guard.ps1` first and stops on a wrong tenant; keep that call in new scripts.
+- When the default Azure CLI login is another tenant, use a separate profile:
+  `$env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"; az login --tenant 05baed4d-e049-45c7-b47d-c99c66fdb589`.
+- Do not write personal accounts or e-mail addresses into the repo.
 
 ## Change an agent
 1. Edit the `Spec` in its class (`src/LeakOps.Agents/<Name>Agent.cs`): `Instructions`, `AllowedTools` (least privilege: only the tools

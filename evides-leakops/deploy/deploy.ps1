@@ -97,6 +97,7 @@ function Wait-Until([string] $what, [scriptblock] $test, [int] $seconds = 240) {
 }
 
 Write-Host "== Evides LeakOps deployment" -ForegroundColor Cyan
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $SubscriptionId
 $account = Az account show --subscription $SubscriptionId -o json | ConvertFrom-Json
 Write-Host "   subscription: $($account.name)  tenant: $($account.tenantId)  user: $($account.user.name)"
 Write-Host "   resource group: $ResourceGroup ($Location)   suffix: $Suffix   web plan: $WebSku ($WebLocation)"

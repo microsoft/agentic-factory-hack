@@ -42,6 +42,8 @@ $people = [ordered]@{
     'T-08' = 'a woman in her mid 30s of Turkish descent, dark wavy hair, safety glasses pushed up on her head, warm smile'
 }
 
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $Subscription
+
 $endpoint = az cognitiveservices account show --subscription $Subscription -g $ResourceGroup -n $Account --query properties.endpoint -o tsv
 if (-not $endpoint) { throw 'Could not read the Foundry endpoint. Is AZURE_CONFIG_DIR / az login right?' }
 $endpoint = $endpoint.TrimEnd('/')

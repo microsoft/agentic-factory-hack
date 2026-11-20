@@ -491,6 +491,8 @@ $env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"            # when your default az l
 ```
 `deploy.ps1` needs PowerShell 7 and is safe to run again: keys that exist are kept, an agent only gets a new version when its definition changed. A full
 deployment takes 15 to 20 minutes. If the Basic plan has no capacity in the web region use `-WebLocation northeurope`. A new web app may answer 503 for a minute; the script retries.
+Every script that changes Azure first checks (`tenant-guard.ps1`) that the subscription is in the Macaw tenant `05baed4d-e049-45c7-b47d-c99c66fdb589` and stops
+with the `AZURE_CONFIG_DIR` / `az login --tenant` hint when it is not.
 `remove-from-tire-factory.ps1` was a one-off cleanup of the first deployment, which shared the tire-factory resource group; it has been run.
 
 How it is secured:

@@ -43,6 +43,7 @@ function Az {
 }
 
 Write-Host "== Evides LeakOps demo website" -ForegroundColor Cyan
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $SubscriptionId
 $account = Az account show --subscription $SubscriptionId -o json | ConvertFrom-Json
 Write-Host "   subscription: $($account.name)  user: $($account.user.name)"
 Write-Host "   resource group: $ResourceGroup   site: $siteName ($Location, Free)"

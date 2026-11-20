@@ -89,6 +89,7 @@ function Register-Agents([bool] $withKnowledge) {
 }
 
 Write-Host "== Evides LeakOps knowledge layer (Foundry IQ)" -ForegroundColor Cyan
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $SubscriptionId
 $account = Az account show --subscription $SubscriptionId -o json | ConvertFrom-Json
 Write-Host "   subscription: $($account.name)  user: $($account.user.name)"
 Write-Host "   resource group: $ResourceGroup   search service: $searchName ($SearchLocation, Basic)"
