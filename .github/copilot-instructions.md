@@ -2,6 +2,9 @@
 
 This repo is used for a workshop/exercise.
 
+> These workshop rules apply to the challenge folders. `evides-leakops/` is a finished demo with its own rules in
+> `.github/instructions/evides-leakops.instructions.md`, which take precedence there.
+
 ## Key goal
 Help the developer build the solution from context and instructions, **not** by copying an existing completed implementation.
 
