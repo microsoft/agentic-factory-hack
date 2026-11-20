@@ -42,6 +42,13 @@ C# MCP tools it may call with the Cosmos DB container each one reads, the code r
 
 *Source: [docs/architecture-triage-agent.svg](docs/architecture-triage-agent.svg). The agent definition is in `src/LeakOps.Agents/TriageAgent.cs`, the rules in `src/LeakOps.Contracts/Logic/TriageRules.cs`.*
 
+The same agent in plain words, for readers without a technical background: what each part is (the alarm, the instructions, the AI model, the skill,
+the tools, the knowledge, the rule checks, the verdict, the trace) and why it is needed.
+
+![TriageAgent in plain words: what each part does and why it is needed](docs/triage-agent-functional.png)
+
+*Source: [docs/triage-agent-functional.svg](docs/triage-agent-functional.svg). The numbers of the burst example come from `demo-site/js/captured.js`.*
+
 ### Every agent in detail
 
 The same picture for the other five agents. Each one shows how its input arrives, its instructions, model, knowledge base and skills (or that it has none), the C# MCP
@@ -88,7 +95,7 @@ facts the rules compare the answer with. Nothing the model says is published, bo
 | `evals/` | Foundry evaluation dataset (`leakops-evals.json`, 5 evaluations) and runner (`run-evals.ps1`, `-Only knowledge`) |
 | `deploy/` | Bicep and scripts: deploy, add or remove the knowledge layer (`deploy-knowledge.ps1`, `knowledge.bicep`), scale the web plan, tear down |
 | `DEMO.md` | Demo runbook: storyline, portal tour, troubleshooting |
-| `docs/` | Architecture diagrams (`architecture.svg`/`.png` overview, `architecture-detailed.svg`/`.png` with names, MCP functions and data sources) and functional flow (`functional-flow.html`/`.png`) |
+| `docs/` | Architecture diagrams (`architecture.svg`/`.png` overview, `architecture-detailed.svg`/`.png` with names, MCP functions and data sources, `architecture-*-agent.svg`/`.png` per agent), TriageAgent in plain words for non-technical readers (`triage-agent-functional.svg`/`.png`) and functional flow (`functional-flow.html`/`.png`) |
 | `demo-site/` | Interactive demo website (static): each slide shows the functional need, then reveals the technical solution; the finale replays the whole workflow. See [demo-site/README.md](demo-site/README.md) |
 | `src/LeakOps.Waterstoring` | Fake Waterstoring.nl (ingest API + public map) |
 | `src/LeakOps.Workflow` | ASP.NET workflow host: runs the six agents in order, streams progress (SSE), operator console |
@@ -491,6 +498,8 @@ $env:AZURE_CONFIG_DIR = "$HOME\.azure-macaw"            # when your default az l
 ```
 `deploy.ps1` needs PowerShell 7 and is safe to run again: keys that exist are kept, an agent only gets a new version when its definition changed. A full
 deployment takes 15 to 20 minutes. If the Basic plan has no capacity in the web region use `-WebLocation northeurope`. A new web app may answer 503 for a minute; the script retries.
+Every script that changes Azure first checks (`tenant-guard.ps1`) that the subscription is in the Macaw tenant `05baed4d-e049-45c7-b47d-c99c66fdb589` and stops
+with the `AZURE_CONFIG_DIR` / `az login --tenant` hint when it is not.
 `remove-from-tire-factory.ps1` was a one-off cleanup of the first deployment, which shared the tire-factory resource group; it has been run.
 
 How it is secured:

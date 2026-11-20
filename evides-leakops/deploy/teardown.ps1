@@ -26,6 +26,8 @@ function Az {
     $output
 }
 
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $SubscriptionId
+
 $exists = (& $azExe group exists --subscription $SubscriptionId -n $ResourceGroup 2>$null | Out-String).Trim()
 if ($exists -ne 'true') { Write-Host "Resource group $ResourceGroup does not exist. Nothing to delete."; return }
 

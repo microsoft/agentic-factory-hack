@@ -31,6 +31,8 @@ function Az {
     $output
 }
 
+. (Join-Path $PSScriptRoot 'tenant-guard.ps1'); Assert-LeakOpsTenant $SubscriptionId
+
 if ($Sku -eq 'F1') {
     # The free plan has no "always on", so it is switched off before the plan is changed.
     foreach ($app in $apps) { Az webapp config set --subscription $SubscriptionId -g $ResourceGroup -n $app --always-on false -o none | Out-Null }
