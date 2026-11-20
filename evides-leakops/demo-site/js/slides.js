@@ -250,6 +250,96 @@
     </div>`;
   }
 
+  /* ---------- "Before vs after AI": the same 16 steps, marked by who does them now ---------- */
+  // s: agent = done by an agent, assist = an agent prepares and a person acts or approves, people = still done by people.
+  // Every value comes from the captured burst run; field work stays with people.
+  function afterSteps(lang) {
+    const L2 = o => T(o, lang);
+    const sm = scen('burst').summary;
+    const tr = burst('triage'), dg = burst('diagnostic'), cm = burst('communications'), mm = burst('matchmaker'), pc = burst('procurement'), sc = burst('scheduling');
+    const d = dg.result, m = mm.result, p = pc.result, s = sc.result, wo = s.workOrder;
+    const mat = { cast_iron: { en: 'cast iron', nl: 'gietijzer' } }[d.material] || { en: d.material.replace(/_/g, ' '), nl: d.material.replace(/_/g, ' ') };
+    const valves = d.isolationPlan.map(v => v.valveId).join(' \u2192 ');
+    const short = p.lines.filter(l => l.short > 0).length, waits = p.purchaseOrders.filter(o => o.approvalRequired).length;
+    const pub = publishMs();
+    const verdict = { genuine_leak: { en: 'Genuine leak', nl: 'Echte lekkage' } }[tr.result.verdict] || { en: esc(tr.result.verdict.replace(/_/g, ' ')), nl: esc(tr.result.verdict.replace(/_/g, ' ')) };
+    return [
+      { s: 'people', lbl: { en: 'Unchanged', nl: 'Ongewijzigd' }, n: { en: 'Unchanged: a pipe breaks and the sensors measure it.', nl: 'Ongewijzigd: een leiding breekt en de sensoren meten het.' } },
+      { s: 'people', n: { en: 'The operator picks the alarm and starts the run (in production an alarm event can start it).', nl: 'De operator kiest het alarm en start de run (in productie kan een alarmgebeurtenis dat doen).' } },
+      { s: 'agent', a: ['Triage'], n: { en: `${verdict.en}, confidence ${tr.result.confidence}, in ${sec(tr.durationMs)} s: sensors, inflow, planned works and weather.`, nl: `${verdict.nl}, zekerheid ${tr.result.confidence}, in ${sec(tr.durationMs)} s: sensoren, instroom, geplande werken en weer.` } },
+      { s: 'agent', a: ['Diagnostic'], n: { en: `Incident ${esc(sm.incidentId)}, severity ${esc(d.severity)}; code re-checks the severity.`, nl: `Incident ${esc(sm.incidentId)}, ernst ${esc(d.severity)}; code controleert de ernst opnieuw.` } },
+      { s: 'agent', a: ['Diagnostic'], n: { en: `${esc(d.segmentId)} ${esc(d.street.split(' (')[0])}, DN${d.diameterMm} ${mat.en}, ${d.isolationPlan.length} valves, in ${sec(dg.durationMs)} s.`, nl: `${esc(d.segmentId)} ${esc(d.street.split(' (')[0])}, DN${d.diameterMm} ${mat.nl}, ${d.isolationPlan.length} afsluiters, in ${sec(dg.durationMs)} s.` } },
+      { s: 'agent', a: ['Resource Matchmaker', 'Scheduling'], n: { en: `${esc(m.primary.id)} chosen, ${m.primary.estimatedTravelMinutes} min away (backup ${esc(m.backup.id)}); work order with briefing.`, nl: `${esc(m.primary.id)} gekozen, ${m.primary.estimatedTravelMinutes} min weg (reserve ${esc(m.backup.id)}); werkbon met instructie.` } },
+      { s: 'agent', a: ['Diagnostic'], n: { en: `${nf(d.customersAffected)} customers, ${d.criticalCustomers.length} critical customer flagged.`, nl: `${nf(d.customersAffected)} klanten, ${d.criticalCustomers.length} kritieke klant gemarkeerd.` } },
+      { s: 'agent', a: ['Communications'], n: { en: `Published in NL and EN ${sec(pub)} s after the start; code checks the text.`, nl: `Gepubliceerd in NL en EN ${sec(pub)} s na de start; code controleert de tekst.` } },
+      { s: 'assist', a: ['Scheduling'], n: { en: `${esc(m.primary.id)} on site at ${hm(wo.expectedArrivalUtc)} with the route and briefing from the agent.`, nl: `${esc(m.primary.id)} om ${hm(wo.expectedArrivalUtc)} ter plaatse met route en instructie van de agent.` } },
+      { s: 'people', n: { en: 'The technician reports from the field (not automated in this demo).', nl: 'De monteur meldt vanuit het veld (niet geautomatiseerd in deze demo).' } },
+      { s: 'assist', a: ['Diagnostic'], n: { en: `The crew closes ${valves}; the valve order and the seized-valve warning come from the agent.`, nl: `De ploeg sluit ${valves}; de volgorde en de waarschuwing voor een vastzittende afsluiter komen van de agent.` } },
+      { s: 'assist', a: ['Procurement'], n: { en: `People repair; ${p.lines.length} items reserved, ${short} short and ordered, ${waits} order waits for a person.`, nl: `Mensen repareren; ${p.lines.length} items gereserveerd, ${short} tekort en besteld, ${waits} order wacht op een mens.` } },
+      { s: 'agent', a: ['Scheduling'], n: { en: `Notice updated to \u201Crepair planned\u201D: water back about ${hm(s.expectedResolutionUtc)}.`, nl: `Bericht bijgewerkt naar \u201Creparatie gepland\u201D: water terug rond ${hm(s.expectedResolutionUtc)}.` } },
+      { s: 'people', n: { en: 'Operators and the laboratory; the promised time already includes flushing.', nl: 'Operators en laboratorium; de beloofde tijd telt het spoelen al mee.' } },
+      { s: 'people', n: { en: 'The coordinator closes it; every agent step and tool call is already traced.', nl: 'De co\u00F6rdinator sluit af; elke agentstap en tool-aanroep is al vastgelegd.' } },
+      { s: 'people', n: { en: 'The communications officer marks it resolved (not automated in this demo).', nl: 'De communicatiemedewerker zet het op opgelost (niet geautomatiseerd in deze demo).' } }
+    ].map((x, i) => ({ ...BEFORE_STEPS[i], ...x, n: L2(x.n) }));
+  }
+  // Time from the start of the run until the notice was on Waterstoring; falls back to the first three step durations.
+  function publishMs() {
+    const sm = scen('burst').summary, at = Date.parse(burst('communications').result.published.createdUtc) - Date.parse(sm.startedUtc);
+    return at > 0 ? at : ['triage', 'diagnostic', 'communications'].reduce((a, k) => a + burst(k).durationMs, 0);
+  }
+
+  function afterSlide(lang) {
+    const L2 = o => T(o, lang);
+    const steps = afterSteps(lang), runSteps = scen('burst').steps, sm = scen('burst').summary;
+    const count = k => steps.filter(s => s.s === k).length;
+    const systems = new Set(BEFORE_STEPS.flatMap(s => s.sys)).size;
+    const tools = runSteps.reduce((a, s) => a + countCalls(s, false) + countKb(s), 0), rules = runSteps.reduce((a, s) => a + countCalls(s, true), 0);
+    const tok = runSteps.reduce((a, s) => a + (s.inputTokens || 0) + (s.outputTokens || 0), 0);
+    const ST = {
+      agent: { en: 'Done by an agent', nl: 'Door een agent' },
+      assist: { en: 'AI-assisted', nl: 'Met AI-hulp' },
+      people: { en: 'Still done by people', nl: 'Nog door mensen' }
+    };
+    const LEG = { ...ST, people: { en: 'Still done by people or unchanged', nl: 'Nog door mensen of ongewijzigd' } };
+    const kpi = (l, b, a, n, d) => `<div class="ak rv" style="--d:${d}"><span class="akl">${L2(l)}</span>
+        <div class="akv"><s>${L2(b)}</s><b><i>\u2192</i>${L2(a)}</b></div><small>${L2(n)}</small></div>`;
+    const card = (s, i) => `<li class="as ${s.s} rv" style="--d:${400 + i * 50}">
+        <div class="bn p${s.p}">${i + 1}</div>
+        <div class="at"><b>${L2(s.t)}</b>
+          <span class="was"><em>${L2({ en: 'Before', nl: 'V\u00F3\u00F3r' })}</em>${L2(s.who)} \u00B7 \uD83D\uDC65 ${s.pp}</span>
+          <span class="now"><em>${L2({ en: 'With AI', nl: 'Met AI' })}</em>${s.n}</span>
+        </div>
+        <div class="ab"><span class="st ${s.s}">${L2(s.lbl || ST[s.s])}</span>${(s.a || []).map(a => `<span class="tag agent">${a}</span>`).join('')}</div>
+      </li>`;
+    return `<div class="before after">
+      <div class="bhead rv" style="--d:0"><span class="tag bad">${L2({ en: 'Before AI', nl: 'V\u00F3\u00F3r AI' })}</span> \u2192 <span class="tag ok">${L2({ en: 'After AI', nl: 'Na AI' })}</span></div>
+      <h2 class="rv" style="--d:60">${L2({ en: 'The same 16 steps, with six AI agents', nl: 'Dezelfde 16 stappen, met zes AI-agents' })}</h2>
+      <p class="bl rv" style="--d:120">${L2({
+        en: `The chain from \u201COne burst pipe sets off a chain of 16 steps\u201D, step by step: what an agent now does, where an agent prepares and a person acts or approves, and what stays with people. The values with AI come from a real run of the deployed demo (captured ${C.capturedAt}, simulated data).`,
+        nl: `De keten uit \u201CE\u00E9n leidingbreuk zet een keten van 16 stappen in gang\u201D, stap voor stap: wat een agent nu doet, waar een agent voorbereidt en een mens handelt of goedkeurt, en wat bij mensen blijft. De waarden met AI komen uit een echte run van de gedeployde demo (vastgelegd ${C.capturedAt}, gesimuleerde data).` })}</p>
+      <div class="akpis">
+        ${kpi({ en: 'Steps done by an agent + AI-assisted', nl: 'Stappen door een agent + met AI-hulp' }, { en: '0', nl: '0' }, { en: `${count('agent')} + ${count('assist')}`, nl: `${count('agent')} + ${count('assist')}` }, { en: `of 16; ${count('people')} stay with people or are unchanged`, nl: `van 16; ${count('people')} blijven bij mensen of ongewijzigd` }, 160)}
+        ${kpi({ en: 'People involved before residents are told', nl: 'Mensen betrokken voordat bewoners het horen' }, { en: '6-8', nl: '6-8' }, { en: '1', nl: '1' }, { en: 'the operator who starts the run', nl: 'de operator die de run start' }, 220)}
+        ${kpi({ en: 'Alarm to first notice on Waterstoring.nl', nl: 'Alarm tot eerste bericht op Waterstoring.nl' }, { en: 'a chain of people', nl: 'een keten van mensen' }, { en: `${sec(publishMs())} s`, nl: `${sec(publishMs())} s` }, { en: `NL and EN, ${nf(burst('diagnostic').result.customersAffected)} households`, nl: `NL en EN, ${nf(burst('diagnostic').result.customersAffected)} huishoudens` }, 280)}
+        ${kpi({ en: 'Alarm to work order: technician, parts, time', nl: 'Alarm tot werkbon: monteur, onderdelen, tijd' }, { en: 'steps 1-8 by hand', nl: 'stap 1-8 met de hand' }, { en: `${Math.round(sm.totalMs / 1000)} s`, nl: `${Math.round(sm.totalMs / 1000)} s` }, { en: `6 agents, ${Math.round(tok / 1000)}k tokens in this run`, nl: `6 agents, ${Math.round(tok / 1000)}k tokens in deze run` }, 340)}
+        ${kpi({ en: `Facts between ${systems} system types`, nl: `Feiten tussen ${systems} systeemtypen` }, { en: 're-typed', nl: 'overgetypt' }, { en: `${tools} + ${rules}`, nl: `${tools} + ${rules}` }, { en: 'tool calls and lookups + code re-checks', nl: 'tool-aanroepen en opvragingen + code-controles' }, 400)}
+        ${kpi({ en: 'Repair on site', nl: 'Reparatie ter plaatse' }, { en: '2-24+ h', nl: '2-24+ u' }, { en: 'still hours', nl: 'nog uren' }, { en: `water back about ${hm(burst('scheduling').result.expectedResolutionUtc)}: a realistic promise`, nl: `water terug rond ${hm(burst('scheduling').result.expectedResolutionUtc)}: een realistische belofte` }, 460)}
+      </div>
+      <ol class="asteps">${steps.map(card).join('')}</ol>
+      <div class="blegend rv" style="--d:1300">
+        ${['agent', 'assist', 'people'].map(k => `<span><i class="${k}"></i>${L2(LEG[k])} (${count(k)})</span>`).join('')}
+        <span>${L2({ en: 'Number colour = phase, as on the Before AI slide', nl: 'Kleur van het nummer = fase, zoals op de slide V\u00F3\u00F3r AI' })}</span>
+      </div>
+      <div class="value rv" style="--d:1400"><div class="star">\u2605</div><div><b>${L2({ en: 'What changes, and what does not', nl: 'Wat verandert, en wat niet' })}</b>
+        <span>${L2({
+          en: 'Agents take the desk work: checking, map work, impact, the notice, matching, parts and planning. Field work (isolation, repair, flushing, sampling, close-out) stays with people, and people approve what matters. The model judges and writes; code owns the facts; people decide where it matters.',
+          nl: 'Agents nemen het bureauwerk over: controleren, kaartwerk, impact, het bericht, koppelen, onderdelen en planning. Veldwerk (isoleren, repareren, spoelen, bemonsteren, afsluiten) blijft bij mensen, en mensen keuren goed wat ertoe doet. Het model oordeelt en schrijft; code beheert de feiten; mensen beslissen waar het telt.' })}</span></div></div>
+      <p class="bsrc rv" style="--d:1500">${L2({
+        en: 'The 16 steps are a typical drinking-water incident process described by the Evides team, not a confirmed Evides list. The values with AI come from one captured run of this demo; all data is simulated and Waterstoring.nl in the demo is a fake.',
+        nl: 'De 16 stappen zijn een typisch drinkwaterstoringsproces zoals beschreven door het Evides-team, geen bevestigde lijst van Evides. De waarden met AI komen uit \u00E9\u00E9n vastgelegde run van deze demo; alle data is gesimuleerd en Waterstoring.nl in de demo is nep.' })}</p>
+    </div>`;
+  }
+
   /* ---------- slides ---------- */
   const SLIDES = [
     { id: 'intro', type: 'intro', short: { en: 'Start', nl: 'Start' } },
@@ -624,7 +714,12 @@
       }
     },
 
-    { id: 'finale', type: 'finale', short: { en: 'Workflow', nl: 'Workflow' } }
+    { id: 'finale', type: 'finale', short: { en: 'Workflow', nl: 'Workflow' } },
+
+    {
+      id: 'after', type: 'compare', short: { en: 'Before vs after AI', nl: 'V\u00F3\u00F3r en na AI' },
+      render: ctx => afterSlide(ctx.lang)
+    }
   ];
 
   window.SLIDES = SLIDES;
