@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Netkaart (demo, gesimuleerd) | LeakOps</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="/gis.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5V6.5Z"/><path d="M9 4v13.5M15 6.5V20"/></svg>
+      <strong data-i18n="app"></strong><span class="brand-sub" data-i18n="appSub"></span>
+    </div>
+    <nav class="apps" aria-label="Navigation">
+      <a href="/gis" class="active" aria-current="page" data-i18n="navGis"></a>
+      <a href="/technicians" data-i18n="navTech"></a>
+      <a href="/warehouse" data-i18n="navWarehouse"></a>
+      <a href="/evides" data-i18n="navIncidents"></a>
+    </nav>
+    <span id="clock" class="clock"></span>
+    <span class="live"><i></i><span data-i18n="live"></span></span>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button id="lang-nl" class="active" type="button">NL</button>
+      <button id="lang-en" type="button">EN</button>
+    </div>
+  </header>
+
+  <p class="sim-banner" role="note">
+    <strong data-i18n="bannerTitle"></strong>
+    <span data-i18n="bannerText"></span>
+  </p>
+
+  <p id="error" class="error-bar" role="alert" hidden></p>
+
+  <div class="layout">
+    <aside class="side" aria-label="Details">
+      <section class="panel">
+        <h2 data-i18n="layers"></h2>
+        <label class="layer"><input type="checkbox" id="lyr-pipes" checked><i class="sw pipe"></i><span data-i18n="pipes"></span><em id="n-pipes"></em></label>
+        <label class="layer"><input type="checkbox" id="lyr-valves" checked><i class="sw valve"></i><span data-i18n="valves"></span><em id="n-valves"></em></label>
+        <label class="layer"><input type="checkbox" id="lyr-sensors" checked><i class="sw sensor"></i><span data-i18n="sensors"></span><em id="n-sensors"></em></label>
+        <label class="layer"><input type="checkbox" id="lyr-incident" checked><i class="sw leak"></i><span data-i18n="incidentLayer"></span></label>
+      </section>
+
+      <section class="panel incident" id="incident" aria-live="polite"></section>
+    </aside>
+
+    <main class="map-wrap">
+      <div id="map" class="map" role="application" data-i18n-aria="mapLabel"></div>
+      <div class="legend" id="legend"></div>
+    </main>
+  </div>
+
+  <footer class="statusbar">
+    <span id="status"></span>
+    <span data-i18n="statusNote"></span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/gis.js"></script>
+</body>
+</html>

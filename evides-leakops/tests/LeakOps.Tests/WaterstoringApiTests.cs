@@ -173,6 +173,22 @@ public class WaterstoringApiTests
         Assert.Contains("affected", body);
     }
 
+    [Fact]
+    public async Task A_diagnosis_without_its_lists_is_rejected_so_the_map_keeps_working()
+    {
+        using var factory = new WebApplicationFactory<Program>();
+        var client = NewClient(factory);
+
+        var response = await client.PostAsJsonAsync("/api/gis/diagnosis",
+            new { alarmId = "ALM-1", segmentId = "SEG-0412", districtId = "DMA-SPK-01" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("isolationPlan", body);
+        Assert.Contains("location", body);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/gis")).StatusCode);
+    }
+
     [Theory]
     [InlineData("3201 AB", true)]
     [InlineData("3201ab", true)]
@@ -284,6 +300,11 @@ public class WaterstoringApiTests
         public Task<IReadOnlyList<Supplier>> SuppliersAsync() => _seed.SuppliersAsync();
         public Task<IReadOnlyList<StockReservation>> ReservationsAsync() => Task.FromResult<IReadOnlyList<StockReservation>>(Reservations);
         public Task<IReadOnlyList<PurchaseOrder>> PurchaseOrdersAsync() => Task.FromResult<IReadOnlyList<PurchaseOrder>>(Orders);
+        public Task<IReadOnlyList<PipeSegment>> PipeSegmentsAsync() => _seed.PipeSegmentsAsync();
+        public Task<IReadOnlyList<Valve>> ValvesAsync() => _seed.ValvesAsync();
+        public Task<IReadOnlyList<Sensor>> SensorsAsync() => _seed.SensorsAsync();
+        public Task<IReadOnlyList<GisDiagnosis>> DiagnosesAsync() => _seed.DiagnosesAsync();
+        public Task SaveDiagnosisAsync(GisDiagnosis diagnosis) => _seed.SaveDiagnosisAsync(diagnosis);
         public Task ResetAsync() { Resets++; return Task.CompletedTask; }
     }
 

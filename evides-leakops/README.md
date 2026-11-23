@@ -186,6 +186,8 @@ tiles load from the internet (Leaflet and OpenStreetMap); the list works offline
 | `GET /api/technicians[?at=<ISO time>]` | public | The simulated roster of all technicians with a state: `available`, `assigned` (a scheduled work order names them, with the job details), `busy` (a job from the roster) or `off_shift`. `at` defaults to the simulation clock, the time of the demo alarm (`DEMO_CLOCK_UTC` overrides it). Same logic as the Resource Matchmaker (`WorkforceAvailability`), so page and agent agree |
 | `POST /api/admin/reset-demo` | `X-Api-Key` or `X-Operator-Key` | Back to the start: clears the incidents, the work orders (so nobody is assigned), purchase orders and stock reservations of the workflow, and restores the stock from `data/inventory.json`. Behind the console's **Reset demo data** button |
 | `GET /api/warehouse[?at=<ISO time>]` | public | The simulated stock of both Evides depots: per item on hand, reserved, available, stock level (`ok`, `low` below the reorder level, `out`; heavy equipment in maintenance counts as out until it is back), supplier, the reservations per incident and the purchase orders, plus a summary and a newest-first list of changes (what Procurement wrote). Same stock rules as the agents' tools (`StockViews`) |
+| `GET /api/gis` | public | The simulated network for the map (pipe segments, valves with a `mayBeStiff` flag, sensors) and, once the Diagnostic agent has run, the latest diagnosed incident: leak coordinate (`Geo.PointAt`, the same calculation as the `get-point-on-segment` MCP tool), uncertainty, the stretch of pipe where the break can be, the isolation valves in closing order, a backup valve the diagnosis names, customers affected, critical customers, postal codes and streets. Never the scenario's ground truth |
+| `POST /api/gis/diagnosis` | `X-Api-Key` or `X-Operator-Key` | The workflow host posts the Diagnostic agent's report here right after step 2 (best effort: a failure is logged and the run goes on). Cleared by `reset-demo` |
 
 **Warehouse app:** `/warehouse` is styled as an internal **Power Apps model-driven app on Dataverse** (NL/EN, refreshes every 5 seconds): purple app bar,
 sitemap (Items, Purchase orders, Reservations, Recent changes, links to Technicians and Incidents), command bar, a sortable grid with stock-level bars, filter chips
@@ -200,6 +202,14 @@ becomes assigned during a run is selected automatically. The roster and the seed
 (`data/*.json`, linked in `LeakOps.Waterstoring.csproj`); in Azure the roster and work orders are read from Cosmos DB with the web app's
 managed identity. The page is public and shows simulated data only. The portraits (`wwwroot/technicians/T-0x.jpg`) are **AI-generated
 fictional people**, made once with `deploy/generate-technician-photos.ps1` (a temporary `gpt-image-1.5` deployment, removed afterwards; the JPGs are committed, so a normal deploy needs no image model). A missing portrait falls back to initials.
+
+**Network map (demo GIS):** `/gis` shows the **simulated** pipes (coloured by material, width by diameter), valves and sensors of both districts
+on a real OpenStreetMap street map (Leaflet 1.9.4 from unpkg with SRI; NL/EN, refreshes every 5 seconds), with layer switches and details on click.
+A banner says it is a simulated demo and not the Evides GIS or any real Evides system; only the street map is real. After the Diagnostic agent ran,
+the map zooms to the incident: the leak position with its uncertainty circle and the uncertain stretch of pipe, the valves numbered in closing order
+(a stiff valve is flagged), the backup valve (R), and a side panel with severity, customers affected, the critical customer (care home), streets and
+postal codes. Without a diagnosis it shows the network only. The network data ships with the app (`data/pipe-segments.json`, `valves.json`,
+`sensors.json`); in Azure it is read from Cosmos DB and the diagnoses are kept in the `Incidents` container (`kind: gis-diagnosis`).
 
 Statuses: `reported`, `repair_planned`, `repair_in_progress`, `resolved` (resolved incidents leave the search but stay in the list).
 Request and response shapes are the records in `src/LeakOps.Contracts/Waterstoring.cs`. Outside Development the app refuses to
@@ -421,7 +431,9 @@ are in `scripts/e2e.cs`):
 
 ## Workflow host and operator console (`src/LeakOps.Workflow`)
 The workflow host runs the six agents in order for one alarm and streams the progress to a browser page. It only orchestrates: it
-calls the HTTP functions of the Agents app (`AGENTS_BASE_URL`, `AGENTS_FUNCTION_KEY` when deployed) and never touches data.
+calls the HTTP functions of the Agents app (`AGENTS_BASE_URL`, `AGENTS_FUNCTION_KEY` when deployed) and never touches data itself.
+Like the demo reset, it hands one thing to the Waterstoring app: the Diagnostic report, posted to `/api/gis/diagnosis` for the network map
+(`IGisFeed`, best effort, it never stops a run).
 `Contracts/Logic/WorkflowRunner.cs` holds the pipeline (it works against an `IAgentGateway`, so the unit tests use a fake):
 
 | Situation | Result |

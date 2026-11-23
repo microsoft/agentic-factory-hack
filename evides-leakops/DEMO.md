@@ -93,6 +93,12 @@ flow 121 m3/h against 48 m3/h expected, no planned works, frost). For the false 
 3. Open **what residents see** (`/evides`): the incident on the map, status "repair planned", the expected time as an estimate, nothing internal.
 4. Run the burst again: nothing is booked or ordered twice (every step is idempotent).
 
+**Network map (show where the break is; slide 4 "Diagnostic" links to it):**
+1. Press **Reset demo data**, then open the **network map** (`/gis` on the Waterstoring site; linked from the technicians and warehouse pages and from slide 4 of the demo site) in a second tab: the simulated pipes, valves and sensors of Spijkenisse and Hoogvliet on a real street map, no incident. Say it out loud: this is a simulated demo map, not the Evides GIS (the banner says so too).
+2. Click a pipe or a valve for its details: SEG-0412 Dorpsweg is DN300 cast iron from 1962; valve V-0412-B has not been operated since 2023 and is flagged as possibly stiff.
+3. Run the burst (a pause before step 3 keeps the residents' page empty while you show the map). Within 5 seconds of the Diagnostic step the map zooms to Dorpsweg: the leak about 174 m along the pipe with its uncertainty circle (about ±54 m), the valves numbered 1 and 2 in closing order, backup valve V-0415-A marked R, and the side panel with severity S1, 1,840 customers, Zorgcentrum De Hoven, the streets and postal codes.
+4. The position is the same calculation the agent's `get-point-on-segment` tool uses, so map and agent cannot disagree.
+
 **Pause before Communications (show that residents have not been told yet):**
 1. Press **Reset demo data** in the console so the residents' page is empty. Keep that page open in a second tab.
 2. In the console pick the burst, tick **Pause before step 3 Communications**, and run. Triage and Diagnostic run (about 50 s), then step 3 shows **Paused**.

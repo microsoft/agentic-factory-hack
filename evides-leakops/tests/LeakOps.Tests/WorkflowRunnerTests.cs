@@ -116,6 +116,44 @@ public class WorkflowRunnerTests
         Assert.Equal(6, summary.Steps.Count(s => s.Status == "completed"));
     }
 
+    private sealed class RecordingGisFeed(FakeGateway gateway, bool fail = false) : IGisFeed
+    {
+        public List<(DiagnosticReport Report, int CallsSoFar)> Published { get; } = [];
+
+        public Task PublishAsync(DiagnosticReport report, CancellationToken cancellationToken)
+        {
+            Published.Add((report, gateway.Calls.Count));
+            return fail ? throw new HttpRequestException("Waterstoring is down") : Task.CompletedTask;
+        }
+    }
+
+    [Fact]
+    public async Task The_diagnosis_goes_to_the_gis_map_right_after_the_diagnostic_step()
+    {
+        var gateway = FakeGateway.Happy();
+        var gis = new RecordingGisFeed(gateway);
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System, gis).RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None);
+
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        var (report, callsSoFar) = Assert.Single(gis.Published);
+        Assert.Equal("SEG-0412", report.SegmentId);
+        Assert.Equal(2, callsSoFar);   // after Triage and Diagnostic, before Communications
+    }
+
+    [Fact]
+    public async Task A_gis_map_that_cannot_be_reached_does_not_stop_the_run()
+    {
+        var gateway = FakeGateway.Happy();
+        var gis = new RecordingGisFeed(gateway, fail: true);
+
+        var summary = await new WorkflowRunner(gateway, TimeProvider.System, gis).RunAsync(Burst.Alarm, _ => ValueTask.CompletedTask, CancellationToken.None);
+
+        Assert.Equal(WorkflowOutcomes.Completed, summary.Outcome);
+        Assert.Single(gis.Published);
+        Assert.Equal(WorkflowSteps.All, gateway.Calls.Select(c => c.Step));
+    }
+
     [Fact]
     public async Task A_false_alarm_ends_the_workflow_after_triage()
     {

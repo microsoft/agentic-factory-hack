@@ -13,6 +13,9 @@ public static class DiagnosticRules
     public const double BurstInletExcessM3h = 40;
     public const double BurstDropBar = 1.0;
 
+    /// <summary>A valve not operated for more than two years may be stiff or seized, so a backup valve should be ready. Shared with the GIS page.</summary>
+    public static bool MayBeStiff(DateTimeOffset? lastOperatedUtc, DateTimeOffset atUtc) => lastOperatedUtc is { } last && atUtc - last > StiffValveAge;
+
     public static DiagnosticReport Build(
         DiagnosisJudgement judgement,
         PipeSegment segment,
@@ -89,8 +92,8 @@ public static class DiagnosticRules
         {
             if (valve.Status != "open")
                 warnings.Add($"Valve {valve.Id} is {valve.Status}: isolation may not work, plan a backup valve.");
-            else if (valve.LastOperatedUtc is { } last && triage.TriggeredAtUtc - last > StiffValveAge)
-                warnings.Add($"Valve {valve.Id} was last operated {last:yyyy-MM-dd}: it may be stiff or seized, have a backup valve ready.");
+            else if (MayBeStiff(valve.LastOperatedUtc, triage.TriggeredAtUtc))
+                warnings.Add($"Valve {valve.Id} was last operated {valve.LastOperatedUtc:yyyy-MM-dd}: it may be stiff or seized, have a backup valve ready.");
         }
 
         if (procedure is null)
