@@ -1,0 +1,375 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="2494" viewBox="0 0 1780 2494" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+<marker id="arrowp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+<filter id="shadow" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<style>
+.title{font-size:30px;font-weight:700;fill:#0f172a;text-anchor:middle}.subtitle{font-size:16px;fill:#475569;text-anchor:middle}
+.h{font-size:20px;font-weight:700}.hs{font-size:14px;fill:#64748b}
+.ct{font-size:18px;font-weight:700;fill:#1e293b}.b{font-size:14.5px;fill:#334155}.k{font-size:11.5px;font-weight:700;letter-spacing:.08em}
+.chip{font-size:13.5px;font-weight:700;fill:#1e293b}.chs{font-size:12px;fill:#64748b}
+.m{font-size:12px;font-family:Consolas,'Cascadia Mono',monospace;fill:#334155}.mj{font-size:12px;font-family:Consolas,'Cascadia Mono',monospace;fill:#e2e8f0}
+.lbl{font-size:12px;fill:#475569;text-anchor:middle}.ico{font-size:17px;font-weight:700;fill:#fff;text-anchor:middle}
+.core{font-size:24px;font-weight:700;fill:#fff;text-anchor:middle}.foot{font-size:13px;fill:#475569;text-anchor:middle}
+.sum{font-size:15px;font-weight:700;fill:#1e293b;text-anchor:middle}
+.card{fill:#fff;stroke:#e2e8f0;stroke-width:1;filter:url(#shadow)}.hood{fill:#f1f5f9;stroke:#e2e8f0;stroke-width:1}
+.line{stroke:#475569;stroke-width:1.8;fill:none;marker-end:url(#arrow)}.back{stroke:#7c3aed;stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#arrowp)}
+</style></defs>
+<rect width="1780" height="2494" fill="#f6f8fc"/>
+<text x="890" y="46" class="title">TriageAgent explained: what each part does, why it is needed, and how it is built</text>
+<text x="890" y="76" class="subtitle">Agent 1 of 6 · the first check after an alarm: is this a real leak, a false alarm, or is it unclear? · plain words for everyone, technical details for those who want them</text>
+<text x="890" y="104" class="hs" text-anchor="middle" style="text-anchor:middle">Each card: WHAT IT IS and WHY IT IS NEEDED in plain words, then UNDER THE HOOD (grey strip) with the technical details · read the numbers 1 → 12 in order</text>
+<rect x="24" y="132" width="300" height="499" rx="14" class="card" data-check="The alarm"/>
+<rect x="40" y="148" width="38" height="38" rx="10" fill="#dc2626"/>
+<text x="59" y="173" class="ico">1</text>
+<text x="90" y="173" class="ct">The alarm</text>
+<text x="42" y="214" class="k" fill="#dc2626">WHAT IT IS</text>
+<text x="42" y="235" class="b">A pressure sensor in the pipe network</text>
+<text x="42" y="255" class="b">reports that the pressure fell below its</text>
+<text x="42" y="275" class="b">limit. An operator starts the check (later</text>
+<text x="42" y="295" class="b">an alarm can start it by itself).</text>
+<text x="42" y="323" class="k" fill="#dc2626">WHY IT IS NEEDED</text>
+<text x="42" y="344" class="b">On its own an alarm cannot tell a burst</text>
+<text x="42" y="364" class="b">pipe from planned valve work or a busy</text>
+<text x="42" y="384" class="b">hour. Someone has to look at the</text>
+<text x="42" y="404" class="b">context first: that is this agent’s job.</text>
+<rect x="40" y="428" width="268" height="187" rx="9" class="hood"/>
+<rect x="40" y="428" width="5" height="187" rx="2.5" fill="#dc2626"/>
+<text x="56" y="447" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="56" y="466" class="m" xml:space="preserve">AnomalyAlarm (JSON) from the SCADA</text>
+<text x="56" y="483" class="m" xml:space="preserve">  simulation: PS-101 · D-01 · 2.85</text>
+<text x="56" y="500" class="m" xml:space="preserve">  bar, limit 3.00</text>
+<text x="56" y="517" class="m" xml:space="preserve">Sent by the workflow host</text>
+<text x="56" y="534" class="m" xml:space="preserve">  leakops-workflow-88546e</text>
+<text x="56" y="551" class="m" xml:space="preserve">  (operator key on every /api</text>
+<text x="56" y="568" class="m" xml:space="preserve">  call)</text>
+<text x="56" y="585" class="m" xml:space="preserve">The alarm text is data, never</text>
+<text x="56" y="602" class="m" xml:space="preserve">  instructions</text>
+<rect x="24" y="743" width="300" height="442" rx="14" class="card" data-check="The front door (API)"/>
+<rect x="40" y="759" width="38" height="38" rx="10" fill="#475569"/>
+<text x="59" y="784" class="ico">2</text>
+<text x="90" y="784" class="ct">The front door (API)</text>
+<text x="42" y="825" class="k" fill="#475569">WHAT IT IS</text>
+<text x="42" y="846" class="b">The one way in and out of the agent: a</text>
+<text x="42" y="866" class="b">web address that the workflow calls</text>
+<text x="42" y="886" class="b">with the alarm.</text>
+<text x="42" y="914" class="k" fill="#475569">WHY IT IS NEEDED</text>
+<text x="42" y="935" class="b">The workflow hands in the alarm and</text>
+<text x="42" y="955" class="b">gets a checked answer back. Only a</text>
+<text x="42" y="975" class="b">caller with the key gets in.</text>
+<rect x="40" y="999" width="268" height="170" rx="9" class="hood"/>
+<rect x="40" y="999" width="5" height="170" rx="2.5" fill="#475569"/>
+<text x="56" y="1018" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="56" y="1037" class="m" xml:space="preserve">POST /api/agents/triage</text>
+<text x="56" y="1054" class="m" xml:space="preserve">Azure Functions app</text>
+<text x="56" y="1071" class="m" xml:space="preserve">  leakops-agents-88546e (Flex</text>
+<text x="56" y="1088" class="m" xml:space="preserve">  Consumption), function key</text>
+<text x="56" y="1105" class="m" xml:space="preserve">TriageAgent.TriageAsync calls the</text>
+<text x="56" y="1122" class="m" xml:space="preserve">  Foundry agent by name, runs the</text>
+<text x="56" y="1139" class="m" xml:space="preserve">  rule checks (9) and keeps the</text>
+<text x="56" y="1156" class="m" xml:space="preserve">  trace</text>
+<path d="M174.0,631 L174.0,741" class="line"/>
+<text x="184" y="691" class="lbl" text-anchor="start" style="text-anchor:start">sent by the workflow</text>
+<path d="M324,964.0 L362,964.0" class="line"/>
+<text x="344" y="952" class="lbl">alarm</text>
+<rect x="364" y="132" width="640" height="1053" rx="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2.4"/>
+<text x="386" y="166" class="h" fill="#2563eb">The agent (in Microsoft Foundry)</text>
+<text x="386" y="188" class="hs">it thinks and writes, but it cannot change anything</text>
+<rect x="384" y="208" width="292" height="482" rx="14" class="card" data-check="The instructions"/>
+<rect x="400" y="224" width="38" height="38" rx="10" fill="#3b82f6"/>
+<text x="419" y="249" class="ico">3</text>
+<text x="450" y="249" class="ct">The instructions</text>
+<text x="402" y="290" class="k" fill="#3b82f6">WHAT IT IS</text>
+<text x="402" y="311" class="b">The agent’s job description and</text>
+<text x="402" y="331" class="b">working method: what to check, in</text>
+<text x="402" y="351" class="b">which order, and how a leak and a</text>
+<text x="402" y="371" class="b">false alarm look.</text>
+<text x="402" y="399" class="k" fill="#3b82f6">WHY IT IS NEEDED</text>
+<text x="402" y="420" class="b">Every alarm is checked in the same</text>
+<text x="402" y="440" class="b">careful way, like a written procedure. It</text>
+<text x="402" y="460" class="b">also says: never guess a number, and</text>
+<text x="402" y="480" class="b">when in doubt answer “unclear”.</text>
+<rect x="400" y="504" width="260" height="170" rx="9" class="hood"/>
+<rect x="400" y="504" width="5" height="170" rx="2.5" fill="#3b82f6"/>
+<text x="416" y="523" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="416" y="542" class="m" xml:space="preserve">5 steps: list-sensors → readings</text>
+<text x="416" y="559" class="m" xml:space="preserve">  (3 h) → planned works → weather</text>
+<text x="416" y="576" class="m" xml:space="preserve">  (12 h) → usage history</text>
+<text x="416" y="593" class="m" xml:space="preserve">Tool error, conflicting evidence</text>
+<text x="416" y="610" class="m" xml:space="preserve">  or unknown alarm sensor →</text>
+<text x="416" y="627" class="m" xml:space="preserve">  uncertain</text>
+<text x="416" y="644" class="m" xml:space="preserve">Spec.Instructions in</text>
+<text x="416" y="661" class="m" xml:space="preserve">  TriageAgent.cs</text>
+<rect x="692" y="208" width="292" height="482" rx="14" class="card" data-check="The AI model"/>
+<rect x="708" y="224" width="38" height="38" rx="10" fill="#2563eb"/>
+<text x="727" y="249" class="ico">4</text>
+<text x="758" y="249" class="ct">The AI model</text>
+<text x="710" y="290" class="k" fill="#2563eb">WHAT IT IS</text>
+<text x="710" y="311" class="b">The language model (GPT) that reads</text>
+<text x="710" y="331" class="b">all the facts the agent collected. On its</text>
+<text x="710" y="351" class="b">own it knows nothing about Evides.</text>
+<text x="710" y="379" class="k" fill="#2563eb">WHY IT IS NEEDED</text>
+<text x="710" y="400" class="b">It weighs the evidence like an</text>
+<text x="710" y="420" class="b">experienced operator would and</text>
+<text x="710" y="440" class="b">writes a short explanation a duty</text>
+<text x="710" y="460" class="b">manager can read. It does not decide</text>
+<text x="710" y="480" class="b">on its own (see 9).</text>
+<rect x="708" y="538" width="260" height="136" rx="9" class="hood"/>
+<rect x="708" y="538" width="5" height="136" rx="2.5" fill="#2563eb"/>
+<text x="724" y="557" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="724" y="576" class="m" xml:space="preserve">gpt-5.4 deployment (Global</text>
+<text x="724" y="593" class="m" xml:space="preserve">  Standard, 150k tokens/min)</text>
+<text x="724" y="610" class="m" xml:space="preserve">At most 8,000 output tokens per</text>
+<text x="724" y="627" class="m" xml:space="preserve">  call</text>
+<text x="724" y="644" class="m" xml:space="preserve">Burst run: 9,365 tokens in, 1,120</text>
+<text x="724" y="661" class="m" xml:space="preserve">  out, about 17 s, 9 tool calls</text>
+<rect x="384" y="706" width="600" height="351" rx="14" class="card" data-check="The skill"/>
+<rect x="400" y="722" width="38" height="38" rx="10" fill="#7c3aed"/>
+<text x="419" y="747" class="ico">5</text>
+<text x="450" y="747" class="ct">The skill</text>
+<text x="402" y="788" class="k" fill="#7c3aed">WHAT IT IS</text>
+<text x="402" y="809" class="b">A reusable way of working, written once and shared by several agents: here, how to</text>
+<text x="402" y="829" class="b">cite evidence (the Diagnostic agent uses it too).</text>
+<text x="402" y="857" class="k" fill="#7c3aed">WHY IT IS NEEDED</text>
+<text x="402" y="878" class="b">Every claim in the answer names where it came from and quotes the real numbers, so</text>
+<text x="402" y="898" class="b">anyone can check it.</text>
+<rect x="400" y="922" width="568" height="119" rx="9" class="hood"/>
+<rect x="400" y="922" width="5" height="119" rx="2.5" fill="#7c3aed"/>
+<text x="416" y="941" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="416" y="960" class="m" xml:space="preserve">Foundry Skill (preview) evidence-citation, from</text>
+<text x="416" y="977" class="m" xml:space="preserve">  skills/evidence-citation/SKILL.md; added to the instructions at</text>
+<text x="416" y="994" class="m" xml:space="preserve">  registration</text>
+<text x="416" y="1011" class="m" xml:space="preserve">How to write source, finding and supports (leak, no_leak, neutral), and how</text>
+<text x="416" y="1028" class="m" xml:space="preserve">  to cite a knowledge document</text>
+<rect x="384" y="1073" width="600" height="92" rx="14" class="card" data-check="Guardrails"/>
+<rect x="400" y="1089" width="38" height="38" rx="10" fill="#1d4ed8"/>
+<text x="419" y="1114" class="ico">✓</text>
+<text x="450" y="1103" class="k" fill="#1d4ed8">GUARDRAILS</text>
+<text x="450" y="1124" class="b">A safety filter checks everything that goes in and comes out.</text>
+<text x="450" y="1147" class="m">content filter Microsoft.DefaultV2, with prompt shields</text>
+<rect x="1074" y="132" width="682" height="1053" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<text x="1096" y="166" class="h" fill="#92400e">Where the facts and the guidance come from</text>
+<text x="1096" y="188" class="hs">the agent asks, these systems answer</text>
+<rect x="1094" y="208" width="642" height="482" rx="14" class="card" data-check="The tools (MCP)"/>
+<rect x="1110" y="224" width="38" height="38" rx="10" fill="#f59e0b"/>
+<text x="1129" y="249" class="ico">6</text>
+<text x="1160" y="249" class="ct">The tools (MCP)</text>
+<text x="1112" y="290" class="k" fill="#f59e0b">WHAT IT IS</text>
+<text x="1112" y="311" class="b">Safe, read-only connections to the</text>
+<text x="1112" y="331" class="b">live systems. MCP is one standard</text>
+<text x="1112" y="351" class="b">plug: every system is connected the</text>
+<text x="1112" y="371" class="b">same way.</text>
+<text x="1112" y="399" class="k" fill="#f59e0b">WHY IT IS NEEDED</text>
+<text x="1112" y="420" class="b">The facts come from these systems,</text>
+<text x="1112" y="440" class="b">never from the model’s memory, so it</text>
+<text x="1112" y="460" class="b">never makes up a number. Read-only:</text>
+<text x="1112" y="480" class="b">the agent can look, not change.</text>
+<rect x="1110" y="504" width="250" height="170" rx="9" class="hood"/>
+<rect x="1110" y="504" width="5" height="170" rx="2.5" fill="#f59e0b"/>
+<text x="1126" y="523" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="1126" y="542" class="m" xml:space="preserve">MCP server leakops-mcp-88546e:</text>
+<text x="1126" y="559" class="m" xml:space="preserve">  C# Azure Functions with</text>
+<text x="1126" y="576" class="m" xml:space="preserve">  [McpToolTrigger]</text>
+<text x="1126" y="593" class="m" xml:space="preserve">Allow-list: 5 of the 19 tools,</text>
+<text x="1126" y="610" class="m" xml:space="preserve">  all read-only</text>
+<text x="1126" y="627" class="m" xml:space="preserve">Each tool reads a Cosmos DB</text>
+<text x="1126" y="644" class="m" xml:space="preserve">  container in LeakOpsDB</text>
+<text x="1126" y="661" class="m" xml:space="preserve">  (right)</text>
+<rect x="1378" y="278" width="342" height="72.8" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1378" y="278" width="6" height="72.8" rx="3" fill="#f59e0b"/>
+<text x="1394" y="305.4" class="chip">Nearby sensors</text>
+<text x="1394" y="321.4" class="chs">which sensors sit on the same pipe</text>
+<text x="1394" y="337.4" class="m">list-sensors → Sensors</text>
+<rect x="1378" y="358.8" width="342" height="72.8" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1378" y="358.8" width="6" height="72.8" rx="3" fill="#f59e0b"/>
+<text x="1394" y="386.2" class="chip">Readings, last 3 hours</text>
+<text x="1394" y="402.2" class="chs">pressure, and the water flowing in</text>
+<text x="1394" y="418.2" class="m">get-sensor-readings → SensorReadings</text>
+<rect x="1378" y="439.6" width="342" height="72.8" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1378" y="439.6" width="6" height="72.8" rx="3" fill="#f59e0b"/>
+<text x="1394" y="467" class="chip">Planned works</text>
+<text x="1394" y="483" class="chs">is someone closing valves right now?</text>
+<text x="1394" y="499" class="m">get-planned-works → PlannedWorks</text>
+<rect x="1378" y="520.4" width="342" height="72.8" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1378" y="520.4" width="6" height="72.8" rx="3" fill="#f59e0b"/>
+<text x="1394" y="547.8" class="chip">Weather</text>
+<text x="1394" y="563.8" class="chs">frost raises the risk, proves nothing</text>
+<text x="1394" y="579.8" class="m">get-weather → WeatherObservations</text>
+<rect x="1378" y="601.2" width="342" height="72.8" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1378" y="601.2" width="6" height="72.8" rx="3" fill="#f59e0b"/>
+<text x="1394" y="628.6" class="chip">Normal usage</text>
+<text x="1394" y="644.6" class="chs">what is normal for this hour?</text>
+<text x="1394" y="660.6" class="m">get-usage-history → UsageProfiles + UsageEvents</text>
+<rect x="1094" y="706" width="642" height="459" rx="14" class="card" data-check="The knowledge (Foundry IQ)"/>
+<rect x="1110" y="722" width="38" height="38" rx="10" fill="#0e7490"/>
+<text x="1129" y="747" class="ico">7</text>
+<text x="1160" y="747" class="ct">The knowledge (Foundry IQ)</text>
+<text x="1112" y="788" class="k" fill="#0e7490">WHAT IT IS</text>
+<text x="1112" y="809" class="b">The company’s own playbooks and lessons from earlier incidents, which the agent can</text>
+<text x="1112" y="829" class="b">search.</text>
+<text x="1112" y="857" class="k" fill="#0e7490">WHY IT IS NEEDED</text>
+<text x="1112" y="878" class="b">It helps compare what the agent sees with past experience. It is guidance, not data: a</text>
+<text x="1112" y="898" class="b">document can never close an alarm.</text>
+<rect x="1110" y="1030" width="610" height="119" rx="9" class="hood"/>
+<rect x="1110" y="1030" width="5" height="119" rx="2.5" fill="#0e7490"/>
+<text x="1126" y="1049" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="1126" y="1068" class="m" xml:space="preserve">Foundry IQ knowledge base leakops-ops-kb on Azure AI Search (connection</text>
+<text x="1126" y="1085" class="m" xml:space="preserve">  leakops-kb-ops)</text>
+<text x="1126" y="1102" class="m" xml:space="preserve">Tool knowledge_base_retrieve (a second MCP tool), used once after the data tools</text>
+<text x="1126" y="1119" class="m" xml:space="preserve">Cited by the code at the start of each title (above), never by file name ·</text>
+<text x="1126" y="1136" class="m" xml:space="preserve">  documents in knowledge/ops/</text>
+<text x="1112" y="930" class="k" fill="#0e7490">FOR EXAMPLE (SYNTHETIC DOCUMENTS)</text>
+<rect x="1110" y="940" width="198" height="42" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1110" y="940" width="6" height="42" rx="3" fill="#0e7490"/>
+<text x="1126" y="957" class="chip">PLAY-TRIAGE-01</text>
+<text x="1126" y="973" class="chs">telling a leak from a false alarm</text>
+<rect x="1316" y="940" width="198" height="42" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1316" y="940" width="6" height="42" rx="3" fill="#0e7490"/>
+<text x="1332" y="957" class="chip">INC-2024-0217</text>
+<text x="1332" y="973" class="chs">burst on Dorpsweg (review)</text>
+<rect x="1522" y="940" width="198" height="42" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="1522" y="940" width="6" height="42" rx="3" fill="#0e7490"/>
+<text x="1538" y="957" class="chip">INC-2025-0903</text>
+<text x="1538" y="973" class="chs">planned valve work, no leak</text>
+<path d="M1004,288 L1072,288" class="line"/>
+<text x="1039" y="261" class="lbl">asks for</text>
+<text x="1039" y="276" class="lbl">facts</text>
+<path d="M1072,320 L1006,320" class="back"/>
+<text x="1039" y="340" class="lbl">answers</text>
+<path d="M1004,786 L1072,786" class="line"/>
+<text x="1039" y="759" class="lbl">asks for</text>
+<text x="1039" y="774" class="lbl">guidance</text>
+<path d="M1072,818 L1006,818" class="back"/>
+<text x="1039" y="838" class="lbl">advice</text>
+<rect x="24" y="1233" width="470" height="534" rx="14" class="card" data-check="The answer form"/>
+<rect x="40" y="1249" width="38" height="38" rx="10" fill="#334155"/>
+<text x="59" y="1274" class="ico">8</text>
+<text x="90" y="1274" class="ct">The answer form</text>
+<text x="42" y="1315" class="k" fill="#334155">WHAT IT IS</text>
+<text x="42" y="1336" class="b">A fixed form the agent must fill in: the verdict, how sure it is, a</text>
+<text x="42" y="1356" class="b">short summary, three to six pieces of evidence, the suspected</text>
+<text x="42" y="1376" class="b">pipe and the next step.</text>
+<text x="42" y="1404" class="k" fill="#334155">WHY IT IS NEEDED</text>
+<text x="42" y="1425" class="b">Software can read a form, not a story, so code can check every</text>
+<text x="42" y="1445" class="b">field before anything happens.</text>
+<rect x="40" y="1666" width="438" height="85" rx="9" class="hood"/>
+<rect x="40" y="1666" width="5" height="85" rx="2.5" fill="#334155"/>
+<text x="56" y="1685" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="56" y="1704" class="m" xml:space="preserve">TriageVerdict: typed JSON answer schema, set at</text>
+<text x="56" y="1721" class="m" xml:space="preserve">  registration by LeakOps.AgentRegistry</text>
+<text x="56" y="1738" class="m" xml:space="preserve">Above: a real answer of the burst run, shortened</text>
+<rect x="40" y="1467" width="438" height="183" rx="9" fill="#0f172a"/>
+<text x="54" y="1489" class="mj" xml:space="preserve">{ "verdict": "genuine_leak",</text>
+<text x="54" y="1506" class="mj" xml:space="preserve">  "confidence": 0.96,</text>
+<text x="54" y="1523" class="mj" xml:space="preserve">  "summary": "… pressure fell sharply at PS-101 …",</text>
+<text x="54" y="1540" class="mj" xml:space="preserve">  "evidence": [ { "source": "get-sensor-readings",</text>
+<text x="54" y="1557" class="mj" xml:space="preserve">      "finding": "PS-101 fell from 4.89 … to 2.85 bar …",</text>
+<text x="54" y="1574" class="mj" xml:space="preserve">      "supports": "leak" }, … 3-6 items ],</text>
+<text x="54" y="1591" class="mj" xml:space="preserve">  "suspectedSegmentId": "SEG-0412",</text>
+<text x="54" y="1608" class="mj" xml:space="preserve">  "nextStep": "diagnose",</text>
+<text x="54" y="1625" class="mj" xml:space="preserve">  "alarmId", "districtId", "sensorId", "triggeredAtUtc" }</text>
+<rect x="554" y="1233" width="520" height="534" rx="14" class="card" data-check="Rule checks in code"/>
+<rect x="570" y="1249" width="38" height="38" rx="10" fill="#b45309"/>
+<text x="589" y="1274" class="ico">9</text>
+<text x="620" y="1274" class="ct">Rule checks in code</text>
+<text x="572" y="1315" class="k" fill="#b45309">WHAT IT IS</text>
+<text x="572" y="1336" class="b">Fixed rules in ordinary software that check the model’s answer against</text>
+<text x="572" y="1356" class="b">the data before anything happens.</text>
+<text x="572" y="1384" class="k" fill="#b45309">WHY IT IS NEEDED</text>
+<text x="572" y="1405" class="b">A second pair of eyes. The answer must quote the alarm sensor’s own</text>
+<text x="572" y="1425" class="b">readings and have enough evidence, or it becomes “unclear”. A false</text>
+<text x="572" y="1445" class="b">alarm is only accepted when the planned-works list really shows work</text>
+<text x="572" y="1465" class="b">going on: closing a real leak would be the worst mistake. When the rules</text>
+<text x="572" y="1485" class="b">overrule the model, it gets one more try.</text>
+<rect x="570" y="1581" width="488" height="170" rx="9" class="hood"/>
+<rect x="570" y="1581" width="5" height="170" rx="2.5" fill="#b45309"/>
+<text x="586" y="1600" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="586" y="1619" class="m" xml:space="preserve">TriageRules.Normalize: ids copied from the alarm, confidence 0 to</text>
+<text x="586" y="1636" class="m" xml:space="preserve">  1, nextStep follows the verdict</text>
+<text x="586" y="1653" class="m" xml:space="preserve">Needs 2+ evidence items, a leak or no_leak item for the verdict,</text>
+<text x="586" y="1670" class="m" xml:space="preserve">  and the alarm sensor with a reading in bar or m³/h; otherwise</text>
+<text x="586" y="1687" class="m" xml:space="preserve">  uncertain (confidence at most 0.4)</text>
+<text x="586" y="1704" class="m" xml:space="preserve">Overruled → 1 retry; the second answer stands</text>
+<text x="586" y="1721" class="m" xml:space="preserve">RequireDocumentedExplanation: code calls get-planned-works</text>
+<text x="586" y="1738" class="m" xml:space="preserve">  itself; false_alarm only with an active, not completed work</text>
+<rect x="1134" y="1233" width="622" height="534" rx="14" class="card" data-check="The verdict"/>
+<rect x="1150" y="1249" width="38" height="38" rx="10" fill="#10b981"/>
+<text x="1169" y="1274" class="ico">10</text>
+<text x="1200" y="1274" class="ct">The verdict: three possible outcomes</text>
+<rect x="1150" y="1303" width="590" height="124.333" rx="10" fill="#fef2f2"/>
+<text x="1168" y="1335.67" class="ct" fill="#991b1b">Genuine leak → the next agent</text>
+<text x="1168" y="1359.67" class="b">The Diagnostic agent finds the pipe, the valves and the customers.</text>
+<text x="1168" y="1379.67" class="b">The workflow goes on to the other five agents.</text>
+<text x="1168" y="1403.67" class="m" xml:space="preserve">nextStep: diagnose · burst run: 0.96 sure, suspected segment SEG-0412</text>
+<rect x="1150" y="1439.33" width="590" height="158.333" rx="10" fill="#f0fdf4"/>
+<text x="1168" y="1472" class="ct" fill="#166534">False alarm → closed, with proof</text>
+<text x="1168" y="1496" class="b">Only with planned work that explains the drop.</text>
+<text x="1168" y="1516" class="b">The run ends: no incident, no work order, nothing is published.</text>
+<text x="1168" y="1540" class="m" xml:space="preserve">nextStep: close_alarm · run outcome closed_false_alarm</text>
+<text x="1168" y="1557" class="m" xml:space="preserve">Valve-work run: PW-7781 active, 0.95 sure; inflow fell to 112 m³/h (normal p95</text>
+<text x="1168" y="1574" class="m" xml:space="preserve">  188.8)</text>
+<rect x="1150" y="1609.67" width="590" height="141.333" rx="10" fill="#fffbeb"/>
+<text x="1168" y="1642.33" class="ct" fill="#92400e">Unclear → a person decides</text>
+<text x="1168" y="1666.33" class="b">The flow stops and the control room takes over.</text>
+<text x="1168" y="1686.33" class="b">Nothing is published or sent until a person has looked at it.</text>
+<text x="1168" y="1710.33" class="m" xml:space="preserve">nextStep: manual_review · run outcome needs_review</text>
+<text x="1168" y="1727.33" class="m" xml:space="preserve">E.g. unknown sensor PS-999, a tool error, or evidence that conflicts</text>
+<path d="M414,1185 L414,1231" class="line"/>
+<text x="426" y="1213" class="lbl" style="text-anchor:start">proposed answer</text>
+<path d="M494,1500.0 L552,1500.0" class="line"/>
+<text x="524" y="1488" class="lbl">filled in</text>
+<path d="M1074,1500.0 L1132,1500.0" class="line"/>
+<text x="1104" y="1488" class="lbl">checked</text>
+<rect x="24" y="1815" width="1050" height="314" rx="14" class="card" data-check="The evaluations"/>
+<rect x="40" y="1831" width="38" height="38" rx="10" fill="#0369a1"/>
+<text x="59" y="1856" class="ico">12</text>
+<text x="90" y="1856" class="ct">The evaluations</text>
+<text x="42" y="1897" class="k" fill="#0369a1">WHAT IT IS</text>
+<text x="42" y="1918" class="b">Four test cases with a known right answer: a burst, planned work, an alarm text that tries to trick the agent, and a sensor that does not exist. They can be</text>
+<text x="42" y="1938" class="b">run again after every change.</text>
+<text x="42" y="1966" class="k" fill="#0369a1">WHY IT IS NEEDED</text>
+<text x="42" y="1987" class="b">A change is tested before it goes live: is a new version still right?</text>
+<rect x="40" y="2028" width="1018" height="85" rx="9" class="hood"/>
+<rect x="40" y="2028" width="5" height="85" rx="2.5" fill="#0369a1"/>
+<text x="56" y="2047" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="56" y="2066" class="m" xml:space="preserve">Foundry evaluations from evals/leakops-evals.json, run by evals/run-evals.ps1</text>
+<text x="56" y="2083" class="m" xml:space="preserve">Expected: genuine_leak · false_alarm · genuine_leak (the trick is ignored) · uncertain</text>
+<text x="56" y="2100" class="m" xml:space="preserve">Scores: verdict_correct, task_adherence (AI judge), tool_call_success · Playground for live tries</text>
+<rect x="1134" y="1815" width="622" height="314" rx="14" class="card" data-check="The trace"/>
+<rect x="1150" y="1831" width="38" height="38" rx="10" fill="#0f766e"/>
+<text x="1169" y="1856" class="ico">11</text>
+<text x="1200" y="1856" class="ct">The trace</text>
+<text x="1152" y="1897" class="k" fill="#0f766e">WHAT IT IS</text>
+<text x="1152" y="1918" class="b">Every step is recorded: which facts were looked up, what the model answered and how</text>
+<text x="1152" y="1938" class="b">long it took.</text>
+<text x="1152" y="1966" class="k" fill="#0f766e">WHY IT IS NEEDED</text>
+<text x="1152" y="1987" class="b">A decision can be explained afterwards, also weeks later: why did the agent decide this?</text>
+<rect x="1150" y="2011" width="590" height="102" rx="9" class="hood"/>
+<rect x="1150" y="2011" width="5" height="102" rx="2.5" fill="#0f766e"/>
+<text x="1166" y="2030" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="1166" y="2049" class="m" xml:space="preserve">Foundry traces in Application Insights: invoke_agent TriageAgent, chat gpt-5.4,</text>
+<text x="1166" y="2066" class="m" xml:space="preserve">  execute_tool leakops_mcp.&lt;tool&gt; and leakops_kb.knowledge_base_retrieve</text>
+<text x="1166" y="2083" class="m" xml:space="preserve">Model, tokens, tool calls and time per run; the code’s own lookup is added as</text>
+<text x="1166" y="2100" class="m" xml:space="preserve">  (rules) get-planned-works</text>
+<path d="M1445.0,1767 L1445.0,1813" class="line"/>
+<text x="1455" y="1795" class="lbl" style="text-anchor:start">recorded</text>
+<rect x="24" y="2169" width="1140" height="251" rx="14" class="card" data-check="Burst example"/>
+<rect x="40" y="2185" width="38" height="38" rx="10" fill="#dc2626"/>
+<text x="59" y="2210" class="ico">!</text>
+<text x="90" y="2210" class="ct">The burst example in plain words (a real run of the demo)</text>
+<text x="42" y="2251" class="b">At night the pressure at one sensor fell from 4.89 to 2.85 bar, while the water flowing into the district rose to 121 m³/h: normal for that hour is at most about 48. There</text>
+<text x="42" y="2273" class="b">was no planned work. The agent looked up 9 facts and sources and concluded “genuine leak”, 96% sure, in about 17 seconds. The rules agreed, so the next agent took</text>
+<text x="42" y="2295" class="b">over.</text>
+<rect x="40" y="2319" width="1108" height="85" rx="9" class="hood"/>
+<rect x="40" y="2319" width="5" height="85" rx="2.5" fill="#dc2626"/>
+<text x="56" y="2338" class="k" fill="#64748b">UNDER THE HOOD</text>
+<text x="56" y="2357" class="m" xml:space="preserve">ALM-2026-1114-0001 · PS-101 4.89 → 2.85 bar in 3 h · inflow FS-101 121 m³/h, p95 for this hour 48.4 · no planned works</text>
+<text x="56" y="2374" class="m" xml:space="preserve">9 calls: list-sensors, get-sensor-readings ×4, get-planned-works, get-weather, get-usage-history, knowledge_base_retrieve</text>
+<text x="56" y="2391" class="m" xml:space="preserve">9,365 + 1,120 tokens · 17.0 s · genuine_leak 0.96 → diagnose · captured 2026-11-16 from the deployed demo</text>
+<rect x="1204" y="2169" width="552" height="251" rx="14" fill="#0f172a"/>
+<text x="1480" y="2268.5" class="core">The model judges and writes.</text>
+<text x="1480" y="2302.5" class="core">Code owns the facts.</text>
+<text x="1480" y="2336.5" class="core">A person decides when unclear.</text>
+<text x="890" y="2448" class="sum">Instructions = how to work · Tools = facts · Knowledge = experience · Skill = habit · Form = readable by software · Code + a person = safe</text>
+<text x="890" y="2474" class="foot">All data is simulated, not a real Evides system · resource group rg-evides-ai-demo · registered by LeakOps.AgentRegistry · the technical version of this picture is docs/architecture-triage-agent.png</text>
+</svg>

@@ -42,12 +42,13 @@ C# MCP tools it may call with the Cosmos DB container each one reads, the code r
 
 *Source: [docs/architecture-triage-agent.svg](docs/architecture-triage-agent.svg). The agent definition is in `src/LeakOps.Agents/TriageAgent.cs`, the rules in `src/LeakOps.Contracts/Logic/TriageRules.cs`.*
 
-The same agent in plain words, for readers without a technical background: what each part is (the alarm, the instructions, the AI model, the skill,
-the tools, the knowledge, the rule checks, the verdict, the trace) and why it is needed.
+The same agent explained for every reader: each of its 12 parts (the alarm, the front door, the instructions, the AI model, the skill, the tools,
+the knowledge, the answer form, the rule checks, the verdict, the trace and the evaluations) says in plain words what it is and why it is needed,
+and then, in a grey "under the hood" strip, how it is built.
 
-![TriageAgent in plain words: what each part does and why it is needed](docs/triage-agent-functional.png)
+![TriageAgent explained: what each part does, why it is needed, and how it is built](docs/triage-agent-explained.png)
 
-*Source: [docs/triage-agent-functional.svg](docs/triage-agent-functional.svg). The numbers of the burst example come from `demo-site/js/captured.js`.*
+*Source: [docs/triage-agent-explained.svg](docs/triage-agent-explained.svg). The numbers of the two runs come from `demo-site/js/captured.js`.*
 
 ### Every agent in detail
 
@@ -95,7 +96,7 @@ facts the rules compare the answer with. Nothing the model says is published, bo
 | `evals/` | Foundry evaluation dataset (`leakops-evals.json`, 5 evaluations) and runner (`run-evals.ps1`, `-Only knowledge`) |
 | `deploy/` | Bicep and scripts: deploy, add or remove the knowledge layer (`deploy-knowledge.ps1`, `knowledge.bicep`), scale the web plan, tear down |
 | `DEMO.md` | Demo runbook: storyline, portal tour, troubleshooting |
-| `docs/` | Architecture diagrams (`architecture.svg`/`.png` overview, `architecture-detailed.svg`/`.png` with names, MCP functions and data sources, `architecture-*-agent.svg`/`.png` per agent), TriageAgent in plain words for non-technical readers (`triage-agent-functional.svg`/`.png`) and functional flow (`functional-flow.html`/`.png`) |
+| `docs/` | Architecture diagrams (`architecture.svg`/`.png` overview, `architecture-detailed.svg`/`.png` with names, MCP functions and data sources, `architecture-*-agent.svg`/`.png` per agent), TriageAgent explained in plain words with the technical details per part (`triage-agent-explained.svg`/`.png`) and functional flow (`functional-flow.html`/`.png`) |
 | `demo-site/` | Interactive demo website (static): each slide shows the functional need, then reveals the technical solution; the finale replays the whole workflow. See [demo-site/README.md](demo-site/README.md) |
 | `src/LeakOps.Waterstoring` | Fake Waterstoring.nl (ingest API + public map) |
 | `src/LeakOps.Workflow` | ASP.NET workflow host: runs the six agents in order, streams progress (SSE), operator console |
