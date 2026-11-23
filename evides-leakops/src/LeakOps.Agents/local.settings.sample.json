@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "AZURE_AI_PROJECT_ENDPOINT": "",
+    "AZURE_TENANT_ID": "",
+    "MODEL_DEPLOYMENT_NAME": "gpt-5.4",
+    "MCP_SERVER_URL": "http://localhost:7071/runtime/webhooks/mcp",
+    "MCP_AUTH_KEY": "",
+    "WATERSTORING_BASE_URL": "http://localhost:5080",
+    "WATERSTORING_API_KEY": "dev-waterstoring-key"
+  },
+  "Host": {
+    "LocalHttpPort": 7072
+  }
+}

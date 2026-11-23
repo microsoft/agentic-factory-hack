@@ -1,0 +1,7 @@
+local.settings.json
+appsettings.Local.json
+__azurite*
+__blobstorage__/
+__queuestorage__/
+AzuriteConfig
+.azurite/

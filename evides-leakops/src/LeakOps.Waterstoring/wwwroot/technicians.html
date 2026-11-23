@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resource planning - Technici (demo) | Evides</title>
+  <link rel="stylesheet" href="/technicians.css">
+</head>
+<body>
+  <header class="appbar">
+    <button class="waffle" type="button" aria-label="Apps" tabindex="-1">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5" cy="5" r="1.8"/><circle cx="12" cy="5" r="1.8"/><circle cx="19" cy="5" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/><circle cx="5" cy="19" r="1.8"/><circle cx="12" cy="19" r="1.8"/><circle cx="19" cy="19" r="1.8"/></g></svg>
+    </button>
+    <div class="brand">
+      <svg class="brand-drop" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C12 1 2 13.5 2 21a10 10 0 0 0 20 0C22 13.5 12 1 12 1Z" fill="currentColor" stroke="none"/></svg>
+      <strong>Evides</strong><span data-i18n="app"></span>
+    </div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
+      <input id="search" type="search" autocomplete="off" data-i18n-placeholder="search" data-i18n-aria="search">
+    </label>
+    <span class="demo-tag" data-i18n="demo"></span>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button id="lang-nl" class="active" type="button">NL</button>
+      <button id="lang-en" type="button">EN</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="rail" aria-label="Navigation">
+      <a class="rail-item active" href="/technicians" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3.2 2.6-5 5.5-5s5.1 1.8 5.5 5"/><path d="M16 5.5a3 3 0 0 1 0 5.5M17.5 14.2c1.8.6 3 2.2 3.3 4.8"/></svg>
+        <span data-i18n="navTech"></span>
+      </a>
+      <a class="rail-item" href="/warehouse">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8 12 3.5 20.5 8v8L12 20.5 3.5 16V8Z"/><path d="M3.5 8 12 12.5 20.5 8M12 12.5v8"/></svg>
+        <span data-i18n="navWarehouse"></span>
+      </a>
+      <a class="rail-item" href="/gis">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5V6.5Z"/><path d="M9 4v13.5M15 6.5V20"/></svg>
+        <span data-i18n="navGis"></span>
+      </a>
+      <a class="rail-item" href="/evides">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4.5M12 17.2v.1"/></svg>
+        <span data-i18n="navIncidents"></span>
+      </a>
+    </nav>
+
+    <main class="workspace">
+      <div class="command-bar">
+        <span class="command-title" data-i18n="title"></span>
+        <span id="clock" class="command-clock"></span>
+        <span class="command-live"><i></i><span data-i18n="live"></span></span>
+      </div>
+
+      <p id="error" class="error-bar" role="alert" hidden></p>
+
+      <div class="panes">
+        <section class="list-pane" aria-label="Technici">
+          <div class="pivot" id="pivot" role="tablist"></div>
+          <ul id="list" class="mail-list" role="listbox"></ul>
+        </section>
+
+        <section class="reading-pane" id="reading" aria-live="polite"></section>
+      </div>
+
+      <section class="assistant" aria-labelledby="assistant-title">
+        <div class="assistant-head">
+          <h2 id="assistant-title" data-i18n="plannerTitle"></h2>
+          <ul class="legend">
+            <li><i class="lg shift"></i><span data-i18n="legendShift"></span></li>
+            <li><i class="lg busy"></i><span data-i18n="legendBusy"></span></li>
+            <li><i class="lg job"></i><span data-i18n="legendJob"></span></li>
+            <li><i class="lg now"></i><span data-i18n="legendNow"></span></li>
+          </ul>
+        </div>
+        <div id="planner" class="planner"></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="statusbar">
+    <span id="status-count"></span>
+    <span data-i18n="statusNote"></span>
+  </footer>
+
+  <script src="/technicians.js"></script>
+</body>
+</html>

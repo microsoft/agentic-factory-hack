@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared records (anomaly, verdict, diagnosis, incident, work order ...) are added in step 1. -->
+
+</Project>

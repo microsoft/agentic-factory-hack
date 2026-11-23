@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evides LeakOps - Operator console (demo)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="demo-banner">DEMO - simulated data. Six AI agents handle a pressure alarm from start to finish.</div>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 3C16 3 6 14.5 6 20.5a10 10 0 0 0 20 0C26 14.5 16 3 16 3z" fill="currentColor"/></svg>
+        <div><strong>Evides LeakOps</strong><span>Operator console</span></div>
+      </div>
+      <a id="site-link" class="ghost-link" href="http://localhost:5080/evides" target="_blank" rel="noopener">Open Waterstoring (what residents see) &rarr;</a>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="panel control" aria-labelledby="h-alarm">
+      <h2 id="h-alarm"><span class="num">1</span> Choose an alarm</h2>
+      <div id="scenarios" class="scenarios" role="radiogroup" aria-label="Scenarios"></div>
+
+      <label class="field-label" for="alarm">Alarm payload (editable)</label>
+      <textarea id="alarm" spellcheck="false" rows="13"></textarea>
+      <p class="hint">This is what the SCADA system sends. You can edit it, for example to see how the agents deal with a sensor they do not know or with odd text in the message.</p>
+
+      <div id="key-row" class="key-row" hidden>
+        <label class="field-label" for="operator-key">Operator key</label>
+        <input id="operator-key" type="password" autocomplete="off" spellcheck="false">
+        <p class="hint">This deployment is protected. Enter the key once; it is kept in this browser tab only.</p>
+      </div>
+
+      <fieldset class="pause-options">
+        <legend>Pause the workflow (for the audience)</legend>
+        <label class="check" for="pause-comms"><input id="pause-comms" type="checkbox"> Pause before step 3 Communications <span>(first show that Waterstoring has no notice, then resume)</span></label>
+        <label class="check" for="pause-match"><input id="pause-match" type="checkbox"> Pause before step 4 Resource Matchmaker <span>(first show all technicians and who is available, then resume)</span></label>
+        <label class="check" for="pause-proc"><input id="pause-proc" type="checkbox"> Pause before step 5 Procurement <span>(first show the warehouse and its stock, then resume)</span></label>
+      </fieldset>
+
+      <button id="run" class="primary" type="button" disabled>Run the workflow</button>
+      <p id="run-error" class="error" role="alert" hidden></p>
+
+      <h3>Recent runs</h3>
+      <ul id="recent" class="recent"><li class="muted">None yet.</li></ul>
+
+      <div class="reset-box">
+        <button id="reset-demo" class="ghost-danger" type="button">Reset demo data</button>
+        <p id="reset-msg" class="hint" role="status">Clears the Waterstoring page, work orders, orders and reservations and restores the stock, so every technician is free again.</p>
+      </div>
+    </section>
+
+    <section class="panel flow" aria-labelledby="h-flow">
+      <h2 id="h-flow"><span class="num">2</span> Watch the agents work</h2>
+      <div id="banner" class="banner" hidden></div>
+      <ol id="steps" class="steps"></ol>
+    </section>
+  </main>
+
+  <footer class="wrap foot">Evides LeakOps demo &middot; agents are Azure Functions (C#) on a Microsoft Foundry model &middot; data and Waterstoring.nl are simulated.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

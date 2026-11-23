@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- ASP.NET workflow host: runs the six agents in order, streams progress (SSE) and serves the operator page. -->
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LeakOps.Contracts\LeakOps.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The operator page offers the alarms of the scenarios. The file also holds the hidden answers of the simulation, so the host only ever sends id, name, description and alarm. -->
+    <Content Include="..\..\data\scenarios.json" Link="data\scenarios.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "SEG-0412", "districtId": "D-01", "street": "Dorpsweg (Kerkstraat to Havenlaan)",
+    "place": "Spijkenisse", "servedStreets": [ "Dorpsweg", "Kerkstraat", "Havenlaan" ],
+    "material": "cast_iron", "diameterMm": 300, "installYear": 1962, "depthM": 1.2, "lengthM": 438, "pressureClass": "PN10",
+    "start": { "lat": 51.8612, "lon": 4.3281 }, "end": { "lat": 51.8601, "lon": 4.3342 },
+    "customersServed": 1840,
+    "criticalCustomers": [ "Zorgcentrum De Hoven (care home, simulated)" ],
+    "postalCodes": [ "3201 AB", "3201 AC", "3201 AD", "3202 BA" ],
+    "isolationValveIds": [ "V-0412-A", "V-0412-B" ],
+    "previousBursts": 3, "surface": "asphalt", "roadType": "arterial"
+  },
+  {
+    "id": "SEG-0415", "districtId": "D-01", "street": "Havenlaan",
+    "place": "Spijkenisse", "servedStreets": [ "Havenlaan" ],
+    "material": "pvc", "diameterMm": 200, "installYear": 1988, "depthM": 1.0, "lengthM": 229, "pressureClass": "PN10",
+    "start": { "lat": 51.8601, "lon": 4.3342 }, "end": { "lat": 51.8590, "lon": 4.3370 },
+    "customersServed": 420,
+    "criticalCustomers": [],
+    "postalCodes": [ "3202 BA", "3202 BB" ],
+    "isolationValveIds": [ "V-0415-A" ],
+    "previousBursts": 0, "surface": "pavement", "roadType": "local"
+  },
+  {
+    "id": "SEG-0399", "districtId": "D-01", "street": "Kerkstraat",
+    "place": "Spijkenisse", "servedStreets": [ "Kerkstraat" ],
+    "material": "asbestos_cement", "diameterMm": 150, "installYear": 1974, "depthM": 0.9, "lengthM": 283, "pressureClass": "PN10",
+    "start": { "lat": 51.8630, "lon": 4.3310 }, "end": { "lat": 51.8612, "lon": 4.3281 },
+    "customersServed": 310,
+    "criticalCustomers": [],
+    "postalCodes": [ "3201 AA", "3201 AB" ],
+    "isolationValveIds": [ "V-0399-A" ],
+    "previousBursts": 2, "surface": "pavement", "roadType": "local"
+  },
+  {
+    "id": "SEG-0420", "districtId": "D-01", "street": "Randweg Noord (district inlet)",
+    "place": "Spijkenisse", "servedStreets": [ "Randweg Noord" ],
+    "material": "ductile_iron", "diameterMm": 400, "installYear": 2001, "depthM": 1.5, "lengthM": 498, "pressureClass": "PN16",
+    "start": { "lat": 51.8655, "lon": 4.3250 }, "end": { "lat": 51.8630, "lon": 4.3310 },
+    "customersServed": 3000,
+    "criticalCustomers": [ "Zorgcentrum De Hoven (care home, simulated)" ],
+    "postalCodes": [ "3201 AA", "3201 AB", "3201 AC", "3201 AD", "3202 BA", "3202 BB" ],
+    "isolationValveIds": [ "V-0420-A" ],
+    "previousBursts": 0, "surface": "asphalt", "roadType": "arterial"
+  },
+  {
+    "id": "SEG-0507", "districtId": "D-02", "street": "Industrieweg",
+    "place": "Hoogvliet", "servedStreets": [ "Industrieweg", "Handelsstraat" ],
+    "material": "ductile_iron", "diameterMm": 250, "installYear": 1995, "depthM": 1.3, "lengthM": 383, "pressureClass": "PN16",
+    "start": { "lat": 51.8590, "lon": 4.3590 }, "end": { "lat": 51.8575, "lon": 4.3640 },
+    "customersServed": 38,
+    "criticalCustomers": [ "ChemPlast Benelux (process water, simulated)" ],
+    "postalCodes": [ "3192 AA", "3192 AB" ],
+    "isolationValveIds": [ "V-0507-A", "V-0507-B" ],
+    "previousBursts": 0, "surface": "asphalt", "roadType": "industrial"
+  },
+  {
+    "id": "SEG-0508", "districtId": "D-02", "street": "Handelsstraat",
+    "place": "Hoogvliet", "servedStreets": [ "Handelsstraat" ],
+    "material": "pe", "diameterMm": 160, "installYear": 2004, "depthM": 1.0, "lengthM": 255, "pressureClass": "PN12.5",
+    "start": { "lat": 51.8575, "lon": 4.3640 }, "end": { "lat": 51.8560, "lon": 4.3668 },
+    "customersServed": 22,
+    "criticalCustomers": [],
+    "postalCodes": [ "3192 AB", "3192 AC" ],
+    "isolationValveIds": [ "V-0508-A" ],
+    "previousBursts": 0, "surface": "pavement", "roadType": "industrial"
+  },
+  {
+    "id": "SEG-0510", "districtId": "D-02", "street": "Randweg Zuid (district inlet)",
+    "place": "Hoogvliet", "servedStreets": [ "Randweg Zuid" ],
+    "material": "steel", "diameterMm": 400, "installYear": 1978, "depthM": 1.6, "lengthM": 304, "pressureClass": "PN16",
+    "start": { "lat": 51.8610, "lon": 4.3560 }, "end": { "lat": 51.8590, "lon": 4.3590 },
+    "customersServed": 60,
+    "criticalCustomers": [ "ChemPlast Benelux (process water, simulated)" ],
+    "postalCodes": [ "3192 AA", "3192 AB", "3192 AC" ],
+    "isolationValveIds": [ "V-0510-A" ],
+    "previousBursts": 1, "surface": "asphalt", "roadType": "arterial"
+  }
+]

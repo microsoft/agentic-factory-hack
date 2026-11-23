@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Magazijn - Voorraad (demo) | Evides</title>
+  <link rel="stylesheet" href="/warehouse.css">
+</head>
+<body>
+  <header class="appbar">
+    <button class="waffle" type="button" aria-label="Apps" tabindex="-1">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5" cy="5" r="1.8"/><circle cx="12" cy="5" r="1.8"/><circle cx="19" cy="5" r="1.8"/><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/><circle cx="5" cy="19" r="1.8"/><circle cx="12" cy="19" r="1.8"/><circle cx="19" cy="19" r="1.8"/></g></svg>
+    </button>
+    <div class="brand"><strong>Evides</strong><span data-i18n="app"></span></div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
+      <input id="search" type="search" autocomplete="off" data-i18n-placeholder="search" data-i18n-aria="search">
+    </label>
+    <span class="env" data-i18n="env"></span>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button id="lang-nl" class="active" type="button">NL</button>
+      <button id="lang-en" type="button">EN</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sitemap" aria-label="Navigation">
+      <p class="group" data-i18n="grpStock"></p>
+      <button class="nav-item active" data-view="items" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8 12 3.500 20.500 8v8L12 20.500 3.500 16V8Z"/><path d="M3.500 8 12 12.500 20.500 8M12 12.500v8"/></svg><span data-i18n="navItems"></span></button>
+      <p class="group" data-i18n="grpProc"></p>
+      <button class="nav-item" data-view="orders" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.500h9l3 3V20.500H6V3.500Z"/><path d="M9 11h6M9 14.500h6M9 8h3"/></svg><span data-i18n="navOrders"></span><b id="n-orders" class="count"></b></button>
+      <button class="nav-item" data-view="reservations" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.500" width="14" height="10" rx="2"/><path d="M8 10.500V8a4 4 0 0 1 8 0v2.500"/></svg><span data-i18n="navReservations"></span><b id="n-reservations" class="count"></b></button>
+      <p class="group" data-i18n="grpAudit"></p>
+      <button class="nav-item" data-view="changes" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.500"/><path d="M12 7v5l3.500 2"/></svg><span data-i18n="navChanges"></span><b id="n-changes" class="count"></b></button>
+      <p class="group" data-i18n="grpApps"></p>
+      <a class="nav-item" href="/technicians"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.200"/><path d="M3.500 19c.4-3.200 2.600-5 5.500-5s5.100 1.800 5.500 5"/></svg><span data-i18n="navTech"></span></a>
+      <a class="nav-item" href="/gis"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.500 6.500 9 4l6 2.500L20.500 4v13.500L15 20l-6-2.500-5.500 2.500V6.500Z"/><path d="M9 4v13.500M15 6.500V20"/></svg><span data-i18n="navGis"></span></a>
+      <a class="nav-item" href="/evides"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.500 20h19L12 3Z"/><path d="M12 10v4.500"/></svg><span data-i18n="navIncidents"></span></a>
+    </nav>
+
+    <main class="workspace">
+      <div class="command-bar">
+        <button type="button" class="cmd" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="cmdNew"></span></button>
+        <button type="button" class="cmd" id="refresh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.700-6M20 4v4.500h-4.500"/></svg><span data-i18n="cmdRefresh"></span></button>
+        <button type="button" class="cmd" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg><span data-i18n="cmdExport"></span></button>
+        <span class="cmd-gap"></span>
+        <span class="clock" id="clock"></span>
+        <span class="live"><i></i><span data-i18n="live"></span></span>
+      </div>
+
+      <p id="error" class="error-bar" role="alert" hidden></p>
+
+      <div class="view-head">
+        <h1 id="view-title"></h1>
+        <ul class="kpis" id="kpis"></ul>
+      </div>
+      <div class="filters" id="filters" role="group"></div>
+
+      <div class="body">
+        <section class="grid-wrap" id="grid-wrap" aria-live="polite"></section>
+        <aside class="form-pane" id="form" aria-label="Record"></aside>
+      </div>
+    </main>
+  </div>
+
+  <footer class="statusbar">
+    <span id="status-count"></span>
+    <span data-i18n="statusNote"></span>
+  </footer>
+
+  <script src="/warehouse.js"></script>
+</body>
+</html>

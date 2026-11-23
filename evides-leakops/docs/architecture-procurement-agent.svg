@@ -1,0 +1,242 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1210" viewBox="0 0 1780 1210" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+<marker id="arrowp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+<filter id="shadow" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<style>
+.title{font-size:28px;font-weight:700;fill:#0f172a;text-anchor:middle}.subtitle{font-size:15px;fill:#475569;text-anchor:middle}
+.zone{font-size:13px;font-weight:700;fill:#2e7d32}.h{font-size:18px;font-weight:700;fill:#1e293b}.hs{font-size:12px;fill:#64748b}
+.ct{font-size:14px;font-weight:700;fill:#1e293b}.cs{font-size:12px;fill:#64748b}.foot{font-size:12px;text-anchor:middle}
+.lbl{font-size:11px;fill:#475569;text-anchor:middle}.ico{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle}
+.pill{font-size:11px;font-weight:600;text-anchor:middle;font-family:Consolas,Menlo,monospace}
+.grp{font-size:11px;font-weight:700;fill:#475569;letter-spacing:.04em}.sec{font-size:13px;font-weight:700;fill:#2e7d32}
+.card{fill:#fff;stroke:#e2e8f0;stroke-width:1;filter:url(#shadow)}
+.line{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arrow)}.dash{stroke:#7c3aed;stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#arrowp)}
+.thin{stroke:#94a3b8;stroke-width:1.4;fill:none;stroke-dasharray:3 4;marker-end:url(#arrow)}
+.note{font-size:11.5px;fill:#6d28d9}
+</style></defs>
+<rect width="1780" height="1210" fill="#f6f8fc"/>
+<text x="890" y="44" class="title" >ProcurementAgent — one Foundry agent that plans; code reserves and orders</text>
+<text x="890" y="70" class="subtitle" >Agent 5 of 6 · decides which parts and equipment the repair needs · code reserves, orders and reports what is still short</text>
+<rect x="150" y="96" width="1610" height="1050" rx="22" fill="none" stroke="#3a9a4a" stroke-width="2" stroke-dasharray="9 7"/>
+<text x="172" y="122" class="zone" >Resource group rg-evides-ai-demo · agent name ProcurementAgent · gpt-5.4 (Global Standard) · the model proposes, code checks and decides</text>
+<rect x="12" y="250" width="116" height="150" rx="12" class="card"/>
+<rect x="22" y="262" width="30" height="30" rx="9" fill="#3b82f6"/>
+<text x="37" y="281" class="ico" >IN</text>
+<text x="60" y="282" class="ct" >Input</text>
+<text x="70" y="322" class="ct" text-anchor="middle" style="font-size:12px">Diagnostic report</text>
+<text x="70" y="340" class="cs" text-anchor="middle">SEG-0412</text>
+<text x="70" y="356" class="cs" text-anchor="middle">DN300 cast iron</text>
+<text x="70" y="372" class="cs" text-anchor="middle">burst, S1</text>
+<text x="70" y="388" class="cs" text-anchor="middle">simulated</text>
+<text x="70" y="440" class="ct" text-anchor="middle">Operator</text>
+<text x="70" y="456" class="cs" text-anchor="middle">starts the run</text>
+<rect x="170" y="146" width="330" height="612" rx="22" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.4"/>
+<rect x="186" y="162" width="46" height="46" rx="9" fill="#7c3aed"/>
+<text x="209" y="189" class="ico" >WF</text>
+<text x="244" y="186" class="h" >1. Workflow host</text>
+<text x="244" y="206" class="hs" >leakops-workflow-88546e</text>
+<text x="335" y="742" class="foot" fill="#7c3aed">Operator key on every /api call</text>
+<rect x="540" y="146" width="330" height="612" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="556" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="579" y="189" class="ico" >fn</text>
+<text x="614" y="186" class="h" >2. Agents app</text>
+<text x="614" y="206" class="hs" >leakops-agents-88546e · Functions Flex</text>
+<text x="705" y="742" class="foot" fill="#f59e0b">The code never trusts the model blindly</text>
+<rect x="910" y="146" width="330" height="612" rx="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2.4"/>
+<rect x="926" y="162" width="46" height="46" rx="9" fill="#2563eb"/>
+<text x="949" y="189" class="ico" >AI</text>
+<text x="984" y="186" class="h" >3. Microsoft Foundry</text>
+<text x="984" y="206" class="hs" >agent ProcurementAgent</text>
+<text x="1075" y="742" class="foot" fill="#2563eb">Playground · Traces · Evaluations</text>
+<rect x="1280" y="146" width="460" height="612" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="1296" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="1319" y="189" class="ico" >fn</text>
+<text x="1354" y="186" class="h" >4. MCP server (2 + 3 tools)</text>
+<text x="1354" y="206" class="hs" >leakops-mcp-88546e · 2 for the model, 3 for the code</text>
+<text x="1510" y="742" class="foot" fill="#f59e0b">Writes only by code, after the rules</text>
+<rect x="180" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="246" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="268" class="ico" >IN</text>
+<text x="242" y="262" class="ct" >Diagnostic report (data)</text>
+<text x="242" y="282" class="cs" >severity, breach type, valve state</text>
+<text x="242" y="299" class="cs" >material and diameter pick the procedure</text>
+<text x="242" y="316" class="cs" >text inside is data, never instructions</text>
+<rect x="180" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="370" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="392" class="ico" >1-6</text>
+<text x="242" y="386" class="ct" >Workflow runner</text>
+<text x="242" y="406" class="cs" >step 5 of 6, after the Matchmaker</text>
+<text x="242" y="423" class="cs" >optional pause: show the warehouse first</text>
+<text x="242" y="440" class="cs" >cannot equip the repair: needs_review</text>
+<rect x="180" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="494" width="36" height="36" rx="9" fill="#10b981"/>
+<text x="212" y="516" class="ico" >OK</text>
+<text x="242" y="510" class="ct" >The package for Scheduling</text>
+<text x="242" y="530" class="cs" >reserved items, what is short, orders</text>
+<text x="242" y="547" class="cs" >packageComplete: true or false</text>
+<text x="242" y="564" class="cs" >big orders wait for a person</text>
+<rect x="550" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="246" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="268" class="ico" >fn</text>
+<text x="612" y="262" class="ct" >Procurement function</text>
+<text x="612" y="282" class="cs" >POST /api/agents/procurement</text>
+<text x="612" y="299" class="cs" >function key from the workflow host</text>
+<text x="612" y="316" class="cs" >ProcurementAgent.ProcureAsync</text>
+<rect x="550" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="370" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="392" class="ico" >RT</text>
+<text x="612" y="386" class="ct" >Agent runtime</text>
+<text x="612" y="406" class="cs" >calls the Foundry agent by name</text>
+<text x="612" y="423" class="cs" >latest version, typed JSON answer plus</text>
+<text x="612" y="440" class="cs" >trace: model, tokens, tool calls</text>
+<rect x="550" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="494" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="516" class="ico" >✓</text>
+<text x="612" y="510" class="ct" >Rule check: the plan</text>
+<text x="612" y="530" class="cs" >code plans from procedure and stock</text>
+<text x="612" y="547" class="cs" >the model cannot reserve outside it</text>
+<text x="612" y="564" class="cs" >conditional parts stay as contingency</text>
+<rect x="550" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="618" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="640" class="ico" >✓</text>
+<text x="612" y="634" class="ct" >Code books the plan</text>
+<text x="612" y="654" class="cs" >reserve-stock per SKU, safe to repeat</text>
+<text x="612" y="671" class="cs" >express order for what is short</text>
+<text x="612" y="688" class="cs" >standard order to restock (-REPL)</text>
+<rect x="920" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="246" width="36" height="36" rx="9" fill="#3b82f6"/>
+<text x="952" y="268" class="ico" >IN</text>
+<text x="982" y="262" class="ct" >Instructions (4 steps)</text>
+<text x="982" y="282" class="cs" >get-repair-procedure: parts + equipment</text>
+<text x="982" y="299" class="cs" >get-inventory: stock and lead times</text>
+<text x="982" y="316" class="cs" >always-parts + conditional parts that apply</text>
+<rect x="920" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="370" width="36" height="36" rx="9" fill="#3b82f6"/>
+<text x="952" y="392" class="ico" >LLM</text>
+<text x="982" y="386" class="ct" >gpt-5.4 deployment</text>
+<text x="982" y="406" class="cs" >Global Standard · content filter DefaultV2</text>
+<text x="982" y="423" class="cs" >real burst run: 7,610 tokens in, 429 out</text>
+<text x="982" y="440" class="cs" >13.5 s · 2 tools, 1 KB, 15 code calls</text>
+<rect x="920" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="494" width="36" height="36" rx="9" fill="#2563eb"/>
+<text x="952" y="516" class="ico" >IQ</text>
+<text x="982" y="510" class="ct" >Foundry IQ: leakops-ops-kb</text>
+<text x="982" y="530" class="cs" >called once, after the data tools</text>
+<text x="982" y="547" class="cs" >via connection leakops-kb-ops</text>
+<text x="982" y="564" class="cs" >05-procurement-policy (POL-PROC-03)</text>
+<rect x="920" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="618" width="36" height="36" rx="9" fill="#94a3b8"/>
+<text x="952" y="640" class="ico" >—</text>
+<text x="982" y="634" class="ct" >No skills</text>
+<text x="982" y="654" class="cs" >none needed: the policy comes from the</text>
+<text x="982" y="671" class="cs" >knowledge base, the rules from code</text>
+<rect x="1290" y="232" width="440" height="330" rx="14" class="card"/>
+<rect x="1304" y="246" width="36" height="36" rx="9" fill="#1e293b"/>
+<text x="1322" y="268" class="ico" >5</text>
+<text x="1352" y="262" class="ct" >C# tools [McpToolTrigger]</text>
+<text x="1352" y="280" class="cs" >tool → Cosmos DB containers it reads or writes</text>
+<text x="1306" y="306" class="grp" >MODEL MAY CALL (2)</text>
+<rect x="1306" y="314" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="328.5" class="pill" style="font-size:10.5px;fill:#fff">get-repair-procedure</text>
+<text x="1512" y="329" class="ct" >→</text>
+<text x="1528" y="329" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">RepairProcedures</text>
+<rect x="1306" y="358" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="372.5" class="pill" style="font-size:10.5px;fill:#fff">get-inventory</text>
+<text x="1512" y="373" class="ct" >→</text>
+<text x="1528" y="373" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">Inventory, Warehouses, Suppliers</text>
+<text x="1306" y="414" class="grp" >CODE CALLS AFTER THE RULES (3, writes in purple)</text>
+<rect x="1306" y="422" width="200" height="21" rx="10.5" fill="#1e293b"/>
+<text x="1406" y="436.5" class="pill" style="font-size:10.5px;fill:#fff">get-incident-package</text>
+<text x="1512" y="437" class="ct" >→</text>
+<text x="1528" y="437" class="cs" style="font-weight:700;fill:#0369a1;font-size:10px">StockReservations, PurchaseOrders</text>
+<rect x="1306" y="466" width="200" height="21" rx="10.5" fill="#6d28d9"/>
+<text x="1406" y="480.5" class="pill" style="font-size:10.5px;fill:#fff">reserve-stock</text>
+<text x="1512" y="481" class="ct" >→</text>
+<text x="1528" y="481" class="cs" style="font-weight:700;fill:#6d28d9;font-size:10px">Inventory + StockReservations</text>
+<rect x="1306" y="510" width="200" height="21" rx="10.5" fill="#6d28d9"/>
+<text x="1406" y="524.5" class="pill" style="font-size:10.5px;fill:#fff">create-purchase-order</text>
+<text x="1512" y="525" class="ct" >→</text>
+<text x="1528" y="525" class="cs" style="font-weight:700;fill:#6d28d9;font-size:10px">PurchaseOrders</text>
+<rect x="1290" y="574" width="440" height="100" rx="14" class="card"/>
+<rect x="1304" y="588" width="36" height="36" rx="9" fill="#2563eb"/>
+<text x="1322" y="610" class="ico" >IQ</text>
+<text x="1352" y="604" class="ct" >knowledge_base_retrieve (MCP)</text>
+<text x="1352" y="624" class="cs" >second MCP tool on the agent, label leakops_kb</text>
+<text x="1352" y="641" class="cs" >allowed tool: knowledge_base_retrieve only</text>
+<text x="519" y="318" class="lbl" >input</text>
+<text x="519" y="330" class="lbl" >+ key</text>
+<path d="M500,344 L538,344" class="line"/>
+<text x="889" y="318" class="lbl" >call</text>
+<text x="889" y="330" class="lbl" >agent</text>
+<path d="M870,344 L908,344" class="line"/>
+<text x="1259" y="318" class="lbl" >MCP</text>
+<text x="1259" y="330" class="lbl" >tools</text>
+<path d="M1240,344 L1278,344" class="line"/>
+<path d="M114,330 L168,330" class="line"/>
+<text x="889" y="650" class="lbl" >answer</text>
+<text x="889" y="662" class="lbl" >JSON</text>
+<path d="M908,676 L872,676" class="dash"/>
+<text x="519" y="650" class="lbl" >result</text>
+<text x="519" y="662" class="lbl" >(rules)</text>
+<path d="M538,676 L502,676" class="dash"/>
+<text x="172" y="782" class="sec" >What goes in, what comes out, and how it decides</text>
+<rect x="170" y="794" width="420" height="330" rx="14" class="card"/>
+<rect x="184" y="808" width="36" height="36" rx="9" fill="#7c3aed"/>
+<text x="202" y="830" class="ico" >{}</text>
+<text x="232" y="824" class="ct" style="font-size:13px">Answer: ProcurementJudgement → ProcurementResult</text>
+<text x="232" y="842" class="cs" >what the model decides, then what code books</text>
+<rect x="184" y="856" width="392" height="254" rx="10" fill="#0b1220"/>
+<text x="196" y="878" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#7dd3fc" xml:space="preserve">// ProcurementJudgement (the model)</text>
+<text x="196" y="897" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">{ "partSkus": [ … ], "equipmentSkus": [ … ],</text>
+<text x="196" y="916" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "rationale": "I included the always-required</text>
+<text x="196" y="935" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    parts CLP-CI-300, GSK-300, BLT-KIT-300…" }</text>
+<text x="196" y="954" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve"></text>
+<text x="196" y="973" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#7dd3fc" xml:space="preserve">// ProcurementResult (code)</text>
+<text x="196" y="992" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">{ "lines": [ 9 items: 8 reserved,</text>
+<text x="196" y="1011" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    CPL-FLEX-300 partly reserved ],</text>
+<text x="196" y="1030" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "purchaseOrders": [ CPL-FLEX-300 express 675 EUR,</text>
+<text x="196" y="1049" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    CPL-FLEX-300 restock 2,160 EUR,</text>
+<text x="196" y="1068" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">    CLP-CI-300 restock 4,110 EUR pending_approval ],</text>
+<text x="196" y="1087" font-family="Consolas, Menlo, monospace" font-size="11.2" fill="#cbd5e1" xml:space="preserve">  "packageComplete": false }</text>
+<rect x="610" y="794" width="560" height="330" rx="14" class="card"/>
+<rect x="624" y="808" width="36" height="36" rx="9" fill="#be185d"/>
+<text x="642" y="830" class="ico" >?</text>
+<text x="672" y="824" class="ct" >What gets reserved and ordered</text>
+<text x="672" y="842" class="cs" >the model plans, the rules and the tools book</text>
+<rect x="624" y="856" width="532" height="81" rx="10" fill="#eff6ff"/>
+<text x="638" y="876" class="ct" fill="#1e40af">What gets reserved</text>
+<text x="638" y="894" class="cs" >every part marked "always" in the procedure</text>
+<text x="638" y="911" class="cs" >conditional parts when the condition applies</text>
+<text x="638" y="928" class="cs" >smallest sufficient equipment, available now</text>
+<rect x="624" y="945" width="532" height="81" rx="10" fill="#fef2f2"/>
+<text x="638" y="965" class="ct" fill="#991b1b">What gets ordered</text>
+<text x="638" y="983" class="cs" >express for what this repair is short of</text>
+<text x="638" y="1000" class="cs" >standard to restock below the reorder level</text>
+<text x="638" y="1017" class="cs" >above 2,500 EUR: pending_approval (a person)</text>
+<rect x="624" y="1034" width="532" height="81" rx="10" fill="#fffbeb"/>
+<text x="638" y="1054" class="ct" fill="#92400e">Real result</text>
+<text x="638" y="1072" class="cs" >9 items reserved, coupling DN300 short</text>
+<text x="638" y="1089" class="cs" >express order 675 EUR for CPL-FLEX-300</text>
+<text x="638" y="1106" class="cs" >clamp restock 4,110 EUR waits for approval</text>
+<rect x="1190" y="794" width="550" height="330" rx="14" class="card"/>
+<rect x="1204" y="808" width="36" height="36" rx="9" fill="#0e7490"/>
+<text x="1222" y="830" class="ico" >RUN</text>
+<text x="1252" y="824" class="ct" >The real run of the deployed demo</text>
+<text x="1252" y="842" class="cs" >captured 2026-11-16 (simulated data)</text>
+<rect x="1204" y="856" width="522" height="85" rx="10" fill="#eff6ff"/>
+<text x="1218" y="877" class="ct" >Burst on a cast-iron main</text>
+<text x="1218" y="896" class="cs" >13.5 s · 7,610 + 429 tokens</text>
+<text x="1218" y="913" class="cs" >2 MCP tool calls by the model, 1 knowledge lookup</text>
+<text x="1218" y="930" class="cs" >15 calls made by the code (rules)</text>
+<rect x="1204" y="951" width="522" height="85" rx="10" fill="#f0fdf4"/>
+<text x="1218" y="972" class="ct" >Result</text>
+<text x="1218" y="991" class="cs" >stock moves in the warehouse app after this step</text>
+<text x="1218" y="1008" class="cs" >3 purchase orders, 1 waiting for approval</text>
+<text x="1218" y="1025" class="cs" >the missing coupling is counted in the ETA later</text>
+<rect x="1204" y="1046" width="522" height="68" rx="10" fill="#f8fafc"/>
+<text x="1218" y="1067" class="ct" >Guardrails shown</text>
+<text x="1218" y="1086" class="cs" >the model can never reserve outside the procedure</text>
+<text x="1218" y="1103" class="cs" >the same incident and SKU is only booked once</text>
+<text x="890" y="1186" class="lbl" >All data is simulated · ProcurementAgent is registered by LeakOps.AgentRegistry (instructions, tools, knowledge, skills, answer schema) and visible in the Foundry portal · code: src/LeakOps.Agents/ProcurementAgent.cs</text>
+</svg>

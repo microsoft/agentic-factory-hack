@@ -1,0 +1,5 @@
+[
+  { "id": "SUP-01", "name": "Hydrotec Leidingtechniek (simulated)", "standardLeadTimeDays": 2,  "expressLeadHours": 12, "expressSurchargePercent": 25, "contact": "orders@hydrotec.example" },
+  { "id": "SUP-02", "name": "NoordWest Afsluiters (simulated)",     "standardLeadTimeDays": 10, "expressLeadHours": 72, "expressSurchargePercent": 40, "contact": "sales@noordwest-afsluiters.example" },
+  { "id": "SUP-03", "name": "PolyPipe Benelux (simulated)",         "standardLeadTimeDays": 3,  "expressLeadHours": 24, "expressSurchargePercent": 20, "contact": "service@polypipe.example" }
+]

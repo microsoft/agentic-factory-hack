@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "COSMOS_ENDPOINT": "",
+    "COSMOS_KEY": "",
+    "COSMOS_DATABASE_NAME": "LeakOpsDB"
+  },
+  "Host": {
+    "LocalHttpPort": 7071
+  }
+}

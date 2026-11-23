@@ -1,0 +1,11 @@
+[
+  { "id": "V-0412-A", "districtId": "D-01", "segmentId": "SEG-0412", "chainageM": 0,   "location": { "lat": 51.8612, "lon": 4.3281 }, "type": "gate_valve", "diameterMm": 300, "status": "open", "turnsToClose": 120, "lastOperatedUtc": "2025-09-18T09:30:00Z" },
+  { "id": "V-0412-B", "districtId": "D-01", "segmentId": "SEG-0412", "chainageM": 438, "location": { "lat": 51.8601, "lon": 4.3342 }, "type": "gate_valve", "diameterMm": 300, "status": "open", "turnsToClose": 140, "lastOperatedUtc": "2023-05-04T11:00:00Z" },
+  { "id": "V-0415-A", "districtId": "D-01", "segmentId": "SEG-0415", "chainageM": 0,   "location": { "lat": 51.8601, "lon": 4.3342 }, "type": "gate_valve", "diameterMm": 200, "status": "open", "turnsToClose": 80,  "lastOperatedUtc": "2024-03-12T10:00:00Z" },
+  { "id": "V-0399-A", "districtId": "D-01", "segmentId": "SEG-0399", "chainageM": 0,   "location": { "lat": 51.8630, "lon": 4.3310 }, "type": "gate_valve", "diameterMm": 150, "status": "open", "turnsToClose": 60,  "lastOperatedUtc": "2024-11-02T08:15:00Z" },
+  { "id": "V-0420-A", "districtId": "D-01", "segmentId": "SEG-0420", "chainageM": 0,   "location": { "lat": 51.8655, "lon": 4.3250 }, "type": "butterfly_valve", "diameterMm": 400, "status": "open", "turnsToClose": 45, "lastOperatedUtc": "2025-02-20T12:00:00Z" },
+  { "id": "V-0507-A", "districtId": "D-02", "segmentId": "SEG-0507", "chainageM": 0,   "location": { "lat": 51.8590, "lon": 4.3590 }, "type": "gate_valve", "diameterMm": 250, "status": "open", "turnsToClose": 100, "lastOperatedUtc": "2025-06-10T10:00:00Z" },
+  { "id": "V-0507-B", "districtId": "D-02", "segmentId": "SEG-0507", "chainageM": 383, "location": { "lat": 51.8575, "lon": 4.3640 }, "type": "gate_valve", "diameterMm": 250, "status": "closed", "turnsToClose": 100, "lastOperatedUtc": "2026-11-13T09:05:00Z" },
+  { "id": "V-0508-A", "districtId": "D-02", "segmentId": "SEG-0508", "chainageM": 0,   "location": { "lat": 51.8575, "lon": 4.3640 }, "type": "gate_valve", "diameterMm": 160, "status": "open", "turnsToClose": 70,  "lastOperatedUtc": "2024-08-21T09:00:00Z" },
+  { "id": "V-0510-A", "districtId": "D-02", "segmentId": "SEG-0510", "chainageM": 0,   "location": { "lat": 51.8610, "lon": 4.3560 }, "type": "butterfly_valve", "diameterMm": 400, "status": "open", "turnsToClose": 50, "lastOperatedUtc": "2025-10-01T07:30:00Z" }
+]

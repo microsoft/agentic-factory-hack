@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Waterstoring (demo) | Actuele storingen en werkzaamheden van uw waterbedrijf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="demo-bar">
+    <span data-i18n="ribbon"></span>
+    <button id="clear-open" class="demo-clear" type="button" data-i18n="clearBtn"></button>
+  </div>
+
+  <dialog id="clear-dialog" class="clear-dialog" aria-labelledby="clear-title">
+    <form id="clear-form" method="dialog">
+      <h2 id="clear-title" data-i18n="clearTitle"></h2>
+      <p data-i18n="clearText"></p>
+      <label for="clear-key" data-i18n="clearKeyLabel"></label>
+      <input id="clear-key" type="password" autocomplete="off" required>
+      <p id="clear-msg" class="clear-msg" role="alert"></p>
+      <div class="clear-actions">
+        <button id="clear-cancel" type="button" class="clear-secondary" data-i18n="clearCancel"></button>
+        <button id="clear-go" type="submit" class="clear-danger" data-i18n="clearGo"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="/" aria-label="Waterstoring demo">
+        <svg class="logo-drop" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C12 1 2 13.5 2 21a10 10 0 0 0 20 0C22 13.5 12 1 12 1Z"/></svg>
+        <span class="logo-text">WATERSTORING<small>.NL</small></span>
+        <span class="logo-demo">demo</span>
+      </a>
+      <nav class="main-nav" aria-label="Menu">
+        <a href="#bedrijven" data-i18n="navCompany"></a>
+        <a href="#melden" data-i18n="navReport"></a>
+      </nav>
+      <div class="lang-switch">
+        <button id="lang-nl" class="lang active" type="button">NL</button>
+        <button id="lang-en" class="lang" type="button">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow"><span class="dot"></span><span data-i18n="eyebrow"></span></p>
+        <h1><span data-i18n="titleA"></span> <em data-i18n="titleB"></em></h1>
+        <p class="lead" data-i18n="subtitle"></p>
+
+        <form id="search-form" class="search-box" role="search">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search-input" type="search" autocomplete="off" data-i18n-placeholder="placeholder" data-i18n-aria="placeholder">
+          <button class="search-go" type="submit" data-i18n-aria="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+
+        <button id="locate" class="btn-outline" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21Z"/><circle cx="12" cy="9.500" r="2.500"/></svg>
+          <span data-i18n="locate"></span>
+        </button>
+
+        <div id="search-result" class="search-result" aria-live="polite"></div>
+
+        <button id="map-toggle" class="map-card" type="button" aria-expanded="true" aria-controls="map-wrap">
+          <span class="map-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6.500v13L9 17l6 2.500 6-2.500v-13L15 6.500 9 4Z"/><path d="M9 4v13M15 6.500v13"/></svg></span>
+          <span class="map-card-text"><strong id="map-card-title"></strong><span id="map-card-sub"></span></span>
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+
+        <div id="map-wrap" class="map-wrap">
+          <div id="map" class="map"></div>
+          <p id="map-note" class="map-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4.500M12 17.500v.01"/></svg></span>
+            <div>
+              <h2 data-i18n="listTitle"></h2>
+              <p id="updated" class="card-sub"></p>
+            </div>
+          </div>
+          <div id="incident-list" class="incident-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bedrijven" class="section">
+      <div class="container">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-icon ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.500 3.400 8 8 9 4.600-1 8-4.500 8-9V6l-8-3Z"/><path d="m9 12 2.200 2.200L15.500 10"/></svg></span>
+            <div>
+              <h2 data-i18n="companiesTitle"></h2>
+              <p class="card-sub" data-i18n="companiesSub"></p>
+            </div>
+          </div>
+          <ul class="company-tiles">
+            <li class="company-tile"><span class="company-name">Evides</span><span class="company-sub">waterbedrijf</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="melden" class="section">
+      <div class="container">
+        <div class="card report">
+          <h2 data-i18n="reportTitle"></h2>
+          <p data-i18n="reportText"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-logo">
+        <svg class="logo-drop" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C12 1 2 13.5 2 21a10 10 0 0 0 20 0C22 13.5 12 1 12 1Z"/></svg>
+        <span class="logo-text">WATERSTORING<small>.NL</small></span>
+      </div>
+      <p class="footer-about" data-i18n="footerAbout"></p>
+      <hr>
+      <p class="footer-label" data-i18n="footerNav"></p>
+      <ul class="footer-links">
+        <li><a href="#bedrijven" data-i18n="navCompany"></a></li>
+        <li><a href="#melden" data-i18n="navReport"></a></li>
+        <li><a href="/technicians" data-i18n="navTech"></a></li>
+      </ul>
+      <hr>
+      <p class="footer-small"><span data-i18n="lastUpdated"></span>: <time id="footer-time"></time></p>
+      <p class="footer-small" data-i18n="source"></p>
+      <p class="footer-small" data-i18n="mapCredit"></p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

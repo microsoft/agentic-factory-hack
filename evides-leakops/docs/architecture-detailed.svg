@@ -1,0 +1,324 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1305" viewBox="0 0 1780 1305" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+<marker id="arrowp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+<filter id="shadow" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/></filter>
+<style>
+.title{font-size:28px;font-weight:700;fill:#0f172a;text-anchor:middle}.subtitle{font-size:15px;fill:#475569;text-anchor:middle}
+.zone{font-size:13px;font-weight:700;fill:#2e7d32}.h{font-size:18px;font-weight:700;fill:#1e293b}.hs{font-size:12px;fill:#64748b}
+.ct{font-size:14px;font-weight:700;fill:#1e293b}.cs{font-size:12px;fill:#64748b}.foot{font-size:12px;text-anchor:middle}
+.lbl{font-size:11px;fill:#475569;text-anchor:middle}.ico{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle}
+.pill{font-size:11px;font-weight:600;text-anchor:middle;font-family:Consolas,Menlo,monospace}
+.grp{font-size:11px;font-weight:700;fill:#475569;letter-spacing:.04em}.sec{font-size:13px;font-weight:700;fill:#2e7d32}
+.card{fill:#fff;stroke:#e2e8f0;stroke-width:1;filter:url(#shadow)}
+.line{stroke:#475569;stroke-width:1.7;fill:none;marker-end:url(#arrow)}.dash{stroke:#7c3aed;stroke-width:1.6;fill:none;stroke-dasharray:6 5;marker-end:url(#arrowp)}
+.thin{stroke:#94a3b8;stroke-width:1.4;fill:none;stroke-dasharray:3 4;marker-end:url(#arrow)}
+.note{font-size:11.5px;fill:#6d28d9}
+</style></defs>
+<rect width="1780" height="1305" fill="#f6f8fc"/>
+<text x="890" y="44" class="title" >Evides LeakOps — six Foundry agents with C# MCP tools, knowledge and skills</text>
+<text x="890" y="70" class="subtitle" >Detailed view · workflow host → agent functions → Microsoft Foundry → MCP functions on Azure Functions (Flex Consumption) → Cosmos DB, Storage and AI Search</text>
+<rect x="150" y="96" width="1610" height="1160" rx="22" fill="none" stroke="#3a9a4a" stroke-width="2" stroke-dasharray="9 7"/>
+<text x="172" y="122" class="zone" >Resource group rg-evides-ai-demo · Sweden Central (web apps: West Europe) · Entra ID only on Foundry and AI Search · managed identities between Azure services</text>
+<circle cx="70" cy="330" r="24" fill="#3b82f6"/><path d="M26 392 C26 358 114 358 114 392 Z" fill="#3b82f6"/>
+<text x="70" y="416" class="ct" text-anchor="middle">Operator</text>
+<text x="70" y="432" class="cs" text-anchor="middle">duty manager</text>
+<rect x="12" y="470" width="116" height="74" rx="12" class="card"/>
+<text x="70" y="496" class="ct" text-anchor="middle">Entra ID</text>
+<text x="70" y="513" class="cs" text-anchor="middle">sign-in &amp; RBAC</text>
+<text x="70" y="529" class="cs" text-anchor="middle">operator key</text>
+<rect x="170" y="146" width="330" height="640" rx="22" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.4"/>
+<rect x="186" y="162" width="46" height="46" rx="9" fill="#7c3aed"/>
+<text x="209" y="189" class="ico" >WF</text>
+<text x="244" y="186" class="h" >1. Workflow host</text>
+<text x="244" y="206" class="hs" >leakops-workflow-88546e · App Service B1</text>
+<text x="335" y="770" class="foot" fill="#7c3aed">Operator key on every /api call</text>
+<rect x="540" y="146" width="330" height="640" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="556" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="579" y="189" class="ico" >fn</text>
+<text x="614" y="186" class="h" >2. Agents app</text>
+<text x="614" y="206" class="hs" >leakops-agents-88546e · Functions Flex</text>
+<text x="705" y="770" class="foot" fill="#f59e0b">Nothing is published unchecked</text>
+<rect x="910" y="146" width="330" height="640" rx="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2.4"/>
+<rect x="926" y="162" width="46" height="46" rx="9" fill="#2563eb"/>
+<text x="949" y="189" class="ico" >AI</text>
+<text x="984" y="186" class="h" >3. Microsoft Foundry</text>
+<text x="984" y="206" class="hs" >evides-foundry-88546e / evides-leakops</text>
+<text x="1075" y="770" class="foot" fill="#2563eb">Tracing · Evaluations (5) · content filter DefaultV2</text>
+<rect x="1280" y="146" width="460" height="640" rx="22" fill="#fffbeb" stroke="#f59e0b" stroke-width="2.4"/>
+<rect x="1296" y="162" width="46" height="46" rx="9" fill="#f59e0b"/>
+<text x="1319" y="189" class="ico" >fn</text>
+<text x="1354" y="186" class="h" >4. MCP server (C# tools)</text>
+<text x="1354" y="206" class="hs" >leakops-mcp-88546e · .NET 10 · Functions Flex</text>
+<text x="1510" y="770" class="foot" fill="#f59e0b">Allow-list per agent · managed identity to Cosmos</text>
+<rect x="180" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="246" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="268" class="ico" >UI</text>
+<text x="242" y="262" class="ct" >Operator console</text>
+<text x="242" y="282" class="cs" >pick a scenario, live progress per agent</text>
+<text x="242" y="299" class="cs" >pause before step 3, 4 or 5</text>
+<text x="242" y="316" class="cs" >Reset demo data · POST /api/runs (SSE)</text>
+<rect x="180" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="370" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="392" class="ico" >1-6</text>
+<text x="242" y="386" class="ct" >Workflow runner</text>
+<text x="242" y="406" class="cs" >six steps in order, a false alarm stops</text>
+<text x="242" y="423" class="cs" >needs_review stops the run with reasons</text>
+<text x="242" y="440" class="cs" >pause gate: resume, cancel, 15 min limit</text>
+<rect x="180" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="494" width="36" height="36" rx="9" fill="#a78bfa"/>
+<text x="212" y="516" class="ico" >NL</text>
+<text x="242" y="510" class="ct" >Fake Waterstoring.nl</text>
+<text x="242" y="530" class="cs" >leakops-waterstoring-88546e · ingest API</text>
+<text x="242" y="547" class="cs" >/evides · /technicians · /warehouse · /gis</text>
+<text x="242" y="564" class="cs" >residents’ page, planning, stock, network map</text>
+<rect x="180" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="194" y="618" width="36" height="36" rx="9" fill="#10b981"/>
+<text x="212" y="640" class="ico" >ID</text>
+<text x="242" y="634" class="ct" >Managed identity</text>
+<text x="242" y="654" class="cs" >Cosmos data role (roster, stock, orders)</text>
+<text x="242" y="671" class="cs" >API key to write to the ingest API</text>
+<text x="242" y="688" class="cs" >public pages are read-only, simulated data</text>
+<rect x="550" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="246" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="268" class="ico" >6x</text>
+<text x="612" y="262" class="ct" >6 HTTP functions</text>
+<text x="612" y="282" class="cs" >POST /api/agents/triage · diagnostic</text>
+<text x="612" y="299" class="cs" >communications · matchmaker</text>
+<text x="612" y="316" class="cs" >procurement · scheduling · GET /api/health</text>
+<rect x="550" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="370" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="392" class="ico" >RT</text>
+<text x="612" y="386" class="ct" >Agent runtime</text>
+<text x="612" y="406" class="cs" >calls the Foundry agent by name</text>
+<text x="612" y="423" class="cs" >latest version, typed JSON answer plus</text>
+<text x="612" y="440" class="cs" >trace: model, tokens, tool calls</text>
+<rect x="550" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="494" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="582" y="516" class="ico" >✓</text>
+<text x="612" y="510" class="ct" >Code rules &amp; guardrails</text>
+<text x="612" y="530" class="cs" >re-reads the facts with direct MCP calls</text>
+<text x="612" y="547" class="cs" >(rules) and compares them with the model</text>
+<text x="612" y="564" class="cs" >safe templates · needs_review, never silent</text>
+<rect x="550" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="564" y="618" width="36" height="36" rx="9" fill="#10b981"/>
+<text x="582" y="640" class="ico" >ID</text>
+<text x="612" y="634" class="ct" >Managed identity</text>
+<text x="612" y="654" class="cs" >role Foundry User on the project</text>
+<text x="612" y="671" class="cs" >function key from the workflow host</text>
+<text x="612" y="688" class="cs" >no keys in configuration</text>
+<rect x="920" y="232" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="246" width="36" height="36" rx="9" fill="#7c3aed"/>
+<text x="952" y="268" class="ico" >6</text>
+<text x="982" y="262" class="ct" >6 registered agents</text>
+<text x="982" y="282" class="cs" >Triage · Diagnostic · Communications</text>
+<text x="982" y="299" class="cs" >ResourceMatchmaker · Procurement</text>
+<text x="982" y="316" class="cs" >Scheduling (each named &lt;Name&gt;Agent)</text>
+<rect x="920" y="356" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="370" width="36" height="36" rx="9" fill="#3b82f6"/>
+<text x="952" y="392" class="ico" >LLM</text>
+<text x="982" y="386" class="ct" >gpt-5.4 deployment</text>
+<text x="982" y="406" class="cs" >Global Standard · 150k tokens a minute</text>
+<text x="982" y="423" class="cs" >instructions + answer schema + tool list</text>
+<text x="982" y="440" class="cs" >per agent, versioned in the portal</text>
+<rect x="920" y="480" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="494" width="36" height="36" rx="9" fill="#2563eb"/>
+<text x="952" y="516" class="ico" >IQ</text>
+<text x="982" y="510" class="ct" >Foundry IQ knowledge</text>
+<text x="982" y="530" class="cs" >leakops-ops-kb · leakops-comms-kb</text>
+<text x="982" y="547" class="cs" >connections leakops-kb-ops / -comms</text>
+<text x="982" y="564" class="cs" >tool knowledge_base_retrieve</text>
+<rect x="920" y="604" width="310" height="116" rx="14" class="card"/>
+<rect x="934" y="618" width="36" height="36" rx="9" fill="#7c3aed"/>
+<text x="952" y="640" class="ico" >SK</text>
+<text x="982" y="634" class="ct" >Foundry Skills (preview)</text>
+<text x="982" y="654" class="cs" >evides-notice-style · isolation-playbook</text>
+<text x="982" y="671" class="cs" >evidence-citation</text>
+<text x="982" y="688" class="cs" >published from skills/*/SKILL.md</text>
+<rect x="1290" y="232" width="440" height="92" rx="14" class="card"/>
+<rect x="1304" y="246" width="36" height="36" rx="9" fill="#f59e0b"/>
+<text x="1322" y="268" class="ico" >MCP</text>
+<text x="1352" y="262" class="ct" >MCP extension</text>
+<text x="1352" y="282" class="cs" >/runtime/webhooks/mcp · key mcp_extension</text>
+<text x="1352" y="299" class="cs" >every [McpToolTrigger] function is one MCP tool</text>
+<rect x="1290" y="336" width="440" height="408" rx="14" class="card"/>
+<rect x="1304" y="350" width="36" height="36" rx="9" fill="#1e293b"/>
+<text x="1322" y="372" class="ico" >19</text>
+<text x="1352" y="366" class="ct" >19 C# tools [McpToolTrigger] — the MCP functions</text>
+<text x="1352" y="384" class="cs" >each agent may call only its own allow-list</text>
+<text x="1306" y="406" class="grp" >TRIAGE (5)</text>
+<rect x="1306" y="414" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="428" class="pill" fill="#fff">list-sensors</text>
+<rect x="1514" y="414" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="428" class="pill" fill="#fff">get-sensor-readings</text>
+<rect x="1306" y="438" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="452" class="pill" fill="#fff">get-planned-works</text>
+<rect x="1514" y="438" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="452" class="pill" fill="#fff">get-weather</text>
+<rect x="1306" y="462" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="476" class="pill" fill="#fff">get-usage-history</text>
+<text x="1306" y="498" class="grp" >DIAGNOSTIC (7)</text>
+<rect x="1306" y="506" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="520" class="pill" fill="#fff">get-pipe-segment</text>
+<rect x="1514" y="506" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="520" class="pill" fill="#fff">get-point-on-segment</text>
+<rect x="1306" y="530" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="544" class="pill" fill="#fff">get-nearby-valves</text>
+<rect x="1514" y="530" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="544" class="pill" fill="#fff">estimate-leak-position</text>
+<rect x="1306" y="554" width="408" height="20" rx="10" fill="#1e293b" />
+<text x="1510" y="568" class="pill" fill="#fff">rank-segments-by-pressure-drop</text>
+<rect x="1306" y="578" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="592" class="pill" fill="#fff">classify-severity</text>
+<rect x="1514" y="578" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="592" class="pill" fill="#fff">get-repair-procedure</text>
+<text x="1306" y="614" class="grp" >MATCHMAKER (1) · SCHEDULING (2)</text>
+<rect x="1306" y="622" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="636" class="pill" fill="#fff">get-technicians</text>
+<rect x="1514" y="622" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="636" class="pill" fill="#fff">get-travel-estimate</text>
+<rect x="1306" y="646" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="660" class="pill" fill="#fff">create-work-order</text>
+<text x="1306" y="682" class="grp" >PROCUREMENT (4)</text>
+<rect x="1306" y="690" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="704" class="pill" fill="#fff">get-inventory</text>
+<rect x="1514" y="690" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="704" class="pill" fill="#fff">get-incident-package</text>
+<rect x="1306" y="714" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1406" y="728" class="pill" fill="#fff">reserve-stock</text>
+<rect x="1514" y="714" width="200" height="20" rx="10" fill="#1e293b" />
+<text x="1614" y="728" class="pill" fill="#fff">create-purchase-order</text>
+<text x="519" y="318" class="lbl" >HTTP</text>
+<text x="519" y="330" class="lbl" >+ key</text>
+<path d="M500,344 L538,344" class="line"/>
+<text x="889" y="318" class="lbl" >call</text>
+<text x="889" y="330" class="lbl" >agent</text>
+<path d="M870,344 L908,344" class="line"/>
+<text x="1259" y="318" class="lbl" >MCP</text>
+<text x="1259" y="330" class="lbl" >tools</text>
+<path d="M1240,344 L1278,344" class="line"/>
+<path d="M114,350 L168,350" class="line"/>
+<text x="172" y="818" class="sec" >Data, knowledge and storage (names as deployed)</text>
+<rect x="170" y="830" width="360" height="226" rx="14" class="card"/>
+<rect x="184" y="844" width="36" height="36" rx="9" fill="#16a34a"/>
+<text x="202" y="866" class="ico" >St</text>
+<text x="232" y="860" class="ct" >Storage account evidessa88546e</text>
+<text x="232" y="878" class="cs" >Standard LRS · shared-key access off</text>
+<text x="184" y="906" class="grp" >BLOB CONTAINERS</text>
+<rect x="184" y="914" width="332" height="20" rx="10" fill="#16a34a" />
+<text x="350" y="928" class="pill" fill="#fff">knowledge</text>
+<rect x="184" y="937" width="332" height="20" rx="10" fill="#64748b" />
+<text x="350" y="951" class="pill" fill="#fff">leakops-mcp-88546e-deploy</text>
+<rect x="184" y="960" width="332" height="20" rx="10" fill="#64748b" />
+<text x="350" y="974" class="pill" fill="#fff">leakops-agents-88546e-deploy</text>
+<rect x="184" y="983" width="332" height="20" rx="10" fill="#94a3b8" />
+<text x="350" y="997" class="pill" fill="#fff">azure-webjobs-hosts</text>
+<rect x="184" y="1006" width="332" height="20" rx="10" fill="#94a3b8" />
+<text x="350" y="1020" class="pill" fill="#fff">azure-webjobs-secrets</text>
+<text x="184" y="1043" class="cs" >knowledge = the 8 documents; others: function packages</text>
+<rect x="550" y="830" width="340" height="226" rx="14" class="card"/>
+<rect x="564" y="844" width="36" height="36" rx="9" fill="#0e7490"/>
+<text x="582" y="866" class="ico" >AS</text>
+<text x="612" y="860" class="ct" >Azure AI Search · Basic</text>
+<text x="612" y="878" class="cs" >evides-search-88546e · Entra ID only</text>
+<text x="564" y="906" class="grp" >KNOWLEDGE SOURCES (index of the blobs)</text>
+<rect x="564" y="916" width="150" height="20" rx="10" fill="#0e7490" />
+<text x="639" y="930" class="pill" fill="#fff">leakops-ops-docs</text>
+<rect x="720" y="916" width="156" height="20" rx="10" fill="#0e7490" />
+<text x="798" y="930" class="pill" fill="#fff">leakops-comms-docs</text>
+<text x="564" y="956" class="grp" >KNOWLEDGE BASES (Foundry IQ)</text>
+<rect x="564" y="966" width="150" height="20" rx="10" fill="#2563eb" />
+<text x="639" y="980" class="pill" fill="#fff">leakops-ops-kb</text>
+<rect x="720" y="966" width="156" height="20" rx="10" fill="#2563eb" />
+<text x="798" y="980" class="pill" fill="#fff">leakops-comms-kb</text>
+<text x="564" y="1006" class="cs" >embeddings text-embedding-3-small</text>
+<text x="564" y="1023" class="cs" >gpt-5.4 plans the queries, then rank and cite</text>
+<rect x="910" y="830" width="830" height="226" rx="14" class="card"/>
+<rect x="924" y="844" width="36" height="36" rx="9" fill="#0369a1"/>
+<text x="942" y="866" class="ico" >DB</text>
+<text x="972" y="860" class="ct" >Cosmos DB serverless · evides-cosmos-88546e · database LeakOpsDB · 19 containers</text>
+<text x="972" y="878" class="cs" >read by the 19 MCP tools; the roster, stock and orders are also read by the Waterstoring pages</text>
+<text x="924" y="906" class="grp" >SIMULATED SEED DATA (14) — source: evides-leakops/data/*.json, readings and weather generated by the Seeder</text>
+<rect x="924" y="914" width="62" height="20" rx="10" fill="#0369a1" />
+<text x="955" y="928" class="pill" fill="#fff">Sensors</text>
+<rect x="992" y="914" width="106" height="20" rx="10" fill="#0369a1" />
+<text x="1045" y="928" class="pill" fill="#fff">SensorReadings</text>
+<rect x="1104" y="914" width="94" height="20" rx="10" fill="#0369a1" />
+<text x="1151" y="928" class="pill" fill="#fff">PipeSegments</text>
+<rect x="1204" y="914" width="56" height="20" rx="10" fill="#0369a1" />
+<text x="1232" y="928" class="pill" fill="#fff">Valves</text>
+<rect x="1266" y="914" width="94" height="20" rx="10" fill="#0369a1" />
+<text x="1313" y="928" class="pill" fill="#fff">PlannedWorks</text>
+<rect x="1366" y="914" width="138" height="20" rx="10" fill="#0369a1" />
+<text x="1435" y="928" class="pill" fill="#fff">WeatherObservations</text>
+<rect x="1510" y="914" width="100" height="20" rx="10" fill="#0369a1" />
+<text x="1560" y="928" class="pill" fill="#fff">UsageProfiles</text>
+<rect x="1616" y="914" width="87" height="20" rx="10" fill="#0369a1" />
+<text x="1659.5" y="928" class="pill" fill="#fff">UsageEvents</text>
+<rect x="924" y="938" width="87" height="20" rx="10" fill="#0369a1" />
+<text x="967.5" y="952" class="pill" fill="#fff">Technicians</text>
+<rect x="1017" y="938" width="75" height="20" rx="10" fill="#0369a1" />
+<text x="1054.5" y="952" class="pill" fill="#fff">Inventory</text>
+<rect x="1098" y="938" width="81" height="20" rx="10" fill="#0369a1" />
+<text x="1138.5" y="952" class="pill" fill="#fff">Warehouses</text>
+<rect x="1185" y="938" width="75" height="20" rx="10" fill="#0369a1" />
+<text x="1222.5" y="952" class="pill" fill="#fff">Suppliers</text>
+<rect x="1266" y="938" width="119" height="20" rx="10" fill="#0369a1" />
+<text x="1325.5" y="952" class="pill" fill="#fff">RepairProcedures</text>
+<rect x="1391" y="938" width="75" height="20" rx="10" fill="#0369a1" />
+<text x="1428.5" y="952" class="pill" fill="#fff">Scenarios</text>
+<text x="924" y="983" class="grp" >WRITTEN AT RUN TIME (5) — by the agents’ tools (and Waterstoring); emptied by Reset demo data</text>
+<rect x="924" y="991" width="75" height="20" rx="10" fill="#7c3aed" />
+<text x="961.5" y="1005" class="pill" fill="#fff">Incidents</text>
+<rect x="1005" y="991" width="81" height="20" rx="10" fill="#7c3aed" />
+<text x="1045.5" y="1005" class="pill" fill="#fff">WorkOrders</text>
+<rect x="1092" y="991" width="106" height="20" rx="10" fill="#7c3aed" />
+<text x="1145" y="1005" class="pill" fill="#fff">PurchaseOrders</text>
+<rect x="1204" y="991" width="125" height="20" rx="10" fill="#7c3aed" />
+<text x="1266.5" y="1005" class="pill" fill="#fff">StockReservations</text>
+<rect x="1335" y="991" width="150" height="20" rx="10" fill="#7c3aed" />
+<text x="1410" y="1005" class="pill" fill="#fff">WaterstoringIncidents</text>
+<rect x="170" y="1070" width="720" height="170" rx="14" class="card"/>
+<rect x="184" y="1084" width="36" height="36" rx="9" fill="#16a34a"/>
+<text x="202" y="1106" class="ico" >BI</text>
+<text x="232" y="1100" class="ct" >Knowledge documents → blob container knowledge</text>
+<text x="232" y="1118" class="cs" >source: evides-leakops/knowledge/ (8 simulated markdown documents, not real Evides documents)</text>
+<rect x="184" y="1132" width="220" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="294" y="1146" class="pill" fill="#166534">ops/01-isolation-sop-trunk-mains</text>
+<rect x="410" y="1132" width="245" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="532.5" y="1146" class="pill" fill="#166534">ops/02-dn300-cast-iron-repair-method</text>
+<rect x="184" y="1156" width="251" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="309.5" y="1170" class="pill" fill="#166534">ops/03-flushing-and-return-to-service</text>
+<rect x="441" y="1156" width="176" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="529" y="1170" class="pill" fill="#166534">ops/05-procurement-policy</text>
+<rect x="623" y="1156" width="188" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="717" y="1170" class="pill" fill="#166534">ops/06-false-alarm-playbook</text>
+<rect x="184" y="1180" width="245" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="306.5" y="1194" class="pill" fill="#166534">ops/07-incident-review-dorpsweg-2024</text>
+<rect x="435" y="1180" width="270" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="570" y="1194" class="pill" fill="#166534">ops/08-incident-review-industrieweg-2025</text>
+<rect x="184" y="1204" width="283" height="20" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="325.5" y="1218" class="pill" fill="#166534">comms/04-resident-communication-guidelines</text>
+<rect x="910" y="1070" width="400" height="170" rx="14" class="card"/>
+<rect x="924" y="1084" width="36" height="36" rx="9" fill="#7c3aed"/>
+<text x="942" y="1106" class="ico" >AI</text>
+<text x="972" y="1100" class="ct" >Observability</text>
+<text x="972" y="1120" class="cs" >Application Insights evides-appinsights-88546e</text>
+<text x="972" y="1137" class="cs" >Log Analytics evides-logs-88546e</text>
+<text x="972" y="1154" class="cs" >spans: invoke_agent · chat gpt-5.4 · execute_tool</text>
+<text x="972" y="1171" class="cs" >feed the Foundry Tracing tab</text>
+<rect x="1330" y="1070" width="410" height="170" rx="14" class="card"/>
+<rect x="1344" y="1084" width="36" height="36" rx="9" fill="#475569"/>
+<text x="1362" y="1106" class="ico" >PL</text>
+<text x="1392" y="1100" class="ct" >Hosting and demo site</text>
+<text x="1392" y="1120" class="cs" >leakops-web-plan-88546e: App Service Linux B1</text>
+<text x="1392" y="1137" class="cs" >  (workflow host, Waterstoring)</text>
+<text x="1392" y="1154" class="cs" >leakops-mcp/agents-88546e-plan: Flex Consumption</text>
+<text x="1392" y="1171" class="cs" >leakops-demo-88546e: Static Web App (demo site)</text>
+<path d="M1510,786 L1510,828" class="line"/>
+<path d="M1000,786 L1000,806 L760,806 L760,828" class="dash"/>
+<text x="1010" y="802" class="note" >knowledge_base_retrieve via the project connection (Foundry identity)</text>
+<path d="M530,935 L548,935" class="thin"/>
+<text x="1520" y="806" class="lbl" style="text-anchor:start">MCP tools read and write</text>
+<text x="890" y="1284" class="lbl" >All data is simulated · Waterstoring is a fake, not waterstoring.nl · Keys only where a key is needed: the MCP tools, the agent functions, the Waterstoring ingest API and the operator console</text>
+</svg>

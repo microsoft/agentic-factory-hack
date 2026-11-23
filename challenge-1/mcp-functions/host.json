@@ -1,0 +1,22 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
+    }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.0.0, 5.0.0)"
+  },
+  "extensions": {
+    "mcp": {
+      "serverName": "factory-data",
+      "serverVersion": "1.0.0",
+      "instructions": "Read-only factory data: get-machine returns a machine by id, get-threshold returns all warning/critical thresholds of a machine type."
+    }
+  }
+}

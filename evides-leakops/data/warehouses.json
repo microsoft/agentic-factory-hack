@@ -1,0 +1,4 @@
+[
+  { "id": "WH-01", "name": "Depot Spijkenisse (simulated)", "address": "Industrielaan 12, Spijkenisse", "location": { "lat": 51.8420, "lon": 4.3300 } },
+  { "id": "WH-02", "name": "Depot Hoogvliet (simulated)",   "address": "Havenweg 40, Hoogvliet",         "location": { "lat": 51.8540, "lon": 4.3700 } }
+]
